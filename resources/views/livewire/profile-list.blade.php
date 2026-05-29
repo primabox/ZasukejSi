@@ -236,7 +236,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 @foreach ($this->profiles() as $profile)
                     {{-- Insert Advert Hero after second row (10 items on xl screens) --}}
                     @if ($loop->iteration === 6)

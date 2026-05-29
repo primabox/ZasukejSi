@@ -57,6 +57,7 @@ class CitySeeder extends Seeder
                 'lat' => !empty($row[2]) ? (float) $row[2] : null,
                 'lng' => !empty($row[3]) ? (float) $row[3] : null,
                 'country_code' => strtoupper($row[5] ?? ''),
+                'admin_name' => !empty($row[7]) ? trim($row[7]) : null,
                 'population' => !empty($row[9]) ? (int) $row[9] : null,
                 'created_at' => now(),
                 'updated_at' => now(),

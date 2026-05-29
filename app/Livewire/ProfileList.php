@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Profile;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\On;
@@ -16,7 +17,7 @@ class ProfileList extends Component
     public $perPage = 20;
     
     // Current filters (synced with search component)
-    public $city = '';
+    public $region = '';
     public $ageMin = '';
     public $ageMax = '';
     public $verified = false;
@@ -31,7 +32,7 @@ class ProfileList extends Component
     public $hasRating = false; // profiles with rating/reviews
     
     protected $queryString = [
-        'city' => ['except' => ''],
+        'region' => ['except' => ''],
         'ageMin' => ['except' => '', 'as' => 'age_min'],
         'ageMax' => ['except' => '', 'as' => 'age_max'],
         'verified' => ['except' => false],
@@ -47,7 +48,7 @@ class ProfileList extends Component
     public function mount()
     {
         // Set filters from URL parameters
-        $this->city = request('city', '');
+        $this->region = request('region', request('city', ''));
         $this->ageMin = request('age_min', '');
         $this->ageMax = request('age_max', '');
         $this->verified = request()->boolean('verified');
@@ -68,7 +69,7 @@ class ProfileList extends Component
     #[On('profile-search-updated')]
     public function updateFilters($filters)
     {
-        $this->city = $filters['city'] ?? '';
+        $this->region = $filters['region'] ?? $filters['city'] ?? '';
         $this->ageMin = $filters['age_min'] ?? '';
         $this->ageMax = $filters['age_max'] ?? '';
         $this->verified = $filters['verified'] ?? false;
@@ -84,7 +85,7 @@ class ProfileList extends Component
 
     public function resetFilters()
     {
-        $this->reset(['city', 'ageMin', 'ageMax', 'verified', 'ageGroup', 'sortRecommendation', 'hasVerifiedPhoto', 'hasVideo', 'isPornActress', 'sortNew', 'hasRating']);
+        $this->reset(['region', 'ageMin', 'ageMax', 'verified', 'ageGroup', 'sortRecommendation', 'hasVerifiedPhoto', 'hasVideo', 'isPornActress', 'sortNew', 'hasRating']);
         $this->resetPage();
     }
 
@@ -174,8 +175,8 @@ class ProfileList extends Component
             ->orderBy('created_at', 'desc');
 
         // Apply search filters (from search component)
-        if ($this->city) {
-            $query->where('city', 'like', '%' . $this->city . '%');
+        if ($this->region) {
+            $this->applyRegionFilter($query, $this->region);
         }
 
         if ($this->ageMin) {
@@ -236,6 +237,17 @@ class ProfileList extends Component
         }
 
         return $query->paginate($this->perPage);
+    }
+
+    protected function applyRegionFilter($query, string $region): void
+    {
+        $query->whereExists(function ($subQuery) use ($region) {
+            $subQuery->select(DB::raw(1))
+                ->from('cities')
+                ->whereColumn('cities.country_code', 'profiles.country_code')
+                ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)')
+                ->where('cities.admin_name', $region);
+        });
     }
 
     /**

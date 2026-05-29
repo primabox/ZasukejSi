@@ -2,11 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\User;
-use App\Models\Profile;
+use App\Actions\Auth\RegisterUser;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -124,21 +121,12 @@ class RegisterModal extends Component
         ]);
 
         try {
-            // Create the user
-            $user = User::create([
+            $user = $this->registerUserAction()->execute([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => !empty($validated['phone']) ? $validated['phone'] : null,
-                'password' => Hash::make($validated['password']),
-            ]);
-
-            // Create the profile with gender
-            Profile::create([
-                'user_id' => $user->id,
                 'gender' => $validated['gender'],
-                'display_name' => $validated['name'],
-                'status' => 'pending',
-                'is_public' => false,
+                'password' => $validated['password'],
             ]);
 
             // Fire the registered event
@@ -152,6 +140,11 @@ class RegisterModal extends Component
         } catch (\Exception $e) {
             $this->addError('registration', __('auth.register.error'));
         }
+    }
+
+    protected function registerUserAction(): RegisterUser
+    {
+        return app(RegisterUser::class);
     }
 
     /**

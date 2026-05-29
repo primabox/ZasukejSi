@@ -10,7 +10,7 @@
                     <div class="space-y-1">
                         <!-- Country Button -->
                         <button wire:click="toggleCountryExpansion('{{ $country->country_code }}')"
-                            class="w-full flex items-center gap-3 p-1 text-left transition-all duration-200 {{ $selectedCountryCode === $country->country_code && !$selectedCity ? 'bg-primary-50 text-primary-700' : '' }}">
+                            class="w-full flex items-center gap-3 p-1 text-left transition-all duration-200 {{ $selectedCountryCode === $country->country_code && !$selectedRegion ? 'bg-primary-50 text-primary-700' : '' }}">
                             <div class="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
                                   <img src="https://flagcdn.com/{{ strtolower($country->country_code) }}.svg"
                                       alt="{{ $country->country_name }}"
@@ -24,18 +24,18 @@
                             </div>
                         </button>
 
-                        <!-- Cities Dropdown -->
-                        @if($country->cities && count($country->cities) > 0 && in_array($country->country_code, $expandedCountries))
+                        <!-- Regions Dropdown -->
+                        @if($country->regions && count($country->regions) > 0 && in_array($country->country_code, $expandedCountries))
                         <div class="flex justify-end" >
                             <div class="w-10/12 rounded-2xl space-y-0.5">
-                                @foreach($country->cities as $city)
-                                <button wire:click="selectCity('{{ $country->country_code }}', '{{ $city['city'] }}')"
-                                    class="w-full bg-gray-100 hover:bg-primary hover:text-white flex items-center gap-3 p-1 px-3 text-left text-sm {{ $selectedCountryCode === $country->country_code && $selectedCity == $city['city'] ? 'bg-primary text-white' : '' }} {{ $loop->first ? 'rounded-t-lg' : '' }} {{ $loop->last ? 'rounded-b-lg' : '' }}">
+                                @foreach($country->regions as $region)
+                                <button wire:click="selectRegion('{{ $country->country_code }}', '{{ $region['region'] }}')"
+                                    class="w-full bg-gray-100 hover:bg-primary hover:text-white flex items-center gap-3 p-1 px-3 text-left text-sm {{ $selectedCountryCode === $country->country_code && $selectedRegion == $region['region'] ? 'bg-primary text-white' : '' }} {{ $loop->first ? 'rounded-t-lg' : '' }} {{ $loop->last ? 'rounded-b-lg' : '' }}">
                                     <div class="flex-1">
-                                        <div class="font-medium text-sm">{{ $city['city'] }}</div>
+                                        <div class="font-medium text-sm">{{ $region['region'] }}</div>
                                     </div>
                                     <div class="text-xs hover:bg-primary hover:text-white ml-auto">
-                                        {{ $city['profiles_count'] }}
+                                        {{ $region['profiles_count'] }}
                                     </div>
                                 </button>
                                 @endforeach
@@ -52,15 +52,15 @@
         <div class="lg:col-span-3">
             <!-- Header -->
             <div class="mb-6">
-                @if($selectedCountry || $selectedCity)
+                @if($selectedCountry || $selectedRegion)
                 <div class="flex items-center gap-4 px-6 py-4 border-2 border-gray-200 rounded-xl min-h-[120px]">
                     <x-icons name="location" class="w-12 h-full text-primary-500 flex-shrink-0" />
                     <div class="flex flex-col justify-center flex-1">
                         <h2 class="text-2xl font-bold text-primary-600 leading-tight">
                             {{ $selectedCountry ? __('codes.' . strtolower($selectedCountry->country_code)) : __('front.countries.all_profiles') }}
                         </h2>
-                        @if($selectedCity)
-                        <p class="text-lg text-secondary-600 leading-tight">{{ $selectedCity }}</p>
+                        @if($selectedRegion)
+                        <p class="text-lg text-secondary-600 leading-tight">{{ $selectedRegion }}</p>
                         @endif
                     </div>
                     <!-- Clear Location Button -->
@@ -226,7 +226,7 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                         @foreach($profiles as $profile)
                         <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer group">
                             <!-- Profile Image -->

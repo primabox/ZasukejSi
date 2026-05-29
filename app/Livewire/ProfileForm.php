@@ -9,6 +9,12 @@ use Livewire\Attributes\Rule;
 
 class ProfileForm extends Component
 {
+    protected array $publishRequiredFields = [
+        'display_name',
+        'age',
+        'country_code',
+    ];
+
     #[Rule('required|string|max:255')]
     public $name = '';
 
@@ -168,6 +174,65 @@ class ProfileForm extends Component
         ];
 
         return $statusColors[$this->status] ?? $statusColors['pending'];
+    }
+
+    public function canPublishProfile(): bool
+    {
+        if (!$this->hasProfile) {
+            return false;
+        }
+
+        return $this->filledForPublication('display_name')
+            && $this->filledForPublication('age')
+            && $this->filledForPublication('country_code');
+    }
+
+    public function shouldShowPublishRequirement(string $field): bool
+    {
+        return $this->hasProfile
+            && in_array($field, $this->publishRequiredFields, true)
+            && !$this->filledForPublication($field)
+            && !$this->canPublishProfile();
+    }
+
+    protected function filledForPublication(string $field): bool
+    {
+        $value = $this->{$field};
+
+        if (is_string($value)) {
+            return trim($value) !== '';
+        }
+
+        return !empty($value);
+    }
+
+    protected function syncPublicationState(): void
+    {
+        if (!$this->canPublishProfile()) {
+            $this->is_public = false;
+        }
+    }
+
+    public function updatedDisplayName(): void
+    {
+        $this->syncPublicationState();
+    }
+
+    public function updatedAge(): void
+    {
+        $this->syncPublicationState();
+    }
+
+    public function updatedCountryCode(): void
+    {
+        $this->syncPublicationState();
+    }
+
+    public function updatedIsPublic($value): void
+    {
+        if ($value) {
+            $this->syncPublicationState();
+        }
     }
 
 
@@ -419,6 +484,7 @@ class ProfileForm extends Component
         $user = Auth::user();
         $user = \App\Models\User::find($user->id);
         $isAdmin = $this->isAdmin();
+        $this->syncPublicationState();
         
         // Build validation rules for user data
         $validationRules = [

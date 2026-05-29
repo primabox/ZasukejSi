@@ -12,12 +12,12 @@ class CountryProfiles extends Component
     use WithPagination;
 
     public $selectedCountryCode = null;
-    public $selectedCity = null;
+    public $selectedRegion = null;
     public $expandedCountries = [];
     public $perPage = 20;
     
     // Search parameter from redirect
-    public $city = '';
+    public $region = '';
     
     // Quick filter properties (matching ProfileList)
     public $ageGroup = ''; // '18-25', '26-30', '31-35', '36-40', '40-50', '50+'
@@ -31,7 +31,7 @@ class CountryProfiles extends Component
     protected $paginationTheme = 'bootstrap';
     
     protected $queryString = [
-        'city' => ['except' => ''],
+        'region' => ['except' => ''],
         'ageGroup' => ['except' => '', 'as' => 'age'],
         'sortRecommendation' => ['except' => '', 'as' => 'recommend'],
         'hasVerifiedPhoto' => ['except' => false, 'as' => 'verified_photo'],
@@ -44,7 +44,7 @@ class CountryProfiles extends Component
     public function mount()
     {
         // Handle search parameters from redirect
-        $this->city = request('city', '');
+        $this->region = request('region', request('city', ''));
         $this->ageGroup = request('age', '');
         $this->sortRecommendation = request('recommend', '');
         $this->hasVerifiedPhoto = request()->boolean('verified_photo');
@@ -53,41 +53,50 @@ class CountryProfiles extends Component
         $this->sortNew = request('new', '');
         $this->hasRating = request()->boolean('rated');
         
-        if ($this->city) {
-            $this->autoSelectCityFromSearch($this->city);
+        if ($this->region) {
+            $this->autoSelectRegionFromSearch($this->region);
         }
     }
     
     /**
-     * Auto-select country and city when coming from search
+     * Auto-select country and region when coming from search.
      */
-    private function autoSelectCityFromSearch($searchCity)
+    private function autoSelectRegionFromSearch($searchRegion)
     {
-        // URL decode the city name in case it's encoded
-        $searchCity = urldecode($searchCity);
-        
-        // First try exact match
-        $profile = Profile::where('status', 'approved')
-            ->where('is_public', true)
-            ->whereNotNull('verified_at')
-            ->whereNotNull('country_code')
-            ->where('city', $searchCity)
+        $searchRegion = urldecode($searchRegion);
+
+        $match = DB::table('profiles')
+            ->join('cities', function ($join) {
+                $join->on('cities.country_code', '=', 'profiles.country_code')
+                    ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)');
+            })
+            ->where('profiles.status', 'approved')
+            ->where('profiles.is_public', true)
+            ->whereNotNull('profiles.verified_at')
+            ->whereNotNull('profiles.country_code')
+            ->where('cities.admin_name', $searchRegion)
+            ->select('profiles.country_code', 'cities.admin_name')
             ->first();
-        
-        // If no exact match, try case-insensitive partial match
-        if (!$profile) {
-            $profile = Profile::where('status', 'approved')
-                ->where('is_public', true)
-                ->whereNotNull('verified_at')
-                ->whereNotNull('country_code')
-                ->whereRaw('LOWER(city) LIKE ?', ['%' . strtolower($searchCity) . '%'])
+
+        if (!$match) {
+            $match = DB::table('profiles')
+                ->join('cities', function ($join) {
+                    $join->on('cities.country_code', '=', 'profiles.country_code')
+                        ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)');
+                })
+                ->where('profiles.status', 'approved')
+                ->where('profiles.is_public', true)
+                ->whereNotNull('profiles.verified_at')
+                ->whereNotNull('profiles.country_code')
+                ->whereRaw('LOWER(cities.admin_name) LIKE ?', ['%' . mb_strtolower($searchRegion) . '%'])
+                ->select('profiles.country_code', 'cities.admin_name')
                 ->first();
         }
-            
-        if ($profile && $profile->country_code) {
-            $this->selectedCountryCode = $profile->country_code;
-            $this->selectedCity = $profile->city;
-            $this->expandedCountries[] = $profile->country_code;
+
+        if ($match && $match->country_code) {
+            $this->selectedCountryCode = $match->country_code;
+            $this->selectedRegion = $match->admin_name;
+            $this->expandedCountries[] = $match->country_code;
         }
     }
 
@@ -95,26 +104,26 @@ class CountryProfiles extends Component
     public function selectCountry($countryCode = null)
     {
         $this->selectedCountryCode = $countryCode;
-        $this->selectedCity = null; // Reset city when changing country
+        $this->selectedRegion = null;
         $this->resetPage();
     }
 
 
-    public function selectCity($countryCode, $city = null)
+    public function selectRegion($countryCode, $region = null)
     {
         $this->selectedCountryCode = $countryCode;
-        $this->selectedCity = $city;
+        $this->selectedRegion = $region;
         $this->resetPage();
     }
     
     /**
-     * Clear the selected location (country and city)
+     * Clear the selected location (country and region).
      */
     public function clearLocation()
     {
         $this->selectedCountryCode = null;
-        $this->selectedCity = null;
-        $this->city = '';
+        $this->selectedRegion = null;
+        $this->region = '';
         $this->expandedCountries = [];
         $this->resetPage();
     }
@@ -221,32 +230,38 @@ class CountryProfiles extends Component
     public function getCountriesProperty()
     {
         $codes = include base_path('lang/en/codes.php');
-        $profiles = Profile::query()
-            ->where('is_public', true)
-            ->whereNotNull('country_code')
-            ->whereNotNull('verified_at')
+        $regions = DB::table('profiles')
+            ->join('cities', function ($join) {
+                $join->on('cities.country_code', '=', 'profiles.country_code')
+                    ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)');
+            })
+            ->where('profiles.is_public', true)
+            ->whereNotNull('profiles.country_code')
+            ->whereNotNull('profiles.verified_at')
+            ->whereNotNull('cities.admin_name')
+            ->where('cities.admin_name', '!=', '')
+            ->select('profiles.country_code', 'cities.admin_name', DB::raw('COUNT(*) as profiles_count'))
+            ->groupBy('profiles.country_code', 'cities.admin_name')
             ->get();
 
-        // Aggregate by country_code
-        $countries = collect();
-        foreach ($profiles->groupBy('country_code') as $code => $profilesInCountry) {
-            $country = [
-                'country_code' => $code,
-                'country_name' => $codes[strtolower($code)] ?? $code,
-                'profiles_count' => $profilesInCountry->count(),
-                'cities' => $profilesInCountry->whereNotNull('city')
-                    ->groupBy('city')
-                    ->map(function ($cityProfiles, $city) {
-                        return [
-                            'city' => $city,
-                            'profiles_count' => $cityProfiles->count(),
-                        ];
-                    })->sortBy('city')->values(),
-            ];
-            $countries->push((object) $country);
-        }
-        // Sort by country_name
-        return $countries->sortBy('country_name')->values();
+        return $regions
+            ->groupBy('country_code')
+            ->map(function ($regionsInCountry, $code) use ($codes) {
+                return (object) [
+                    'country_code' => $code,
+                    'country_name' => $codes[strtolower($code)] ?? $code,
+                    'profiles_count' => $regionsInCountry->sum('profiles_count'),
+                    'regions' => $regionsInCountry
+                        ->map(fn ($region) => [
+                            'region' => $region->admin_name,
+                            'profiles_count' => $region->profiles_count,
+                        ])
+                        ->sortBy(fn (array $region) => $this->regionSortKey($region['region']), SORT_NATURAL | SORT_FLAG_CASE)
+                        ->values(),
+                ];
+            })
+            ->sortBy('country_name')
+            ->values();
     }
 
     public function getProfilesProperty()
@@ -262,8 +277,8 @@ class CountryProfiles extends Component
             $query->where('country_code', $this->selectedCountryCode);
         }
 
-        if ($this->selectedCity) {
-            $query->where('city', $this->selectedCity);
+        if ($this->selectedRegion) {
+            $this->applyRegionFilter($query, $this->selectedRegion);
         }
         
         // Apply quick filters (matching ProfileList logic)
@@ -312,6 +327,28 @@ class CountryProfiles extends Component
         }
 
         return $query->paginate($this->perPage);
+    }
+
+    protected function applyRegionFilter($query, string $region): void
+    {
+        $query->whereExists(function ($subQuery) use ($region) {
+            $subQuery->select(DB::raw(1))
+                ->from('cities')
+                ->whereColumn('cities.country_code', 'profiles.country_code')
+                ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)')
+                ->where('cities.admin_name', $region);
+        });
+    }
+
+    protected function regionSortKey(string $region): string
+    {
+        $normalizedRegion = mb_strtolower($region);
+
+        if (in_array($normalizedRegion, ['praha', 'hlavní město praha', 'hlavni mesto praha'], true)) {
+            return '0';
+        }
+
+        return '1-' . $normalizedRegion;
     }
     
     /**

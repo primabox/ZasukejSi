@@ -10,20 +10,20 @@
         <form wire:submit.prevent="search" class="space-y-2 md:space-y-6">
             <!-- Search Controls Row -->
             <div class="flex flex-wrap items-end gap-1.5 md:gap-4">
-                <!-- City Picker -->
+                <!-- Region Picker -->
                 <div class="flex-1">
                     <x-autocomplete-select
-                        name="city"
-                        label="{{ __('front.profiles.search.city') }}"
-                        :options="collect($this->filteredCities)->mapWithKeys(fn($city) => [$city => $city])->toArray()"
-                        :value="$city"
-                        placeholder="{{ __('front.profiles.search.entercity') }}"
-                        wire-model="city"
+                    name="region"
+                    label="{{ __('front.profiles.search.region') }}"
+                    :options="collect($this->filteredRegions)->mapWithKeys(fn($region) => [$region => $region])->toArray()"
+                    :value="$region"
+                    placeholder="{{ __('front.profiles.search.enterregion') }}"
+                    wire-model="region"
                         wire-focus="showDropdown"
                         wire-click="clearAndShowDropdown"
-                        dropdown-open="{{ $showCityDropdown }}"
-                        close-dropdown="$wire.set('showCityDropdown', false)"
-                        select-method="selectCity"
+                    dropdown-open="{{ $showRegionDropdown }}"
+                    close-dropdown="$wire.set('showRegionDropdown', false)"
+                    select-method="selectRegion"
                         :searchable="true" /> <!-- Age Range -->
                 </div>
 

@@ -2,64 +2,67 @@
 
 namespace App\Livewire;
 
-use App\Models\Profile;
+use App\Models\City;
 use Livewire\Component;
 
 class SearchProfiles extends Component
 {
     // Search filters
-    public $city = '';
+    public $region = '';
     public $age_range = '';
 
     // UI state
-    public $showCityDropdown = false;
+    public $showRegionDropdown = false;
     public $showAgeRangeDropdown = false;
 
     public function mount()
     {
-        $this->city = request('city', '');
+        $this->region = request('region', request('city', ''));
         $this->age_range = request('age', '');
     }
 
     /**
-     * Get all available cities from approved, public, and verified profiles
-     * Similar to CountryProfiles implementation
+     * Get all available regions from approved, public, and verified profiles.
      */
-    public function getAllCitiesProperty()
+    public function getAllRegionsProperty()
     {
-        return Profile::query()
-            ->where('status', 'approved')
-            ->where('is_public', true)
-            ->whereNotNull('verified_at')
-            ->whereNotNull('city')
-            ->where('city', '!=', '')
+        return City::query()
+            ->join('profiles', function ($join) {
+                $join->on('cities.country_code', '=', 'profiles.country_code')
+                    ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)');
+            })
+            ->where('profiles.status', 'approved')
+            ->where('profiles.is_public', true)
+            ->whereNotNull('profiles.verified_at')
+            ->whereNotNull('cities.admin_name')
+            ->where('cities.admin_name', '!=', '')
             ->distinct()
-            ->pluck('city')
-            ->sort()
+            ->pluck('cities.admin_name')
+            ->sortBy(fn (string $region) => $this->regionSortKey($region), SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
             ->toArray();
     }
 
-    public function updatedCity()
+    public function updatedRegion()
     {
-        $this->showCityDropdown = true;
+        $this->showRegionDropdown = true;
     }
 
-    public function selectCity($city)
+    public function selectRegion($region)
     {
-        $this->city = $city;
-        $this->showCityDropdown = false;
+        $this->region = $region;
+        $this->showRegionDropdown = false;
     }
 
     public function showDropdown()
     {
-        $this->showCityDropdown = true;
+        $this->showRegionDropdown = true;
     }
 
     public function clearAndShowDropdown()
     {
-        $this->city = '';
-        $this->showCityDropdown = true;
+        $this->region = '';
+        $this->showRegionDropdown = true;
     }
 
     // Age Range methods
@@ -75,16 +78,16 @@ class SearchProfiles extends Component
         $this->showAgeRangeDropdown = false;
     }
 
-    public function getFilteredCitiesProperty()
+    public function getFilteredRegionsProperty()
     {
-        $cities = $this->allCities;
+        $regions = $this->allRegions;
         
-        if (empty($this->city)) {
-            return $cities;
+        if (empty($this->region)) {
+            return $regions;
         }
 
-        return collect($cities)
-            ->filter(fn($cityOption) => str_contains(strtolower($cityOption), strtolower($this->city)))
+        return collect($regions)
+            ->filter(fn ($regionOption) => str_contains(mb_strtolower($regionOption), mb_strtolower($this->region)))
             ->values()
             ->toArray();
     }
@@ -108,8 +111,8 @@ class SearchProfiles extends Component
     {
         $params = [];
         
-        if ($this->city) {
-            $params['city'] = $this->city;
+        if ($this->region) {
+            $params['region'] = $this->region;
         }
         
         if ($this->age_range) {
@@ -122,5 +125,16 @@ class SearchProfiles extends Component
     public function render()
     {
         return view('livewire.search-profiles');
+    }
+
+    protected function regionSortKey(string $region): string
+    {
+        $normalizedRegion = mb_strtolower($region);
+
+        if (in_array($normalizedRegion, ['praha', 'hlavní město praha', 'hlavni mesto praha'], true)) {
+            return '0';
+        }
+
+        return '1-' . $normalizedRegion;
     }
 }

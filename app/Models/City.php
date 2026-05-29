@@ -11,6 +11,7 @@ class City extends Model
         'name',
         'name_ascii',
         'country_code',
+        'admin_name',
         'lat',
         'lng',
         'population',

@@ -1,0 +1,59 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        php: [8.4, 8.3]
+        laravel: [11.*, 12.*]
+        stability: [prefer-lowest, prefer-stable]
+    env:
+      OS: ${{ matrix.os }}
+      PHP_VERSION: ${{ matrix.php }}
+      LARAVEL: ${{ matrix.laravel }}
+      STABILITY: ${{ matrix.stability }}
+
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ctype, curl, dom, fileinfo, filter, hash, intl, json, libxml, mbstring, openssl, pcre, phar, session, sqlite, tokenizer, xml, xmlreader, xmlwriter, zip, xdebug
+          coverage: xdebug
+          ini-values: extension=pdo_sqlite
+
+      - name: Check Sqlite is loaded
+        run: php -m | grep sqlite
+          
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
+      - name: Execute tests
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          env_vars: OS,PHP_VERSION,LARAVEL,STABILITY
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -227,9 +227,12 @@
                         type="text"
                         id="display_name"
                         wire:model="display_name"
-                        class="input-control mt-1 @error('display_name') border-red-500 @enderror"
+                        class="input-control mt-1 @error('display_name') border-red-500 @enderror {{ $this->shouldShowPublishRequirement('display_name') ? 'border-red-500' : '' }}"
                         placeholder="{{ __('front.profiles.form.displayname') }}">
                     @error('display_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    @if($this->shouldShowPublishRequirement('display_name'))
+                        <p class="mt-1 text-sm text-red-600">{{ __('front.profiles.form.publish_required') }}</p>
+                    @endif
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -242,9 +245,12 @@
                             wire:model="age"
                             min="18"
                             max="120"
-                            class="input-control mt-1 @error('age') border-red-500 @enderror"
+                            class="input-control mt-1 @error('age') border-red-500 @enderror {{ $this->shouldShowPublishRequirement('age') ? 'border-red-500' : '' }}"
                             placeholder="25">
                         @error('age') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @if($this->shouldShowPublishRequirement('age'))
+                            <p class="mt-1 text-sm text-red-600">{{ __('front.profiles.form.publish_required') }}</p>
+                        @endif
                     </div>
 
                     <!-- City -->
@@ -312,7 +318,7 @@
                         <button
                             type="button"
                             @click="open = !open"
-                            class="input-control w-full text-left flex items-center justify-between @error('country_code') border-red-500 @enderror">
+                            class="input-control w-full text-left flex items-center justify-between @error('country_code') border-red-500 @enderror {{ $this->shouldShowPublishRequirement('country_code') ? 'border-red-500' : '' }}">
                             <span class="flex items-center gap-2 flex-nowrap"> 
                                 <span class="flex items-center gap-2"> 
                                     <svg class="w-5 h-5 text-gray-400" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,6 +373,9 @@
                         </div>
                     </div>
                     @error('country_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    @if($this->shouldShowPublishRequirement('country_code'))
+                        <p class="mt-1 text-sm text-red-600">{{ __('front.profiles.form.publish_required') }}</p>
+                    @endif
                 </div>
 
                 <!-- Address -->
@@ -726,7 +735,8 @@
                         name="is_public"
                         id="is_public"
                         wire-model="is_public"
-                        :checked="$is_public" />
+                        :checked="$is_public"
+                        :disabled="!$this->canPublishProfile()" />
                 </div>
 
                 <!-- Save Profile Button -->

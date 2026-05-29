@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\RegisterUser;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
     use AuthorizesRequests, ValidatesRequests;
+
+    public function __construct(
+        private readonly RegisterUser $registerUser,
+    ) {}
 
     /**
      * Where to redirect users after registration.
@@ -96,16 +100,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'gender' => $data['gender'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        $user->assignRole('user');
-
-        return $user;
+        return $this->registerUser->execute($data);
     }
 }

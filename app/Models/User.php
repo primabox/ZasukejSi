@@ -135,9 +135,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
      */
     public function hasVipAccess(): bool
     {
-        // For now, only admins have VIP access. 
-        // TODO: Implement logic for subscribed male users or other conditions.
-        return $this->hasRole('admin');
+        return $this->hasRole('admin') || $this->hasRole('vip');
     }
 
     /**

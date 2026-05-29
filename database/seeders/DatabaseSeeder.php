@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\Service;
+use App\Models\Subscription;
+use App\Models\SubscriptionType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -21,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $superAdminRole = Role::firstOrCreate(['name' => 'super_admin']);
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $userRole = Role::firstOrCreate(['name' => 'user']);
+        $vipRole = Role::firstOrCreate(['name' => 'vip']);
 
         // Create permissions if they don't exist
         $permissions = [
@@ -55,8 +58,13 @@ class DatabaseSeeder extends Seeder
             'delete_profile',
         ]);
 
+        $vipRole->givePermissionTo([
+            'view_profile',
+        ]);
+
         // Seed cities for autocomplete (must run before profiles are created)
         $this->call(CitySeeder::class);
+        $this->call(SubscriptionTypeSeeder::class);
 
         // Create admin user
         $admin = User::firstOrCreate([
@@ -116,6 +124,69 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $man->syncRoles(['user']);
+
+        // Dedicated premium test accounts
+        $premiumMale = User::updateOrCreate(
+            ['email' => 'premium-muz@example.com'],
+            [
+                'name' => 'Premium Muz',
+                'password' => Hash::make('password'),
+                'phone' => '+420777000111',
+                'gender' => 'male',
+                'email_verified_at' => now(),
+            ]
+        );
+        $premiumMale->syncRoles(['user', 'vip']);
+
+        $premiumFemale = User::updateOrCreate(
+            ['email' => 'premium-zena@example.com'],
+            [
+                'name' => 'Premium Zena',
+                'password' => Hash::make('password'),
+                'phone' => '+420777000222',
+                'gender' => 'female',
+                'email_verified_at' => now(),
+            ]
+        );
+        $premiumFemale->syncRoles(['user']);
+
+        $premiumFemaleProfile = Profile::updateOrCreate(
+            ['user_id' => $premiumFemale->id],
+            [
+                'display_name' => 'Premium Zena Praha',
+                'age' => 27,
+                'city' => 'Prague',
+                'address' => 'Praha 1',
+                'about' => 'Testovaci premium profil pro kontrolu VIP zobrazeni a filtrovani.',
+                'availability_hours' => [
+                    'Monday' => '10:00-18:00',
+                    'Tuesday' => '10:00-18:00',
+                    'Wednesday' => '10:00-18:00',
+                ],
+                'status' => 'approved',
+                'is_public' => true,
+                'verified_at' => now(),
+                'country_code' => 'cz',
+            ]
+        );
+
+        $eliteType = SubscriptionType::firstWhere('slug', 'elite');
+
+        if ($eliteType) {
+            Subscription::updateOrCreate(
+                [
+                    'profile_id' => $premiumFemaleProfile->id,
+                    'subscription_type_id' => $eliteType->id,
+                    'status' => Subscription::STATUS_ACTIVE,
+                ],
+                [
+                    'starts_at' => now()->subDay(),
+                    'ends_at' => now()->addDays($eliteType->duration_days),
+                    'auto_renew' => true,
+                    'notes' => 'Premium test account with active elite subscription.',
+                ]
+            );
+        }
 
         // Create demo users - females with profiles, males as members
         $cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];

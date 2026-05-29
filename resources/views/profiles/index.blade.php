@@ -15,6 +15,19 @@
             <p class="text-lg sm:text-xl text-gray-600 mb-6 md:mb-8 max-w-sm">
                 {{ __('front.landing.girlsregisternow') }}
             </p>
+
+            <div class="flex flex-wrap gap-3">
+                <div class="inline-flex items-center px-4 py-2 bg-white backdrop-blur-sm text-gray-700 rounded-full text-sm font-medium shadow-lg">
+                    <span class="w-3 h-3 mr-2 bg-green-500 rounded-full"></span>
+                    {{ number_format($girlsCount) }}
+                    {!! preg_replace('/\s(\S+)$/', ' <span class="text-gray-400">$1</span>', e(__('front.landing.girls_registered'))) !!}
+                </div>
+                <div class="inline-flex items-center px-4 py-2 bg-white backdrop-blur-sm text-gray-700 rounded-full text-sm font-medium shadow-lg">
+                    <span class="w-3 h-3 mr-2 bg-green-500 rounded-full"></span>
+                    {{ number_format($gentsCount) }}
+                    {!! preg_replace('/\s(\S+)$/', ' <span class="text-gray-400">$1</span>', e(__('front.landing.gents_registered'))) !!}
+                </div>
+            </div>
         </div>
 
         <div class="mt-auto px-0">
