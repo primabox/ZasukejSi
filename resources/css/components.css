@@ -1,0 +1,394 @@
+/* Form Input Styles */
+.input-control,
+input,
+textarea,
+select {
+  @apply block w-full px-4 py-2.5 text-sm leading-5 rounded-lg bg-white outline-none transition-all duration-200 ease-in-out md:px-5 md:py-3 md:text-base;
+  border: 2px solid var(--color-gray-100);
+  color: var(--color-gray-600);
+  font-weight: 600;
+}
+
+
+select {
+  @apply appearance-none cursor-pointer pr-10;
+  background-image: url("../images/arrow.png");
+  background-position: right 3px center;
+  background-repeat: no-repeat;
+  background-size: 42px;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+label {
+  @apply block text-xs pb-0.5 pl-1.5 font-medium;
+  color: rgb(var(--color-text-default));
+}
+
+
+
+
+/* Custom Button Styles */
+.btn-primary {
+  @apply cursor-pointer py-3 px-4 lg:py-4 md:px-6 text-sm md:text-base bg-primary text-white inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out outline-none hover:shadow-xl hover:-translate-y-px;
+  border: 2px solid rgb(var(--color-primary-500));
+}
+
+
+.btn-light {
+  @apply cursor-pointer py-3 px-4 lg:py-4 md:px-6 text-sm md:text-base inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out outline-none;
+  background-color: white;
+  border: 1.5px solid var(--color-primary-500);
+  color: var(--color-primary);
+}
+
+.btn-light:active {
+  transform: translateY(0);
+}
+
+.btn-gold {
+  @apply cursor-pointer py-3 px-4 lg:py-4 md:px-6 text-sm md:text-base text-white inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out outline-none hover:shadow-xl hover:-translate-y-px;
+  background: linear-gradient(90deg, #A07613 0%, #B9A143 100%);
+  border: none;
+}
+
+.btn-small {
+  @apply py-3 px-5 rounded-md text-sm;
+}
+
+
+
+.nav-button {
+  @apply cursor-pointer flex items-center p-4 py-3 border-2 border-gray-200 font-semibold rounded-xl text-gray-700  transition-all duration-200;
+}
+
+.nav-button.active, .nav-button:hover {
+  @apply border-primary-500 bg-primary-500 !text-white;
+}
+.nav-button:hover svg, .nav-button.active svg{
+  @apply text-white transition-all duration-200;
+}
+
+
+.btn-light-green {
+  @apply cursor-pointer py-3 px-5 bg-green-50 text-primary inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out outline-none hover:bg-green-100;
+}
+
+.btn-transparent {
+  @apply py-3 px-5 bg-transparent text-gray-400 inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out outline-none hover:bg-gray-50;
+}
+
+.nav-link {
+  @apply cursor-pointer px-2 xl:px-3 text-sm xl:text-base text-text-default hover:text-primary-600 transition-colors;
+}
+
+.nav-link-mobile {
+  @apply w-full block px-3 py-2 text-text-default hover:text-primary-600 font-medium relative;
+
+  .underline {
+    @apply absolute bottom-0 left-3 w-[40%] h-0.5 bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left;
+  }
+}
+
+
+/* Custom Language Dropdown Styles */
+.language-dropdown {
+  @apply relative inline-block;
+}
+
+.language-dropdown-toggle {
+  @apply inline-flex items-center justify-center p-4 bg-gray-200 border-0 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 ease-in-out outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  width: 58px;
+  height: 58px;
+}
+
+.language-dropdown-toggle img {
+  @apply w-full h-full object-contain;
+}
+
+.language-dropdown-toggle .dropdown-arrow {
+  @apply ml-2 w-4 h-4 text-gray-500 transition-transform duration-200;
+}
+
+.language-dropdown.open .dropdown-arrow {
+  @apply transform rotate-180;
+}
+
+.language-dropdown-menu {
+  @apply absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 opacity-0 invisible transform -translate-y-2 transition-all duration-200 ease-out;
+  width: 58px;
+}
+
+.language-dropdown.open .language-dropdown-menu {
+  @apply opacity-100 visible translate-y-0;
+}
+
+.language-dropdown-item {
+  @apply flex items-center justify-center py-4 hover:bg-gray-100 cursor-pointer transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg;
+  height: 58px;
+}
+
+.language-dropdown-item img {
+  @apply w-full h-full object-contain;
+}
+
+.language-dropdown-item.active {
+  @apply bg-primary-50 text-primary-700;
+}
+
+
+
+/* Custom Checkbox Styles */
+input[type="checkbox"] {
+  @apply appearance-none w-5 h-5 p-2 rounded-md cursor-pointer transition-all duration-200 ease-in-out outline-none hover:ring-[2px] hover:ring-primary-500 hover:ring-offset-[1.5px];
+  border: 2px solid var(--color-gray-300);
+  background-color: white;
+  position: relative;
+}
+
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+}
+
+/* Firefox compatibility */
+input[type="checkbox"]::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* IE/Edge compatibility */
+input[type="checkbox"]::-ms-check {
+  display: none;
+}
+
+
+button, a {
+  @apply cursor-pointer;
+}
+
+
+/* Radial Blur Background */
+.radial-blur, .radial-blur-secondary {
+  height: 400px;
+  z-index: -1;
+  position: relative;
+}
+
+.radial-blur::before, .radial-blur-secondary::before {
+  content: '';
+  position: absolute;
+  left: -260px;
+  width: 400px;
+  height: 400px;
+  top: 100px;
+  background: radial-gradient(
+    circle at center,
+    rgba(221, 56, 136, 0.4) 0%,
+    rgba(221, 56, 136, 0.4) 0%,
+    rgba(221, 56, 136, 0.2) 30%,
+    rgba(221, 56, 136, 0.1) 80%,
+    transparent 100%
+  );
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.radial-blur-secondary::before {
+  background: radial-gradient(
+    circle at center,
+    rgba(92, 45, 98, 0.4) 0%,
+    rgba(92, 45, 98, 0.2) 30%,
+    rgba(92, 45, 98, 0.1) 60%,
+    transparent 100%
+  );
+}
+
+.radial-blur-right::before {
+  left: auto;
+  right: -260px;
+}
+
+.radial-blur-large::before {
+  width: 400px;
+  height: 400px;
+  filter: blur(40px);
+}
+
+.radial-blur-small::before {
+  width: 100px;
+  height: 100px;
+  filter: blur(10px);
+}
+
+
+
+/* Card Component Styles */
+.card {
+  @apply bg-white rounded-2xl p-8 px-6;
+}
+
+/* Alert Component Styles */
+.alert {
+  @apply rounded-lg p-4 border;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-200 text-green-800;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+}
+
+.alert-error {
+  @apply bg-red-50 border-red-200 text-red-800;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+
+
+/* Form Validation Error Styles */
+.input-error {
+  @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+}
+
+hr {
+  @apply border-t rounded-full border-gray-300;
+}
+
+
+/* Modal Component Styles */
+.modal-backdrop {
+  @apply fixed inset-0 backdrop-blur-lg;
+  background-color: rgba(92, 45, 98, 0.8);
+}
+
+.modal-container {
+  @apply relative w-full max-w-lg bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl;
+  @apply p-4 py-6 sm:p-6 sm:py-10 md:p-10 md:py-14;
+}
+
+.modal-close-btn {
+  @apply absolute w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-primary text-white rounded-full;
+  @apply flex items-center justify-center hover:bg-primary/80 transition-colors;
+  @apply top-2 right-2 sm:top-4 sm:right-4 md:top-6 md:right-6;
+}
+
+.modal-back-btn {
+  @apply absolute w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-gray-200 text-gray-600 rounded-full;
+  @apply flex items-center justify-center hover:bg-gray-300 transition-colors;
+  @apply top-2 left-2 sm:top-4 sm:left-4 md:top-6 md:left-6;
+}
+
+.modal-header {
+  @apply text-center mb-4 sm:mb-6 md:mb-8;
+}
+
+.modal-title {
+  @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-secondary mb-0;
+}
+
+.modal-subtitle {
+  @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary;
+}
+
+.modal-description {
+  @apply text-gray-600 mt-2 sm:mt-3 md:mt-4 text-xs sm:text-sm md:text-base;
+}
+
+.form-container {
+  @apply space-y-2.5 sm:space-y-3 md:space-y-4 bg-gray-100 p-3 sm:p-5 md:p-6 rounded-lg sm:rounded-xl;
+}
+
+.form-field {
+  @apply w-full px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-sm sm:text-base;
+  @apply border-2 !border-gray-200 rounded-md sm:rounded-lg bg-gray-50;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+.form-field-error {
+  @apply border-red-500;
+}
+
+.form-label {
+  @apply block text-[11px] sm:text-xs md:text-sm text-gray-600 mb-1 sm:mb-1.5 md:mb-2;
+}
+
+.form-error {
+  @apply mt-1 text-xs sm:text-sm text-red-600;
+}
+
+.form-alert {
+  @apply bg-red-50 border border-red-200 text-red-600 px-2.5 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-[11px] sm:text-xs md:text-sm;
+}
+
+.modal-btn-primary {
+  @apply w-full bg-primary text-white font-semibold;
+  @apply py-2.5 sm:py-3 md:py-4 rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base;
+  @apply hover:bg-primary/80 transition-colors disabled:opacity-50;
+}
+
+.modal-btn-secondary {
+  @apply w-full border-[1.5px] border-gray-300 text-gray-600;
+  @apply text-[11px] sm:text-xs md:text-sm font-semibold py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl;
+  @apply hover:bg-gray-50 transition-colors disabled:opacity-50;
+}
+
+.modal-btn-outline {
+  @apply w-full border-[1.5px] border-primary text-primary;
+  @apply text-[11px] sm:text-xs md:text-sm font-semibold py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl;
+  @apply hover:bg-primary/10 transition-colors disabled:opacity-50;
+}
+
+.modal-success-icon {
+  @apply mx-auto mb-3 sm:mb-4 md:mb-6 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16;
+  @apply bg-green-100 rounded-full flex items-center justify-center;
+}
+
+.text-small {
+  @apply text-[10px] sm:text-xs text-gray-600 px-2;
+}
+
+
+/* Advert Hero Component Styles */
+.advert-hero {
+  @apply relative overflow-hidden;
+}
+
+.advert-hero-title {
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold;
+}
+
+.advert-hero-subtitle {
+  @apply text-base md:text-lg leading-relaxed;
+}
+
+/* Feature Block Component Styles */
+.feature-block {
+  @apply flex items-center gap-4 p-5 md:p-5 rounded-lg;
+  @apply bg-white/30 backdrop-blur-sm shadow-xl;
+}
+
+.feature-block-icon {
+  @apply flex-shrink-0 w-10 h-10 md:w-12 md:h-12;
+  @apply flex items-center justify-center;
+}
+
+.feature-block-text {
+  @apply flex-1 text-sm md:text-base text-gray-700 leading-snug;
+}
+
