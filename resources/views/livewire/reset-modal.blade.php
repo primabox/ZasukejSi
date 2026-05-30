@@ -1,7 +1,7 @@
 <div x-data="{ show: false, closing: false }"
     x-on:show-reset-modal.window="show = true; $wire.show()"
     x-on:hide-reset-modal.window="show = false; closing = false"
-    x-init="$watch('show', v => document.body.style.overflow = v ? 'hidden' : '')"
+    x-init="$watch('show', v => { document.body.style.overflow = v ? 'hidden' : ''; if (v) { document.body.classList.add('modal-open') } else { document.body.classList.remove('modal-open') } ; window.dispatchEvent(new CustomEvent('modal-visibility-changed', { detail: { open: v } })); })"
     x-on:keydown.escape.window="if (show) { closing = true; show = false; $wire.hide() }">
     <!-- Reset Password Modal -->
     <div x-show="show"
@@ -13,12 +13,30 @@
         <div class="modal-backdrop"
             @click="closing = true; show = false; $wire.hide()"></div>
 
+        <style>
+            .form-container { width:100%; max-width:520px; height:353px; }
+            .form-field { width:100%; max-width:460px; height:50px; }
+            .modal-btn-primary, .modal-btn-secondary { width:100%; max-width:460px; }
+            .modal-btn-primary { height:60px; }
+            .modal-container { width:600px !important; max-width:600px !important; height:810px !important; border-radius:24px; overflow:hidden; background:white; box-sizing:border-box; }
+            @media (max-width:480px) {
+                .modal-container { width:320px !important; max-width:320px !important; height:711px !important; }
+                .form-container { width:280px !important; max-width:280px !important; height:337px !important; }
+                .form-field { max-width:240px !important; }
+                .modal-btn-primary, .modal-btn-secondary { max-width:240px !important; height:50px !important; }
+                .modal-title, .modal-subtitle { font-size:28px !important; line-height:1.05 !important; }
+                .modal-close-btn { top:20px !important; right:20px !important; }
+                .modal-btn-primary { margin-top:18px !important; }
+                .modal-subtitle { margin-bottom:32px !important; }
+            }
+        </style>
+
         <!-- Modal Content -->
         <div class="modal-container">
             <!-- Close Button -->
             <button @click="closing = true; show = false; $wire.hide()"
-                class="modal-close-btn">
-                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="modal-close-btn" style="width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;right:35px;top:35px;background:#DD3888;border:none">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>

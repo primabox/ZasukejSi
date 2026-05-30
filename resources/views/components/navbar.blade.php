@@ -1,4 +1,7 @@
 <nav class="fixed top-0 left-0 right-0 z-100 bg-transparent rounded-b-3xl transition-all duration-300 py-4 bg-white " id="navbar" x-data>
+    <style>
+        body.modal-open #navbar { display: none !important; }
+    </style>
     <div class="container mx-auto px-4 ">
         <div class="flex justify-between items-center h-12 ">
             <!-- Left Side: Logo + Navigation Links -->
@@ -254,5 +257,25 @@
                 });
             }
         });
+    });
+    // Listen for global modal visibility events and toggle body.modal-open accordingly.
+    window.addEventListener('modal-visibility-changed', function(e) {
+        try {
+            const open = e && e.detail && e.detail.open;
+            if (open) {
+                document.body.classList.add('modal-open');
+            } else {
+                // Delay briefly and check if any modal-container is still visible
+                setTimeout(function() {
+                    const modals = Array.from(document.querySelectorAll('.modal-container'));
+                    const anyVisible = modals.some(m => window.getComputedStyle(m).display !== 'none' && m.getBoundingClientRect().height > 0);
+                    if (!anyVisible) {
+                        document.body.classList.remove('modal-open');
+                    }
+                }, 10);
+            }
+        } catch (err) {
+            console.error('modal-visibility-changed handler error', err);
+        }
     });
 </script>
