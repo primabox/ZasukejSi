@@ -1,31 +1,135 @@
-<nav class="fixed top-0 left-0 right-0 z-100 bg-transparent rounded-b-3xl transition-all duration-300 py-4 bg-white " id="navbar" x-data>
+<nav class="fixed top-0 left-0 right-0 z-100 bg-transparent rounded-b-3xl transition-all duration-300" id="navbar" x-data>
     <style>
         body.modal-open #navbar { display: none !important; }
+
+        .navbar-shell {
+            width: 1136px;
+            max-width: calc(100% - 32px);
+            height: 80px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-desktop-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: auto 440px 1fr;
+            align-items: center;
+            column-gap: 12px;
+        }
+
+        .brand-mark {
+            font-family: 'Bungee', cursive;
+            font-weight: 400;
+            font-size: 24px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        #nav-logo {
+            padding-right: 97px;
+        }
+
+        .brand-mark .brand-main { color: #5C2D62; }
+        .brand-mark .brand-si { color: #DD3888; }
+        .brand-mark .brand-cz { color: rgba(50, 50, 50, 0.78); }
+
+        .navbar-links {
+            width: 440px;
+            height: 100%;
+            align-self: stretch;
+            display: flex;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: 20px;
+            margin-left: 18px;
+        }
+
+        .navbar-links .nav-link {
+            display: flex;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 1;
+            color: #323232;
+            text-decoration: none;
+            height: 80px;
+            padding: 0 10px;
+            white-space: nowrap;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            transition: color 140ms ease, background-color 140ms ease;
+        }
+
+        .navbar-links .nav-link.active,
+        .navbar-links .nav-link:hover {
+            color: #DD3888;
+            background: #FFFFFF;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        @media (max-width: 1023px) {
+            .navbar-shell {
+                width: 100%;
+                max-width: calc(100% - 24px);
+                height: 56px;
+            }
+
+            #nav-logo {
+                padding-right: 0;
+            }
+        }
     </style>
     <div class="container mx-auto px-4 ">
-        <div class="flex justify-between items-center h-12 ">
+        <div class="navbar-shell">
             <!-- Left Side: Logo + Navigation Links -->
-            <div class="flex items-center space-x-3 md:space-x-12">
+            <div class="navbar-desktop-grid hidden lg:grid">
                 <!-- Logo -->
-                <a href="{{ route('profiles.index') }}" class="text-xl font-bold text-text-default hover:text-primary-600 transition-colors" id="nav-logo">
-                    <span class="text-xl xl:text-2xl font-extrabold">
-                        <span class="text-secondary-500">ZAŠUKEJ</span><span class="text-primary-500">SI</span><span class="text-dark-gray">.CZ</span>
+                <a href="{{ route('profiles.index') }}" class="text-xl font-bold text-text-default hover:text-primary-600 transition-colors justify-self-start" id="nav-logo">
+                    <span class="brand-mark">
+                        <span class="brand-main">ZAŠUKEJ</span><span class="brand-si">SI</span><span class="brand-cz">.CZ</span>
                     </span>
                 </a>
 
                 <!-- Navigation Links - Desktop -->
-                <div class="hidden lg:flex items-center space-x-5 xl:space-x-6">
-                    @foreach($navPages ?? [] as $page)
-                        <a href="{{ url('/' . $page->slug) }}" class="nav-link" id="nav-link-{{ $page->id }}">
+                <div class="navbar-links justify-self-center">
+                    @php
+                        $resolvedNavPages = collect($navPages ?? [])->values();
+                        if ($resolvedNavPages->isEmpty()) {
+                            $resolvedNavPages = collect([
+                                (object) ['id' => 'home', 'slug' => '', 'title' => 'Úvod'],
+                                (object) ['id' => 'vip', 'slug' => 'vip-premium', 'title' => 'VIP a Premium'],
+                                (object) ['id' => 'faq', 'slug' => 'faq', 'title' => 'FAQ'],
+                                (object) ['id' => 'ethics', 'slug' => 'etika', 'title' => 'Etika'],
+                                (object) ['id' => 'contact', 'slug' => 'kontakt', 'title' => 'Kontakt'],
+                            ]);
+                        }
+                    @endphp
+                    @foreach($resolvedNavPages as $page)
+                        @php
+                            $normalizedSlug = trim($page->slug, '/');
+                            $isHomeSlug = $normalizedSlug === '';
+                            $isActive = $isHomeSlug ? request()->path() === '/' : request()->is($normalizedSlug);
+                        @endphp
+                        <a href="{{ url('/' . $page->slug) }}" class="nav-link {{ $isActive ? 'active' : '' }}" id="nav-link-{{ $page->id }}">
                             {{ $page->title }}
                         </a>
                     @endforeach
                 </div>
-            </div>
 
-            <!-- Right Side: Register, Login, Language Switcher -->
-            <div class="flex items-center space-x-1 md:space-x-2">
-                @auth
+                <!-- Right Side: Register, Login, Language Switcher -->
+                <div class="navbar-actions justify-self-end">
+                    @auth
                     <!-- Icon Buttons - Desktop Only -->
                     <div class="hidden lg:flex items-center space-x-2">
                         <!-- Notifications Button -->
@@ -80,48 +184,57 @@
                             </div>
                         </div>
                     </div> 
-                @else
+                    @else
                     <!-- Register Button - Desktop Only -->
                     <div class="hidden lg:inline-block">
                         <button @click="$dispatch('show-register-modal')" class="btn-primary">
-                            {{ __('front.nav.register') }}
+                            Registrace
                         </button>
                     </div>
                     <!-- Login Link - Desktop Only -->
                     <div class="hidden lg:inline-block">
                          <button @click="$dispatch('show-login-modal')" class="btn-light" id="nav-login">
-                             {{ __('front.nav.login') }}
+                             Login
                          </button>
                     </div>
-                @endauth
+                    @endauth
 
-                <!-- Language Switcher - Desktop Only -->
-                <div class="hidden lg:inline">
-                    <div class="language-dropdown " x-data="{ languageOpen: false }" @click.outside="languageOpen = false">
-                        <button @click="languageOpen = !languageOpen" class="language-dropdown-toggle" id="nav-language">
-                            @if(app()->getLocale() === 'cs')
-                                <img src="{{ asset('flags/cs.png') }}" alt="Czech">
-                            @else
-                                <img src="{{ asset('flags/en.png') }}" alt="English">
-                            @endif
-                        </button>
-                        
-                        <div class="language-dropdown-menu">
-                            <a href="{{ url()->current() }}?locale=en" 
-                               class="language-dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}"
-                               @click="languageOpen = false"
-                               title="English">
-                                <img src="{{ asset('flags/en.png') }}" alt="English">
-                            </a>
-                            <a href="{{ url()->current() }}?locale=cs" 
-                               class="language-dropdown-item {{ app()->getLocale() === 'cs' ? 'active' : '' }}"
-                               @click="languageOpen = false"
-                               title="Čeština">
-                                <img src="{{ asset('flags/cs.png') }}" alt="Czech">
-                            </a>
+                    <!-- Language Switcher - Desktop Only -->
+                    <div class="hidden lg:inline">
+                        <div class="language-dropdown " x-data="{ languageOpen: false }" @click.outside="languageOpen = false">
+                            <button @click="languageOpen = !languageOpen" class="language-dropdown-toggle" id="nav-language">
+                                @if(app()->getLocale() === 'cs')
+                                    <img src="{{ asset('flags/cs.png') }}" alt="Czech">
+                                @else
+                                    <img src="{{ asset('flags/en.png') }}" alt="English">
+                                @endif
+                            </button>
+                            
+                            <div class="language-dropdown-menu">
+                                <a href="{{ url()->current() }}?locale=en" 
+                                   class="language-dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}"
+                                   @click="languageOpen = false"
+                                   title="English">
+                                    <img src="{{ asset('flags/en.png') }}" alt="English">
+                                </a>
+                                <a href="{{ url()->current() }}?locale=cs" 
+                                   class="language-dropdown-item {{ app()->getLocale() === 'cs' ? 'active' : '' }}"
+                                   @click="languageOpen = false"
+                                   title="Čeština">
+                                    <img src="{{ asset('flags/cs.png') }}" alt="Czech">
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="flex w-full items-center justify-between lg:hidden">
+                <a href="{{ route('profiles.index') }}" class="text-xl font-bold text-text-default hover:text-primary-600 transition-colors" id="nav-logo-mobile">
+                    <span class="brand-mark" style="font-size:20px;">
+                        <span class="brand-main">ZAŠUKEJ</span><span class="brand-si">SI</span><span class="brand-cz">.CZ</span>
+                    </span>
+                </a>
                 <!-- Mobile menu button -->
                 <div class="lg:hidden" x-data="{ mobileMenuOpen: false }" @click.outside="mobileMenuOpen = false">
                     <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="flex items-center justify-center text-text-default hover:text-primary-600 focus:outline-none focus:text-primary-600" id="mobile-menu-button">
@@ -151,7 +264,7 @@
                                 $unreadMessages = Auth::user()->receivedMessages()->unread()->count();
                             @endphp
                             @if($unreadMessages > 0)
-                                <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                                <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                     {{ $unreadMessages > 9 ? '9+' : $unreadMessages }}
                                 </span>
                             @endif
@@ -182,10 +295,10 @@
                     <!-- Auth Buttons -->
                     <div class="w-full space-y-3 pt-4">
                         <button @click="$dispatch('show-register-modal')" class="w-full btn-primary py-3 text-center">
-                            {{ __('front.nav.register') }}
+                            Registrace
                         </button>
                         <button @click="$dispatch('show-login-modal')" class="w-full btn-light py-3 text-center">
-                            {{ __('front.nav.login') }}
+                            Login
                         </button>
                     </div>
                 @endauth
@@ -211,21 +324,6 @@
 
 
 <script>
-    // Navbar scroll behavior - only changes background
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('navbar');
-
-        if (window.scrollY > 50) {
-            // Scrolled - white background
-            navbar.classList.remove('bg-transparent');
-            navbar.classList.add('bg-gray-100');
-        } else {
-            // Top - transparent background
-            navbar.classList.add('bg-transparent');
-            navbar.classList.remove('bg-gray-100');
-        }
-    });
-
     // Mobile menu toggle
     document.addEventListener('DOMContentLoaded', function() {
         const mobileMenuButton = document.getElementById('mobile-menu-button');

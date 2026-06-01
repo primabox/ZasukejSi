@@ -5,199 +5,178 @@
     </div>
 
     <!-- Quick Filters -->
-    <div class="mb-4 md:mb-8 md:px-8 lg:px-12">
-        <!-- Age Group Filters -->
-        <!-- Age Group Filters - Mobile Dropdown -->
-        <div class="md:hidden mb-3">
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" type="button"
-                    class="inline-flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 border-2 {{ $ageGroup !== '' ? 'border-primary' : 'border-gray-200' }} bg-white hover:border-gray-300">
-                    <span class="flex items-center">
-                        <x-icons name="users"
-                            class="w-3.5 h-3.5 mr-1.5 {{ $ageGroup !== '' ? 'text-primary' : 'text-gray-500' }}" />
-                        @if ($ageGroup === '')
-                            {{ __('front.profiles.list.all_girls') }}
-                        @else
-                            @php
-                                $ageLabels = [
-                                    '18-25' => __('front.profiles.list.age_18_25'),
-                                    '26-30' => __('front.profiles.list.age_26_30'),
-                                    '31-35' => __('front.profiles.list.age_31_35'),
-                                    '36-40' => __('front.profiles.list.age_36_40'),
-                                    '40-50' => __('front.profiles.list.age_40_50'),
-                                    '50+' => __('front.profiles.list.age_50_plus'),
-                                ];
-                            @endphp
-                            {{ $ageLabels[$ageGroup] ?? __('front.profiles.list.all_girls') }}
-                        @endif
-                    </span>
-                    <svg class="w-4 h-4 ml-2 text-gray-500 transition-transform" :class="{ 'rotate-180': open }"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div x-show="open" @click.away="open = false" x-transition
-                    class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                    <button wire:click="toggleAgeGroup('')" @click="open = false"
-                        class="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 {{ $ageGroup === '' ? 'text-primary font-semibold' : 'text-gray-700' }}">
-                        {{ __('front.profiles.list.all_girls') }}
-                    </button>
-                    @foreach ([
-        '18-25' => __('front.profiles.list.age_18_25'),
-        '26-30' => __('front.profiles.list.age_26_30'),
-        '31-35' => __('front.profiles.list.age_31_35'),
-        '36-40' => __('front.profiles.list.age_36_40'),
-        '40-50' => __('front.profiles.list.age_40_50'),
-        '50+' => __('front.profiles.list.age_50_plus'),
-    ] as $value => $label)
-                        <button wire:click="toggleAgeGroup('{{ $value }}')" @click="open = false"
-                            class="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 {{ $ageGroup === $value ? 'text-primary font-semibold' : 'text-gray-700' }}">
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                </div>
-            </div>
-        </div>
+    <div class="mb-4 md:mb-8 md:px-8 lg:px-12" x-data="{
+        init() {
+            Livewire.on('filters-updated', () => {
+                this.$nextTick(() => {
+                    // Re-evaluate Alpine bindings if needed
+                });
+            });
+        }
+    }">
+        <style>
+            .filter-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 16px;
+                border-radius: 9999px;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s ease-in-out;
+                cursor: pointer;
+                border: 2px solid transparent;
+            }
+
+            .filter-pill.inactive {
+                background-color: #FFFFFF;
+                border-color: #F2F2F2;
+                color: #374151;
+            }
+
+            .filter-pill.active {
+                background-color: #F2F2F2;
+                border-color: #F2F2F2;
+                color: #374151;
+            }
+
+            .filter-pill .icon {
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+            }
+
+            .filter-switch {
+                width: 33px;
+                height: 18px;
+                border-radius: 7500px;
+                background-color: #E4E4E7;
+                position: relative;
+                transition: background-color 0.2s ease-in-out;
+                margin-left: 8px;
+            }
+
+            .filter-switch-thumb {
+                position: absolute;
+                top: 1.5px;
+                left: 1.5px;
+                width: 15px;
+                height: 15px;
+                background-color: #FFFFFF;
+                border-radius: 9999px;
+                transition: transform 0.2s ease-in-out;
+            }
+
+            .filter-pill.active .filter-switch {
+                background-color: #DD3888;
+            }
+
+            .filter-pill.active .filter-switch-thumb {
+                transform: translateX(15px);
+            }
+        </style>
 
         <!-- Age Group Filters - Desktop Buttons -->
         <div class="hidden md:flex flex-wrap gap-2 md:gap-3 mb-3 md:mb-4">
             <!-- All Girls Filter -->
-            <button wire:click="toggleAgeGroup('')"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $ageGroup === '' ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleAgeGroup">
-                <span wire:target="toggleAgeGroup">
-                    <x-icons name="users"
-                        class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 {{ $ageGroup === '' ? 'text-primary' : 'text-gray-500' }}" />
-                </span>
+            <button wire:click.debounce.300ms="toggleAgeGroup('')"
+                :class="{
+                    'filter-pill active': '{{ $ageGroup }}' === '',
+                    'filter-pill inactive': '{{ $ageGroup }}' !== ''
+                }">
+                <img src="{{ asset('images/icons/profile.svg') }}" alt="Profile Icon" class="icon" style="filter: invert(34%) sepia(98%) saturate(1551%) hue-rotate(310deg) brightness(90%) contrast(95%);">
                 {{ __('front.profiles.list.all_girls') }}
             </button>
 
             @foreach ([
-        '18-25' => __('front.profiles.list.age_18_25'),
-        '26-30' => __('front.profiles.list.age_26_30'),
-        '31-35' => __('front.profiles.list.age_31_35'),
-        '36-40' => __('front.profiles.list.age_36_40'),
-        '40-50' => __('front.profiles.list.age_40_50'),
-        '50+' => __('front.profiles.list.age_50_plus'),
-    ] as $value => $label)
-                <button wire:click="toggleAgeGroup('{{ $value }}')"
-                    class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $ageGroup === $value ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    wire:loading.attr="disabled" wire:target="toggleAgeGroup">
-                    <span wire:target="toggleAgeGroup">{{ $label }}</span>
+                '18-25' => __('front.profiles.list.age_18_25'),
+                '26-30' => __('front.profiles.list.age_26_30'),
+                '31-35' => __('front.profiles.list.age_31_35'),
+                '36-40' => __('front.profiles.list.age_36_40'),
+                '40-50' => __('front.profiles.list.age_40_50'),
+                '50+' => __('front.profiles.list.age_50_plus'),
+            ] as $value => $label)
+                <button wire:click.debounce.300ms="toggleAgeGroup('{{ $value }}')"
+                    :class="{
+                        'filter-pill active': '{{ $ageGroup }}' === '{{ $value }}',
+                        'filter-pill inactive': '{{ $ageGroup }}' !== '{{ $value }}'
+                    }">
+                    {{ $label }}
                 </button>
             @endforeach
         </div>
 
         <!-- Feature Filters -->
-        <div class="flex flex-wrap gap-2 md:gap-3">
+        <div class="hidden md:flex flex-wrap gap-2 md:gap-3">
             <!-- Recommendation Filter -->
-            <button wire:click="toggleRecommendation"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $sortRecommendation !== '' ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleRecommendation">
-                @if ($sortRecommendation === 'desc')
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-primary" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                    </svg>
-                @elseif($sortRecommendation === 'asc')
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-primary" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                @else
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-gray-500" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-                    </svg>
-                @endif
+            <button wire:click.debounce.300ms="toggleRecommendation"
+                :class="{
+                    'filter-pill active': '{{ $sortRecommendation }}' !== '',
+                    'filter-pill inactive': '{{ $sortRecommendation }}' === ''
+                }">
+                <img src="{{ asset('images/icons/ArrowUp.svg') }}" alt="Arrow Up Icon" class="icon" style="filter: invert(34%) sepia(98%) saturate(1551%) hue-rotate(310deg) brightness(90%) contrast(95%);">
                 {{ __('front.profiles.list.recommendation') }}
             </button>
 
             <!-- Verified Photo Filter -->
-            <button wire:click="toggleVerifiedPhoto"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $hasVerifiedPhoto ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleVerifiedPhoto">
-                <svg wire:target="toggleVerifiedPhoto"
-                    class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 {{ $hasVerifiedPhoto ? 'text-primary' : 'text-gray-500' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+            <button wire:click.debounce.300ms="toggleVerifiedPhoto"
+                :class="{
+                    'filter-pill active': {{ $hasVerifiedPhoto ? 'true' : 'false' }},
+                    'filter-pill inactive': {{ !$hasVerifiedPhoto ? 'true' : 'false' }}
+                }">
                 {{ __('front.profiles.list.verified_photo') }}
+                <div class="filter-switch">
+                    <div class="filter-switch-thumb"></div>
+                </div>
             </button>
 
             <!-- Video Filter -->
-            <button wire:click="toggleVideo"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $hasVideo ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleVideo">
-                <svg wire:target="toggleVideo"
-                    class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 {{ $hasVideo ? 'text-primary' : 'text-gray-500' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
-                    </path>
-                </svg>
+            <button wire:click.debounce.300ms="toggleVideo"
+                :class="{
+                    'filter-pill active': {{ $hasVideo ? 'true' : 'false' }},
+                    'filter-pill inactive': {{ !$hasVideo ? 'true' : 'false' }}
+                }">
                 {{ __('front.profiles.list.video') }}
+                <div class="filter-switch">
+                    <div class="filter-switch-thumb"></div>
+                </div>
             </button>
 
             <!-- Porn Actress Filter -->
-            <button wire:click="togglePornActress"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $isPornActress ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="togglePornActress">
-                <svg wire:target="togglePornActress"
-                    class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 {{ $isPornActress ? 'text-primary' : 'text-gray-500' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
-                    </path>
-                </svg>
+            <button wire:click.debounce.300ms="togglePornActress"
+                :class="{
+                    'filter-pill active': {{ $isPornActress ? 'true' : 'false' }},
+                    'filter-pill inactive': {{ !$isPornActress ? 'true' : 'false' }}
+                }">
                 {{ __('front.profiles.list.porn_actress') }}
+                <div class="filter-switch">
+                    <div class="filter-switch-thumb"></div>
+                </div>
             </button>
 
             <!-- New Filter -->
-            <button wire:click="toggleNew"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $sortNew !== '' ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleNew">
-                @if ($sortNew === 'desc')
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-primary" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7">
-                        </path>
-                    </svg>
-                @elseif($sortNew === 'asc')
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-primary" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                        </path>
-                    </svg>
-                @else
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 text-gray-500" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                        </path>
-                    </svg>
-                @endif
+            <button wire:click.debounce.300ms="toggleNew"
+                :class="{
+                    'filter-pill active': '{{ $sortNew }}' !== '',
+                    'filter-pill inactive': '{{ $sortNew }}' === ''
+                }">
                 {{ __('front.profiles.list.new') }}
             </button>
 
             <!-- Rating Filter -->
-            <button wire:click="toggleRating"
-                class="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-200 border-2 {{ $hasRating ? 'border-primary text-gray-700 bg-white' : 'border-gray-100 text-gray-700 bg-white' }} hover:border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                wire:loading.attr="disabled" wire:target="toggleRating">
-                <svg wire:target="toggleRating"
-                    class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 md:mr-2 {{ $hasRating ? 'text-primary' : 'text-gray-500' }}"
-                    fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                    </path>
-                </svg>
+            <button wire:click.debounce.300ms="toggleRating"
+                :class="{
+                    'filter-pill active': {{ $hasRating ? 'true' : 'false' }},
+                    'filter-pill inactive': {{ !$hasRating ? 'true' : 'false' }}
+                }">
+                <img src="{{ asset('images/icons/lock.svg') }}" alt="Lock Icon" class="icon">
                 {{ __('front.profiles.list.rating') }}
             </button>
 
             <!-- Clear All Filters Button -->
             @if ($this->activeFiltersCount() > 0)
-                <button wire:click="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters"
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 border-2 border-red-200 text-red-600 bg-white hover:border-red-300 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                <button wire:click.debounce.300ms="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters"
+                    class="filter-pill inactive"
                     title="{{ __('front.profiles.list.clear_all_filters') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

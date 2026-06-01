@@ -1,7 +1,7 @@
 <div x-data="{ show: false, closing: false, expanded: false, selectedGender: null, emailValue: '', emailHasAt: false }"
     x-on:show-register-modal.window="show = true; $wire.show()"
     x-on:hide-register-modal.window="show = false; closing = false; expanded = false"
-    x-init="$watch('show', v => { document.body.style.overflow = v ? 'hidden' : ''; if (v) { document.body.classList.add('modal-open') } else { document.body.classList.remove('modal-open'); selectedGender = null; expanded = false; } ; window.dispatchEvent(new CustomEvent('modal-visibility-changed', { detail: { open: v } })); })"
+    x-init="$watch('show', v => { document.body.style.overflow = v ? 'hidden' : ''; if (v) { document.body.classList.add('modal-open') } else { document.body.classList.remove('modal-open'); selectedGender = null; expanded = false; } ; window.dispatchEvent(new CustomEvent('modal-visibility-changed', { detail: { open: v } })); }); $watch('selectedGender', value => { $wire.set('gender', value ? value : '') })"
     x-on:keydown.escape.window="if (show) { closing = true; show = false; $wire.hide() }">
     <!-- Registration Modal -->
     <div x-show="show"
@@ -32,6 +32,61 @@
             .modal-container.register-step1.expanded { width:600px !important; max-width:600px !important; height:947px !important; }
             .modal-container.register-step1 .modal-header { margin-top:44px !important; }
 
+            /* Register success step */
+            .modal-container.register-success {
+                width:600px !important;
+                max-width:600px !important;
+                height:480px !important;
+                border-radius:24px !important;
+            }
+            .modal-container.register-success .modal-header {
+                margin-top:44px !important;
+                margin-bottom:24px !important;
+            }
+            .register-success-card {
+                width:520px;
+                height:227px;
+                border-radius:15px;
+                background:#F2F2F2;
+                margin:0 auto;
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:flex-start;
+                box-sizing:border-box;
+                padding-top:38px;
+            }
+            .register-success-icon {
+                width:36px;
+                height:36px;
+                display:block;
+                margin-bottom:18px;
+            }
+            .register-success-title {
+                margin:0;
+                width:255px;
+                max-width:255px;
+                height:60px;
+                text-align:center;
+                font-family:'Poppins', sans-serif;
+                font-weight:700;
+                font-size:18px;
+                line-height:1.22;
+                color:#5C5C5C;
+            }
+            .register-success-message {
+                margin:16px 0 0 0;
+                width:326px;
+                max-width:326px;
+                height:54px;
+                text-align:center;
+                font-family:'Poppins', sans-serif;
+                font-weight:400;
+                font-size:11px;
+                line-height:1.45;
+                color:#5C5C5C;
+            }
+
             /* Gender option styles */
             .gender-option { width:520px; height:100px; border-radius:15px; background:#FFFFFF; box-shadow:0 5px 15px rgba(92,45,98,0.20); display:flex; align-items:center; justify-content:space-between; padding:18px 20px; box-sizing:border-box; margin:0 auto; border:1px solid rgba(0,0,0,0.02); transition: transform 160ms ease, opacity 160ms ease; position:relative; z-index:50; }
             .gender-icon { background:#F2F2F2 !important; transition: background-color 220ms cubic-bezier(.2,.9,.3,1); }
@@ -46,10 +101,44 @@
 
             @media (max-width:480px) {
                 .modal-container { width:320px !important; max-width:320px !important; height:711px !important; }
+                form[wire\:submit] { margin-top:12px !important; }
+                .consent-text { font-size:9px !important; }
                 /* Register step 1 specific mobile sizing */
                 .modal-container.register-step1 { width:320px !important; max-width:320px !important; height:342px !important; }
                 /* When a gender option is expanded (clicked) enlarge modal to show more content */
                 .modal-container.register-step1.expanded { width:320px !important; max-width:320px !important; height:895px !important; }
+                .modal-container.register-success {
+                    width:320px !important;
+                    max-width:320px !important;
+                    height:468px !important;
+                    border-radius:24px !important;
+                }
+                .register-success-card {
+                    width:280px !important;
+                    max-width:280px !important;
+                    height:263px !important;
+                    border-radius:15px !important;
+                    background:#EBF8EC !important;
+                    padding-top:28px !important;
+                }
+                .register-success-title {
+                    width:255px !important;
+                    max-width:255px !important;
+                    height:60px !important;
+                    font-family:'Poppins', sans-serif !important;
+                    font-weight:700 !important;
+                    font-size:18px !important;
+                    color:#5C5C5C !important;
+                }
+                .register-success-message {
+                    width:195px !important;
+                    max-width:195px !important;
+                    height:54px !important;
+                    font-family:'Poppins', sans-serif !important;
+                    font-weight:400 !important;
+                    font-size:11px !important;
+                    color:#5C5C5C !important;
+                }
                 .form-container { width:280px !important; max-width:280px !important; height:337px !important; }
                 .form-container form > div { width:240px !important; max-width:240px !important; height:74px !important; }
                 .form-field { max-width:240px !important; height:50px !important; width:240px !important; }
@@ -76,11 +165,12 @@
             }
             @media (max-width:480px) {
                 .form-container.inline-register { width:280px !important; max-width:280px !important; height:520px !important; }
+                .form-container.inline-register > form { margin-top:12px !important; }
             }
         </style>
 
         <!-- Modal Content -->
-        <div class="modal-container pb-4 sm:pb-5 md:pb-7 @if($currentStep === 1) register-step1 @endif" x-bind:class="{ 'expanded': expanded }">
+        <div class="modal-container pb-4 sm:pb-5 md:pb-7 @if($currentStep === 1) register-step1 @endif @if($currentStep === 3) register-success @endif" x-bind:class="{ 'expanded': expanded }">
             <!-- Step Back Button (only on step 2, hide on success step) -->
             @if($currentStep === 2)
             <button wire:click="previousStep"
@@ -343,29 +433,21 @@
             @elseif($currentStep === 3)
             <!-- Step 3: Success Message -->
             <div class="text-center">
-                <!-- Success Icon -->
-                <div class="flex justify-center mb-2 sm:mb-3 md:mb-4">
-                    <div class="bg-green-100 rounded-full p-1.5 sm:p-2 md:p-3">
-                        <svg class="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Success Message -->
                 <div class="modal-header">
-                    <h1 class="modal-title text-base sm:text-lg md:text-xl">{{ __('auth.register.success.title') }}</h1>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-gray-500 mt-1">
-                        {{ __('auth.register.success.message', ['email' => $this->maskedEmail]) }}
-                    </p>
+                    <h1 class="modal-title">{{ __('auth.register.title') }}</h1>
+                    <h2 class="modal-subtitle">
+                        @if($gender === 'female')
+                            {{ __('auth.register.subtitle_female') }}
+                        @elseif($gender === 'male')
+                            {{ __('auth.register.subtitle_male') }}
+                        @endif
+                    </h2>
                 </div>
 
-                <!-- Action Button -->
-                <div class="mt-3 sm:mt-4 md:mt-5">
-                    <button @click="closing = true; show = false; $wire.hide()"
-                        class="modal-btn-primary">
-                        {{ __('auth.register.success.close_button') }}
-                    </button>
+                <div class="register-success-card">
+                    <img src="{{ asset('images/icons/MailCheck.svg') }}" alt="Mail check" class="register-success-icon">
+                    <p class="register-success-title">Registrace proběhla<br>úspěšně, děkujeme</p>
+                    <p class="register-success-message">Potvrďte, prosím, ověřovací odkaz, který jsme poslali na {{ $this->maskedEmail }}. Pak můžete začít platformu plně využívat.</p>
                 </div>
             </div>
             @endif

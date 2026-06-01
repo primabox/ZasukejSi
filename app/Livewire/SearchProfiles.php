@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\City;
 use Livewire\Component;
 
 class SearchProfiles extends Component
@@ -17,30 +16,31 @@ class SearchProfiles extends Component
 
     public function mount()
     {
-        $this->region = request('region', request('city', ''));
-        $this->age_range = request('age', '');
+        $this->region = request('region', request('city', 'Hlavní město Praha'));
+        $this->age_range = request('age', '18');
     }
 
     /**
-     * Get all available regions from approved, public, and verified profiles.
+     * Czech regions list shown in homepage search.
      */
     public function getAllRegionsProperty()
     {
-        return City::query()
-            ->join('profiles', function ($join) {
-                $join->on('cities.country_code', '=', 'profiles.country_code')
-                    ->whereRaw('LOWER(cities.name) = LOWER(profiles.city)');
-            })
-            ->where('profiles.status', 'approved')
-            ->where('profiles.is_public', true)
-            ->whereNotNull('profiles.verified_at')
-            ->whereNotNull('cities.admin_name')
-            ->where('cities.admin_name', '!=', '')
-            ->distinct()
-            ->pluck('cities.admin_name')
-            ->sortBy(fn (string $region) => $this->regionSortKey($region), SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->toArray();
+        return [
+            'Hlavní město Praha',
+            'Středočeský kraj',
+            'Jihočeský kraj',
+            'Plzeňský kraj',
+            'Karlovarský kraj',
+            'Ústecký kraj',
+            'Liberecký kraj',
+            'Královéhradecký kraj',
+            'Pardubický kraj',
+            'Vysočina',
+            'Jihomoravský kraj',
+            'Olomoucký kraj',
+            'Zlínský kraj',
+            'Moravskoslezský kraj',
+        ];
     }
 
     public function updatedRegion()
@@ -95,12 +95,23 @@ class SearchProfiles extends Component
     public function getAgeRangeOptionsProperty()
     {
         return [
-            '18-25' => '18-25 yo',
-            '26-30' => '26-30 yo',
-            '31-35' => '31-35 yo',
-            '36-40' => '36-40 yo',
-            '40-50' => '40-50 yo',
-            '50+' => '50 yo +',
+            '18' => '18 let',
+            '19' => '19 let',
+            '20' => '20 let',
+            '21' => '21 let',
+            '22' => '22 let',
+            '23' => '23 let',
+            '24' => '24 let',
+            '25' => '25 let',
+            '26' => '26 let',
+            '27' => '27 let',
+            '28' => '28 let',
+            '29' => '29 let',
+            '30' => '30 let',
+            '35' => '35 let',
+            '40' => '40 let',
+            '45' => '45 let',
+            '50' => '50 let',
         ];
     }
 
@@ -125,16 +136,5 @@ class SearchProfiles extends Component
     public function render()
     {
         return view('livewire.search-profiles');
-    }
-
-    protected function regionSortKey(string $region): string
-    {
-        $normalizedRegion = mb_strtolower($region);
-
-        if (in_array($normalizedRegion, ['praha', 'hlavní město praha', 'hlavni mesto praha'], true)) {
-            return '0';
-        }
-
-        return '1-' . $normalizedRegion;
     }
 }

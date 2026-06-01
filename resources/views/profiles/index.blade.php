@@ -3,34 +3,120 @@
 @section('title', __('front.title'))
 
 @section('content')
+<style>
+    .hero-bg {
+        width: min(1331px, calc(100% - 24px));
+        height: 602px;
+        margin: 0 auto;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        overflow: visible;
+        position: relative;
+        z-index: 30;
+    }
+
+    .hero-bg .hero-inner {
+        height: 100%;
+        position: relative;
+        z-index: 31;
+    }
+
+    .hero-search-wrap {
+        margin-top: auto;
+        padding-left: 0;
+        padding-right: 0;
+        transform: translateY(28px);
+        position: relative;
+        z-index: 60;
+    }
+
+    .profiles-section-wrap {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-main-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 800;
+        font-size: 50px;
+        line-height: 1.08;
+        color: #5C2D62;
+    }
+
+    .hero-main-title .hero-main-highlight {
+        color: #DD3888;
+    }
+
+    .hero-main-title .hero-main-period {
+        color: #5C2D62;
+    }
+
+    .hero-subtitle {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 20px;
+        line-height: 1.3;
+        color: #5C5C5C;
+        max-width: 430px;
+        margin-bottom: 0;
+    }
+
+    .hero-copy-block {
+        transform: translateX(15px);
+    }
+
+    @media (max-width: 1024px) {
+        .hero-bg {
+            width: calc(100% - 12px);
+            height: auto;
+            min-height: 520px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .hero-bg {
+            width: 100%;
+            min-height: 420px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+        }
+
+        .hero-main-title {
+            font-size: 36px;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+        }
+
+        .hero-copy-block {
+            transform: translateX(0);
+        }
+
+        .hero-search-wrap {
+            transform: translateY(16px);
+        }
+    }
+</style>
 <!-- Hero Section  max-w-[1331px] -->
-<div class="min-h-[420px] md:min-h-[520px] mx-auto rounded-b-3xl bg-center bg-cover" style="background-image: url('/images/header.png');">
-    <div class="container mx-auto px-4 pt-16 md:pt-24 pb-8 flex flex-col min-h-[420px] md:min-h-[520px]">
-        <div class="max-w-2xl px-4 md:pl-16 py-10 md:py-16">
-            <h1 class="text-secondary leading-tight text-3xl sm:text-4xl md:text-6xl py-4 md:py-5">
-                {{ __('front.landing.wearecommunity') }}
-                <span class="text-primary-500">{{ __('front.landing.fucking') }}.</span>
+<div class="hero-bg" style="background-image: url('/images/header.png');">
+    <div class="hero-inner container mx-auto px-4 pt-16 md:pt-24 pb-8 flex flex-col min-h-[420px] md:min-h-[520px]">
+        <div class="max-w-2xl px-4 md:pl-16 py-10 md:py-16 hero-copy-block">
+            <h1 class="hero-main-title py-4 md:py-5">
+                Jsme komunita lidí,<br>
+                co rádi <span class="hero-main-highlight">šukají</span><span class="hero-main-period">.</span>
             </h1>
 
-            <p class="text-lg sm:text-xl text-gray-600 mb-6 md:mb-8 max-w-sm">
-                {{ __('front.landing.girlsregisternow') }}
+            <p class="hero-subtitle">
+                Dívky, registrujte se ještě dnes<br>
+                a získej nové zákazníky.
             </p>
-
-            <div class="flex flex-wrap gap-3">
-                <div class="inline-flex items-center px-4 py-2 bg-white backdrop-blur-sm text-gray-700 rounded-full text-sm font-medium shadow-lg">
-                    <span class="w-3 h-3 mr-2 bg-green-500 rounded-full"></span>
-                    {{ number_format($girlsCount) }}
-                    {!! preg_replace('/\s(\S+)$/', ' <span class="text-gray-400">$1</span>', e(__('front.landing.girls_registered'))) !!}
-                </div>
-                <div class="inline-flex items-center px-4 py-2 bg-white backdrop-blur-sm text-gray-700 rounded-full text-sm font-medium shadow-lg">
-                    <span class="w-3 h-3 mr-2 bg-green-500 rounded-full"></span>
-                    {{ number_format($gentsCount) }}
-                    {!! preg_replace('/\s(\S+)$/', ' <span class="text-gray-400">$1</span>', e(__('front.landing.gents_registered'))) !!}
-                </div>
-            </div>
         </div>
 
-        <div class="mt-auto px-0">
+        <div class="hero-search-wrap">
             <!-- Search Card -->
             <livewire:search-profiles />
         </div>
@@ -39,7 +125,7 @@
 
 <!-- Profiles Section -->
 
-<div class="container mx-auto px-4 pt-20">
+<div class="container mx-auto px-4 pt-20 profiles-section-wrap">
     <livewire:profile-list />
 </div>
 
