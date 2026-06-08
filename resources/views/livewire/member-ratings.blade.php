@@ -28,7 +28,8 @@
                 {{-- Top Action Badges --}}
                 <div class="absolute top-3 left-3 md:top-4 md:left-4 flex gap-1.5 md:gap-2 z-10">
                     <a href="{{ route('profiles.show', $selectedProfile) }}" 
-                       class="bg-pink-500/90 backdrop-blur hover:bg-pink-600/90 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-colors duration-200 text-xs md:text-sm font-semibold">
+                       class="text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-colors duration-200 text-xs md:text-sm font-semibold"
+                       style="background:#5C2D62;">
                         {{ __('front.profiles.list.detail') }}
                     </a>
                     

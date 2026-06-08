@@ -1,7 +1,7 @@
 @props(['posts'])
 
 @if($posts->count() > 0)
-<div class="container mx-auto px-4 py-20">
+<div class="container mx-auto px-4 py-20 blog-section">
     <div class="mb-12">
         <h2 class="text-4xl font-bold text-secondary mb-4">{{ __('Blog') }}</h2>
         <p class="text-gray-600 text-lg">{{ __('Nejnovější články a tipy') }}</p>
@@ -9,16 +9,16 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @foreach($posts as $post)
-        <article class="group">
+        <article class="group blog-card">
             <!-- Header Image with Overlay Pills -->
-            <a href="{{ route('pages.show', $post->slug) }}" class="block relative mb-4 rounded-none md:rounded-xl overflow-hidden -mx-4 md:mx-0">
+            <a href="{{ route('pages.show', $post->slug) }}" class="block relative mb-4 rounded-none md:rounded-xl overflow-hidden -mx-4 md:mx-0 blog-card-media">
                 @if($post->hasMedia('header-image'))
                     <img src="{{ $post->getFirstMediaUrl('header-image') }}" 
                          alt="{{ $post->title }}"
-                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300 blog-card-image">
                 @else
                     <!-- Placeholder -->
-                    <div class="w-full h-64 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-full h-64 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 blog-card-image">
                         <svg class="w-24 h-24 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -49,7 +49,7 @@
 
             <!-- Post Content -->
             <div class="space-y-4">
-                <h3 class="text-2xl mt-4 font-bold text-secondary group-hover:text-primary transition-colors">
+                <h3 class="text-2xl mt-4 font-bold text-secondary group-hover:text-primary transition-colors blog-card-title">
                     <a href="{{ route('pages.show', $post->slug) }}">
                         {{ $post->title }}
                     </a>
@@ -62,7 +62,7 @@
                 @endif
 
                 <a href="{{ route('pages.show', $post->slug) }}" 
-                   class="block  mt-8 w-full py-3 px-6 bg-secondary text-white text-center font-medium rounded-lg hover:bg-secondary-600 transition-colors">
+                         class="block mt-8 w-full py-3 px-6 bg-secondary text-white text-center font-medium rounded-lg hover:bg-secondary-600 transition-colors blog-card-button">
                     {{ __('Číst článek') }}
                 </a>
             </div>

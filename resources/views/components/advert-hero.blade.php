@@ -5,9 +5,8 @@
         <img 
             src="{{ asset('images/dvert.png') }}" 
             alt="Advert background" 
-            class="w-full h-full object-cover blur-xs"
+            class="w-full h-full object-cover"
         >
-        <div class="absolute inset-0 bg-white/30"></div>
     </div>
 
     {{-- Content Container --}}

@@ -3,12 +3,17 @@
 use App\Http\Controllers\Auth\AccountController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
+Route::get('/storage/{media}/{filename}', [MediaController::class, 'show'])
+    ->whereNumber('media')
+    ->name('media.storage');
+Route::get('/media/{media}/{filename}', [MediaController::class, 'show'])->name('media.show');
 Route::get('/', [ProfileController::class, 'index'])->name('profiles.index');
 Route::get('/profiles/{id}', [ProfileController::class, 'show'])->name('profiles.show');
 Route::get('/countries', function () {

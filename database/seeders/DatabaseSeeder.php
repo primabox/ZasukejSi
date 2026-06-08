@@ -9,6 +9,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Database\Seeders\ShowcaseProfilesSeeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -347,5 +348,7 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+
+        $this->call(ShowcaseProfilesSeeder::class);
     }
 }

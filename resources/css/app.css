@@ -3,7 +3,7 @@
 
 @import 'tailwindcss';
 
-@theme {
+:root {
 
   /* Font Family Configuration */
   --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;

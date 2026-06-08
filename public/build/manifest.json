@@ -1,0 +1,27 @@
+{
+  "_swiper-BZrBzCmn.js": {
+    "file": "assets/swiper-BZrBzCmn.js",
+    "name": "swiper"
+  },
+  "_vendor-l0sNRNKZ.js": {
+    "file": "assets/vendor-l0sNRNKZ.js",
+    "name": "vendor"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DDKrQhzg.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Cz785YGx.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_swiper-BZrBzCmn.js"
+    ],
+    "css": [
+      "assets/app-CvY2A7Et.css"
+    ]
+  }
+}

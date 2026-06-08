@@ -18,6 +18,10 @@
         z-index: 30;
     }
 
+    .hero-bg::before {
+        content: none;
+    }
+
     .hero-bg .hero-inner {
         height: 100%;
         position: relative;
@@ -28,7 +32,7 @@
         margin-top: auto;
         padding-left: 0;
         padding-right: 0;
-        transform: translateY(28px);
+        transform: translateY(90px);
         position: relative;
         z-index: 60;
     }
@@ -48,6 +52,7 @@
 
     .hero-main-title .hero-main-highlight {
         color: #DD3888;
+        white-space: nowrap;
     }
 
     .hero-main-title .hero-main-period {
@@ -65,7 +70,93 @@
     }
 
     .hero-copy-block {
-        transform: translateX(15px);
+        transform: translateX(15px) translateY(45px);
+    }
+
+    .hero-text-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: min(750px, 100%);
+        min-height: 112px;
+    }
+
+    .hero-mobile-badges {
+        display: none;
+    }
+
+    .homepage-hero {
+        isolation: isolate;
+        box-shadow: 0 32px 80px rgba(92, 45, 98, 0.14);
+    }
+
+    .homepage-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+        background: linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 42%);
+        opacity: 0.75;
+        pointer-events: none;
+        animation: heroGlow 10s ease-in-out infinite alternate;
+    }
+
+    .hero-animate {
+        opacity: 0;
+        transform: translateY(32px) scale(0.98);
+        animation: heroReveal 760ms cubic-bezier(.2,.9,.3,1) forwards;
+    }
+
+    .hero-animate-delay-1 {
+        animation-delay: 120ms;
+    }
+
+    .hero-animate-delay-2 {
+        animation-delay: 260ms;
+    }
+
+    .homepage-profiles-surface {
+        opacity: 0;
+        animation: sectionReveal 880ms cubic-bezier(.2,.9,.3,1) forwards;
+        animation-delay: 320ms;
+    }
+
+    @keyframes heroReveal {
+        from {
+            opacity: 0;
+            transform: translateY(32px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes sectionReveal {
+        from {
+            opacity: 0;
+            transform: translateY(26px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes heroGlow {
+        from {
+            opacity: 0.45;
+            transform: translateX(-2%) scale(1);
+        }
+        to {
+            opacity: 0.92;
+            transform: translateX(2%) scale(1.03);
+        }
+    }
+
+    .hero-text-block h1, .hero-text-block p {
+        margin: 0;
     }
 
     @media (max-width: 1024px) {
@@ -79,9 +170,26 @@
     @media (max-width: 640px) {
         .hero-bg {
             width: 100%;
-            min-height: 420px;
+            height: 463px;
+            min-height: 463px;
+            background-image: none !important;
             border-bottom-left-radius: 24px;
             border-bottom-right-radius: 24px;
+            overflow: visible !important;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('/images/icons/mobile/mobile.png');
+            background-repeat: no-repeat;
+            background-size: 488px 463px;
+            background-position: center top;
+            filter: blur(5px);
+            clip-path: inset(0 round 0 0 24px 24px);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .hero-main-title {
@@ -92,31 +200,93 @@
             font-size: 18px;
         }
 
+        .hero-inner {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
         .hero-copy-block {
-            transform: translateX(0);
+            order: 1 !important;
+            transform: none !important;
+            padding-bottom: 0 !important;
+        }
+
+        .hero-text-block {
+            width: 100%;
+            min-height: auto;
         }
 
         .hero-search-wrap {
-            transform: translateY(16px);
+            order: 2 !important;
+            transform: translateY(40px) !important;
+            margin-top: 0 !important;
+        }
+    }
+
+    @media (max-width: 425px) {
+        .hero-mobile-badges {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 310px;
+            margin: 24px auto 0;
+        }
+    }
+
+    @media (max-width: 359px) {
+        .hero-inner {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        .hero-copy-block {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .homepage-hero::after,
+        .hero-animate,
+        .homepage-profiles-surface {
+            animation: none;
+            opacity: 1;
+            transform: none;
         }
     }
 </style>
 <!-- Hero Section  max-w-[1331px] -->
-<div class="hero-bg" style="background-image: url('/images/header.png');">
+<div class="hero-bg homepage-hero" style="background-image: url('/images/header.png');">
     <div class="hero-inner container mx-auto px-4 pt-16 md:pt-24 pb-8 flex flex-col min-h-[420px] md:min-h-[520px]">
-        <div class="max-w-2xl px-4 md:pl-16 py-10 md:py-16 hero-copy-block">
-            <h1 class="hero-main-title py-4 md:py-5">
-                Jsme komunita lidí,<br>
-                co rádi <span class="hero-main-highlight">šukají</span><span class="hero-main-period">.</span>
-            </h1>
+        <div class="max-w-2xl px-4 md:pl-16 py-10 md:py-16 hero-copy-block hero-animate hero-animate-delay-1">
+            <div class="hero-text-block">
+                <h1 class="hero-main-title py-4 md:py-5">
+                    {!! __('front.landing.wearecommunity') !!}<br>
+                    {!! __('front.landing.fucking_prefix') !!} <span class="hero-main-highlight">{!! __('front.landing.fucking_keyword') !!}</span><span class="hero-main-period">.</span>
+                </h1>
 
-            <p class="hero-subtitle">
-                Dívky, registrujte se ještě dnes<br>
-                a získej nové zákazníky.
-            </p>
+                <p class="hero-subtitle">
+                    {!! __('front.landing.girlsregisternow') !!}
+                </p>
+
+                <div class="hero-mobile-badges" aria-hidden="true">
+                    <div class="search-badge">
+                        <span class="search-badge-dot"></span>
+                        <span class="search-badge-strong">1 420 {{ __('front.profiles.search.girls') }}</span>
+                        <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
+                    </div>
+                    <div class="search-badge">
+                        <span class="search-badge-dot"></span>
+                        <span class="search-badge-strong">382 {{ __('front.profiles.search.men') }}</span>
+                        <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="hero-search-wrap">
+        <div class="hero-search-wrap hero-animate hero-animate-delay-2">
             <!-- Search Card -->
             <livewire:search-profiles />
         </div>
@@ -125,7 +295,7 @@
 
 <!-- Profiles Section -->
 
-<div class="container mx-auto px-4 pt-20 profiles-section-wrap">
+<div class="container mx-auto px-4 pt-10 md:pt-20 profiles-section-wrap homepage-profiles-surface">
     <livewire:profile-list />
 </div>
 

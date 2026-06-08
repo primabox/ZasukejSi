@@ -6,8 +6,8 @@ use App\Models\User;
 use App\Models\Profile;
 use App\Models\Service;
 use App\Models\Rating;
+use Database\Seeders\ShowcaseProfilesSeeder;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class StagingSeeder extends Seeder
 {
@@ -40,6 +40,9 @@ class StagingSeeder extends Seeder
         
         // Seed VIP subscriptions for some profiles
         $this->call(SubscriptionSeeder::class);
+
+        // Re-map the first showcase cards to deterministic names and metadata.
+        $this->call(ShowcaseProfilesSeeder::class);
         
         // Seed pages (blog posts, FAQ, etc.)
         $this->seedPages();

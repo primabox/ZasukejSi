@@ -26,6 +26,21 @@
                 transition: all 0.2s ease-in-out;
                 cursor: pointer;
                 border: 2px solid transparent;
+                box-shadow: 0 0 0 rgba(92, 45, 98, 0);
+            }
+
+            .filter-pill:hover {
+                transform: translateY(-3px);
+                border-color: #ECDDE6;
+                box-shadow: 0 14px 24px rgba(92, 45, 98, 0.08);
+            }
+
+            .filter-pill .icon {
+                transition: transform 0.2s ease-in-out;
+            }
+
+            .filter-pill:hover .icon {
+                transform: scale(1.08) rotate(-6deg);
             }
 
             .filter-pill.inactive {
@@ -38,6 +53,10 @@
                 background-color: #F2F2F2;
                 border-color: #F2F2F2;
                 color: #374151;
+            }
+
+            .filter-pill.active:hover {
+                box-shadow: 0 16px 28px rgba(221, 56, 136, 0.14);
             }
 
             .filter-pill .icon {
@@ -74,7 +93,253 @@
             .filter-pill.active .filter-switch-thumb {
                 transform: translateX(15px);
             }
+
+            .mobile-top-results {
+                padding: 300px 16px 0 8px;
+            }
+
+            .mobile-top-results-heading {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: nowrap;
+            }
+
+            .mobile-top-results-title {
+                margin: 0;
+                line-height: 1;
+                font-family: 'Poppins', sans-serif;
+                font-size: 28px;
+                font-weight: 700;
+                color: #5C2D62;
+                white-space: nowrap;
+            }
+
+            .mobile-filter-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .mobile-filter-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 36px;
+                padding: 0 14px;
+                border-radius: 999px;
+                background: #FFFFFF;
+                border: 2px solid #F2F2F2;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 500;
+                font-size: 13px;
+                color: #505050;
+                transition: all 0.2s ease-in-out;
+            }
+
+            .mobile-filter-pill.is-active {
+                border-color: #DD3888;
+            }
+
+            .mobile-filter-pill.is-highlighted {
+                border-color: #2490FF;
+            }
+
+            .mobile-filter-pill.icon-pill {
+                gap: 8px;
+            }
+
+            .mobile-filter-pill.switch-pill {
+                gap: 10px;
+                background: #F6F6F8;
+            }
+
+            .mobile-filter-icon {
+                width: 16px;
+                height: 16px;
+                color: #C8C8CF;
+                flex: 0 0 16px;
+            }
+
+            .mobile-filter-divider {
+                width: 100%;
+                height: 1px;
+                background: #EDE7EE;
+                margin: 18px 0 20px;
+            }
+
+            .mobile-filter-clear {
+                width: 36px;
+                min-width: 36px;
+                padding: 0;
+                color: #DD3888;
+                border-color: #DD3888;
+            }
+
+            .mobile-filter-switch {
+                width: 33px;
+                height: 18px;
+                border-radius: 999px;
+                background: #E4E4E7;
+                position: relative;
+                transition: background-color 0.2s ease-in-out;
+            }
+
+            .mobile-filter-switch::after {
+                content: '';
+                position: absolute;
+                top: 1.5px;
+                left: 1.5px;
+                width: 15px;
+                height: 15px;
+                border-radius: 999px;
+                background: #FFFFFF;
+                transition: transform 0.2s ease-in-out;
+            }
+
+            .mobile-filter-pill.is-active .mobile-filter-switch {
+                background: #DD3888;
+            }
+
+            .mobile-filter-pill.is-active .mobile-filter-switch::after {
+                transform: translateX(15px);
+            }
+
+            @media (max-width: 767px) {
+                .profile-list-cards-grid {
+                    justify-items: center;
+                    column-gap: 20px;
+                    row-gap: 60px;
+                }
+            }
+
+            @media (max-width: 320px) {
+                .mobile-top-results {
+                    padding-left: 4px;
+                    padding-right: 12px;
+                }
+
+                .mobile-top-results-heading {
+                    gap: 8px;
+                }
+
+                .mobile-top-results-icon {
+                    width: 24px !important;
+                    height: 24px !important;
+                }
+
+                .mobile-top-results-title {
+                    font-size: 24px;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .mobile-top-results {
+                    display: none;
+                }
+            }
         </style>
+
+        <div class="mobile-top-results md:hidden">
+            <div class="mobile-top-results-heading mb-5">
+                <x-icons name="search" class="mobile-top-results-icon w-[27px] h-[27px] text-[#DD3888]" />
+                <h1 class="mobile-top-results-title">{{ __('front.profiles.list.topresults') }}</h1>
+            </div>
+
+            <div class="mobile-filter-group mb-5">
+                <button wire:click.debounce.300ms="toggleAgeGroup('')"
+                    class="mobile-filter-pill icon-pill {{ $ageGroup === '' ? 'is-active' : '' }}">
+                    <svg class="mobile-filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M4 21C4.8 17.9 7.7 16 12 16C16.3 16 19.2 17.9 20 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    {{ __('front.profiles.list.all_girls') }}
+                </button>
+
+                @foreach ([
+                    '18-25' => __('front.profiles.list.age_18_25'),
+                    '26-30' => __('front.profiles.list.age_26_30'),
+                    '31-35' => __('front.profiles.list.age_31_35'),
+                    '36-40' => __('front.profiles.list.age_36_40'),
+                    '40-50' => __('front.profiles.list.age_40_50'),
+                    '50+' => __('front.profiles.list.age_50_plus'),
+                ] as $value => $label)
+                    <button wire:click.debounce.300ms="toggleAgeGroup('{{ $value }}')"
+                        class="mobile-filter-pill {{ $ageGroup === $value ? ($value === '40-50' ? 'is-highlighted' : 'is-active') : '' }}">
+                        {{ $label }}
+                    </button>
+                @endforeach
+
+                @if ($this->activeFiltersCount() > 0)
+                    <button wire:click.debounce.300ms="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters"
+                        class="mobile-filter-pill mobile-filter-clear" title="{{ __('front.profiles.list.clear_all_filters') }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                @endif
+            </div>
+
+            <div class="mobile-filter-divider"></div>
+
+            <div class="mobile-filter-group">
+                <button wire:click.debounce.300ms="toggleRecommendation"
+                    class="mobile-filter-pill icon-pill {{ $sortRecommendation !== '' ? 'is-active' : '' }}">
+                    <svg class="mobile-filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M12 5V19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M7 10L12 5L17 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ __('front.profiles.list.recommendation') }}
+                </button>
+
+                <button wire:click.debounce.300ms="toggleVerifiedPhoto"
+                    class="mobile-filter-pill switch-pill {{ $hasVerifiedPhoto ? 'is-active' : '' }}">
+                    {{ __('front.profiles.list.verified_photo') }}
+                    <span class="mobile-filter-switch"></span>
+                </button>
+
+                <button wire:click.debounce.300ms="toggleVideo"
+                    class="mobile-filter-pill switch-pill {{ $hasVideo ? 'is-active' : '' }}">
+                    {{ __('front.profiles.list.video') }}
+                    <span class="mobile-filter-switch"></span>
+                </button>
+
+                <button wire:click.debounce.300ms="togglePornActress"
+                    class="mobile-filter-pill switch-pill {{ $isPornActress ? 'is-active' : '' }}">
+                    {{ __('front.profiles.list.porn_actress') }}
+                    <span class="mobile-filter-switch"></span>
+                </button>
+
+                <button wire:click.debounce.300ms="toggleNew"
+                    class="mobile-filter-pill icon-pill {{ $sortNew !== '' ? 'is-active' : '' }}">
+                    <svg class="mobile-filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M12 5V19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M7 10L12 5L17 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+                    </svg>
+                    {{ __('front.profiles.list.new') }}
+                </button>
+
+                <button wire:click.debounce.300ms="toggleRating"
+                    class="mobile-filter-pill icon-pill {{ $hasRating ? 'is-active' : '' }}">
+                    <svg class="mobile-filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M5 19V11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M12 19V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M19 19V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    {{ __('front.profiles.list.rating') }}
+                </button>
+
+                @if ($this->activeFiltersCount() > 0)
+                    <button wire:click.debounce.300ms="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters"
+                        class="mobile-filter-pill mobile-filter-clear" title="{{ __('front.profiles.list.clear_all_filters') }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                @endif
+            </div>
+        </div>
 
         <!-- Age Group Filters - Desktop Buttons -->
         <div class="hidden md:flex flex-wrap gap-2 md:gap-3 mb-3 md:mb-4">
@@ -215,22 +480,21 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 profile-list-cards-grid">
                 @foreach ($this->profiles() as $profile)
                     {{-- Insert Advert Hero after second row (10 items on xl screens) --}}
                     @if ($loop->iteration === 6)
                         <div class="col-span-full my-4">
-                            <div
-                                class="shadow md:shadow-none md:bg-green-100 shadow-green-200 transition rounded-2xl py-3.5 px-4 md:px-6 mx-auto">
-                                <div
-                                    class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-center">
-                                    <x-icons name="eco"
-                                        class="w-7 h-7 md:w-5 md:h-5 text-green-600 flex-shrink-0" />
-                                    <p class="text-xs md:text-sm font-medium text-green-600">
-                                        <span class="font-semibold text-green-700">
-                                            {{ __('front.profiles.list.eco_friendly') }}
+                            <div class="shadow md:shadow-none transition rounded-2xl py-3.5 px-4 md:px-6 mx-auto" style="background-color: #E6FEE8;">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-center">
+                                    <x-icons name="eco" class="w-7 h-7 md:w-5 md:h-5 text-green-600 flex-shrink-0" />
+                                    <p class="text-xs md:text-sm m-0">
+                                        <span style="font-family: 'Poppins', sans-serif; font-weight:800; font-size:11px; color:#00B80F; display:inline-block; line-height:1;">
+                                            Our project is eco-friendly
                                         </span>
-                                        {{ __('front.profiles.list.eco_friendly_desc') }}
+                                        <span style="font-family: 'Poppins', sans-serif; font-weight:500; font-size:11px; color:#505050; display:inline-block; margin-left:8px; line-height:1;">
+                                            – Thanks to the girl verification system, you won’t travel anywhere unnecessarily.
+                                        </span>
                                     </p>
                                 </div>
                             </div>
@@ -243,36 +507,93 @@
                         </div>
                     @endif
 
-                    <x-profile-card :profile="$profile" />
+                    @php
+                        $imageOverride = null;
+                        $idx = $loop->iteration;
+                        // 6-10 => model6..10
+                        if ($idx >= 6 && $idx <= 10) {
+                            $imageOverride = asset('images/models/model' . $idx . '.png');
+                        }
+                        // 11-15 => model11..15
+                        elseif ($idx >= 11 && $idx <= 15) {
+                            $imageOverride = asset('images/models/model' . $idx . '.png');
+                        }
+                        // 16-20 => model16..20
+                        elseif ($idx >= 16 && $idx <= 20) {
+                            $imageOverride = asset('images/models/model' . $idx . '.png');
+                        }
+                        // 21-25 => map back to model11..15
+                        elseif ($idx >= 21 && $idx <= 25) {
+                            $mapped = 11 + ($idx - 21); // 21->11, 25->15
+                            $imageOverride = asset('images/models/model' . $mapped . '.png');
+                        }
+                    @endphp
+                    <x-profile-card :profile="$profile" :image-override="$imageOverride" />
                 @endforeach
             </div>
 
-            <!-- Load More Button -->
-            @if ($this->profiles()->hasMorePages())
-                <div class="text-center mt-8">
-                    <button wire:click="loadMore" wire:loading.attr="disabled"
-                        class="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow hover:shadow-md px-8 py-3 text-base bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500">
-                        <svg wire:loading wire:target="loadMore" class="animate-spin -ml-1 mr-2 h-4 w-4"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <span wire:loading.remove
-                            wire:target="loadMore">{{ __('front.profiles.list.loadmore') }}</span>
-                        <span wire:loading wire:target="loadMore">{{ __('front.profiles.list.loadingmore') }}</span>
+            <!-- Pagination -->
+            @php
+                $paginator = $this->profiles();
+                $currentPage = $paginator->currentPage();
+                $lastPage = $paginator->lastPage();
+            @endphp
+
+            @if ($lastPage > 1)
+                <div class="flex items-center justify-center gap-3 mt-16 md:mt-20 lg:mt-24">
+                    @php
+                        $arrowSvgPath = public_path('images/icons/arrowFilled.svg');
+                        if (file_exists($arrowSvgPath)) {
+                            $arrowSvg = file_get_contents($arrowSvgPath);
+                            $arrowSvg = preg_replace([
+                                '/\bwidth="[^"]*"/',
+                                '/\bheight="[^"]*"/',
+                                '/\bfill="[^"]*"/',
+                                '/<svg/'
+                            ], [
+                                '',
+                                '',
+                                'fill="currentColor"',
+                                '<svg '
+                            ], $arrowSvg);
+                            $arrowSvg = preg_replace('/<svg([^>]*)>/', '<svg$1 width="16" height="16">', $arrowSvg, 1);
+                        } else {
+                            // Fallback minimal SVG (same shape) with currentColor fill
+                            $arrowSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10.6667 12.6668V3.3335L3.33335 8.00016L10.6667 12.6668Z"/></svg>';
+                        }
+                    @endphp
+                    @php $prevDisabled = $currentPage <= 1; @endphp
+                    <button
+                        wire:click="gotoPage({{ max(1, $currentPage - 1) }})"
+                        @if($prevDisabled) disabled aria-disabled="true" @endif
+                        class="flex items-center justify-center"
+                        style="width:45px;height:45px;border-radius:8px;{{ $prevDisabled ? 'background:#F2F2F2;' : 'background:#5C2D62;' }}">
+                        <span class="inline-block transform {{ $prevDisabled ? 'text-[#5C2D62]' : 'text-white' }}">
+                            {!! $arrowSvg !!}
+                        </span>
+                    </button>
+
+                    @for ($i = 1; $i <= $lastPage; $i++)
+                        @php $isActive = $i == $currentPage; @endphp
+                        <button wire:click="gotoPage({{ $i }})"
+                            class="flex items-center justify-center font-semibold"
+                            style="width:45px;height:45px;border-radius:8px;{{ $isActive ? 'background:#DD3888;color:#FFFFFF;' : 'background:transparent;color:#505050;' }}font-family: 'Poppins', sans-serif; font-size:14px;">
+                            {{ $i }}
+                        </button>
+                    @endfor
+
+                    @php $nextDisabled = $currentPage >= $lastPage; @endphp
+                    <button
+                        wire:click="gotoPage({{ min($lastPage, $currentPage + 1) }})"
+                        @if($nextDisabled) disabled @endif
+                        class="flex items-center justify-center"
+                        style="width:45px;height:45px;border-radius:8px;{{ $nextDisabled ? 'background:#F2F2F2;' : 'background:#5C2D62;' }}">
+                        <span class="inline-block transform rotate-180 {{ $nextDisabled ? 'text-[#5C2D62]' : 'text-white' }}">
+                            {!! $arrowSvg !!}
+                        </span>
                     </button>
                 </div>
             @endif
-
-            <!-- Results Count -->
-            <div class="text-center text-sm text-gray-600 mt-4">
-                <span>{{ __('front.profiles.list.showing') }} {{ $this->profiles()->count() }}
-                    {{ __('front.profiles.list.of') }} {{ $this->profiles()->total() }}
-                    {{ __('front.profiles.list.profiles') }}</span>
-            </div>
         </div>
     @else
         <!-- Empty State -->
@@ -291,6 +612,62 @@
         </div>
     @endif
 
+
+<!-- Latest News Section -->
+<section class="news-section py-12 md:py-16 lg:py-20">
+    <div class="px-4 md:px-8 lg:px-12 mx-auto">
+        <div class="flex items-center gap-4 mb-6">
+            <img src="{{ asset('images/icons/Newspaper.svg') }}" alt="Novinky" width="36" height="36" class="news-icon" />
+            <h2 class="news-title m-0">Poslední novinky</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {{-- Card 1 --}}
+            <div class="news-card">
+                <div class="relative">
+                    <img src="{{ asset('images/news1.png') }}" alt="News 1" class="news-image" />
+                    <div class="news-badges">
+                        <div class="news-badge badge-date">
+                            <img src="{{ asset('images/icons/calendar.svg') }}" alt="calendar" width="16" height="16" />
+                            <span class="badge-text">25. 4. 2025</span>
+                        </div>
+                        <div class="news-badge badge-time">
+                            <img src="{{ asset('images/icons/clock.svg') }}" alt="clock" width="16" height="16" />
+                            <span class="badge-text">5 minut čtení</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="news-card-title">Považována užitého za nesou užitých</h3>
+                <p class="news-card-desc">Oprávněné aniž i odstoupil o snadno osoby vede grafikou osobami úmyslu 60 % poskytovat, dělí způsobem, § 36 veletrhu pověřit spravují zřejmém, k před platbě státu zvláštních tuzemsku. Dohodnou zvláštní provádí o nebezpečí kódech § 6 příjmu vhodným třetím</p>
+
+                <button class="news-button">číst článek</button>
+            </div>
+
+            {{-- Card 2 --}}
+            <div class="news-card">
+                <div class="relative">
+                    <img src="{{ asset('images/news2.png') }}" alt="News 2" class="news-image" />
+                    <div class="news-badges">
+                        <div class="news-badge badge-date">
+                            <img src="{{ asset('images/icons/calendar.svg') }}" alt="calendar" width="16" height="16" />
+                            <span class="badge-text">25. 4. 2025</span>
+                        </div>
+                        <div class="news-badge badge-time">
+                            <img src="{{ asset('images/icons/clock.svg') }}" alt="clock" width="16" height="16" />
+                            <span class="badge-text">5 minut čtení</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="news-card-title">Souhlasem o tato i vždy každý k že nabytí uděleného, vůbec se skončením</h3>
+                <p class="news-card-desc">Oprávněné aniž i odstoupil o snadno osoby vede osobami úmyslu 60 % poskytovat, dělí způsobem, § 36 veletrhu pověřit spravují zřejmém, k před platbě státu zvláštních tuzemsku. Dohodnou zvláštní provádí o nebezpečí kódech § 6 příjmu vhodným třetím</p>
+
+                <button class="news-button">číst článek</button>
+            </div>
+        </div>
+    </div>
+</section>
 
 </div>
 

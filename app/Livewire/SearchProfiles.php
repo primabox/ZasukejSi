@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Lang;
 use Livewire\Component;
 
 class SearchProfiles extends Component
@@ -94,24 +95,26 @@ class SearchProfiles extends Component
 
     public function getAgeRangeOptionsProperty()
     {
+        $yearsLabel = Lang::get('front.profiles.list.years');
+
         return [
-            '18' => '18 let',
-            '19' => '19 let',
-            '20' => '20 let',
-            '21' => '21 let',
-            '22' => '22 let',
-            '23' => '23 let',
-            '24' => '24 let',
-            '25' => '25 let',
-            '26' => '26 let',
-            '27' => '27 let',
-            '28' => '28 let',
-            '29' => '29 let',
-            '30' => '30 let',
-            '35' => '35 let',
-            '40' => '40 let',
-            '45' => '45 let',
-            '50' => '50 let',
+            '18' => "18 {$yearsLabel}",
+            '19' => "19 {$yearsLabel}",
+            '20' => "20 {$yearsLabel}",
+            '21' => "21 {$yearsLabel}",
+            '22' => "22 {$yearsLabel}",
+            '23' => "23 {$yearsLabel}",
+            '24' => "24 {$yearsLabel}",
+            '25' => "25 {$yearsLabel}",
+            '26' => "26 {$yearsLabel}",
+            '27' => "27 {$yearsLabel}",
+            '28' => "28 {$yearsLabel}",
+            '29' => "29 {$yearsLabel}",
+            '30' => "30 {$yearsLabel}",
+            '35' => "35 {$yearsLabel}",
+            '40' => "40 {$yearsLabel}",
+            '45' => "45 {$yearsLabel}",
+            '50' => "50 {$yearsLabel}",
         ];
     }
 

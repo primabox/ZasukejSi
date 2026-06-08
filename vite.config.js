@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
+import fullReload from 'vite-plugin-full-reload';
 
 export default defineConfig({
     plugins: [
@@ -9,7 +10,20 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
+        // Full reload for Blade and PHP files (helps when HMR doesn't reload views)
+        fullReload(['resources/views/**/*.blade.php', 'routes/**/*.php']),
     ],
+    server: {
+        // Enable polling for file changes on environments (Windows, Docker) where watchers are unreliable
+        watch: {
+            usePolling: true,
+            interval: 100,
+        },
+        // Keep the overlay enabled so build errors are visible in the browser during dev
+        hmr: {
+            overlay: true,
+        },
+    },
     build: {
         // Production optimizations
         minify: 'terser',

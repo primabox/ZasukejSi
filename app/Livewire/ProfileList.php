@@ -14,7 +14,7 @@ class ProfileList extends Component
     use WithPagination;
 
     public $loading = false;
-    public $perPage = 20;
+    public $perPage = 25;
     
     // Current filters (synced with search component)
     public $region = '';
@@ -168,6 +168,49 @@ class ProfileList extends Component
     #[Computed]
     public function profiles()
     {
+        // Get showcase profiles (identified by content->is_showcase = true or by emails)
+        $showcaseQuery = Profile::with(['user:id,name', 'media'])
+            ->approved()
+            ->public()
+            ->select($this->getPublicProfileColumns())
+            ->where('content->is_showcase', true)
+            ->orderBy('created_at', 'desc');
+
+        $showcaseProfiles = $showcaseQuery->get();
+
+        // If we have showcase profiles, create a repeated virtual list and paginate it
+        if ($showcaseProfiles->count() > 0) {
+            // Number of pages to expose in pagination (repeat showcase profiles)
+            $pagesCount = 6; // show 6 pages by default
+            $total = $this->perPage * $pagesCount;
+
+            // Determine current page (Livewire maintains $this->page when using WithPagination)
+            $currentPage = $this->page ?? request()->get('page', 1);
+
+            // Build a large repeated collection to cover total items
+            $needed = $total;
+            $result = collect();
+            while ($result->count() < $needed) {
+                $result = $result->concat($showcaseProfiles);
+            }
+
+            // Slice the items for the current page
+            $offset = ($currentPage - 1) * $this->perPage;
+            $items = $result->slice($offset, $this->perPage)->values();
+
+            // Create a paginator manually with the requested total and current page
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $items,
+                $total,
+                $this->perPage,
+                $currentPage,
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+
+            return $paginator;
+        }
+
+        // Fallback to normal query if no showcase profiles exist
         $query = Profile::with(['user:id,name', 'media'])
             ->approved()
             ->public()

@@ -13,6 +13,35 @@
         position: relative;
         z-index: 25;
         opacity: 1;
+        overflow: visible;
+        transition: transform 320ms cubic-bezier(.2,.9,.3,1), box-shadow 320ms cubic-bezier(.2,.9,.3,1), border-color 220ms ease;
+    }
+
+    .search-hero-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        clip-path: inset(0 round 24px);
+        background: linear-gradient(110deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 80%);
+        transform: translateX(-140%);
+        transition: transform 680ms cubic-bezier(.2,.9,.3,1);
+        pointer-events: none;
+    }
+
+    .search-hero-top,
+    .search-hero-form-row {
+        position: relative;
+        z-index: 1;
+    }
+
+    .search-hero-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 48px rgba(92, 45, 98, 0.16);
+    }
+
+    .search-hero-card:hover::before {
+        transform: translateX(140%);
     }
 
     .search-hero-top {
@@ -37,6 +66,13 @@
         width: 20px;
         height: 20px;
         stroke: #DD3888;
+        transition: transform 240ms ease, filter 240ms ease;
+        animation: heartBeat 3.8s ease-in-out infinite;
+    }
+
+    .search-hero-card:hover .search-hero-heart {
+        transform: scale(1.12);
+        filter: drop-shadow(0 6px 12px rgba(221, 56, 136, 0.25));
     }
 
     .search-hero-badges {
@@ -45,16 +81,35 @@
     }
 
     .search-badge {
-        width: 167px;
-        height: 26px;
-        border-radius: 999px;
-        background: #F2F2F2;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        box-sizing: border-box;
-        padding: 0 10px;
+            width: 167px;
+            height: 26px;
+            border-radius: 999px;
+            background: #F2F2F2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-sizing: border-box;
+            padding: 0 10px;
+            transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+        }
+
+        @media (max-width: 425px) {
+            .search-hero-badges {
+                display: none !important;
+            }
+
+            .search-badge {
+                width: 310px !important;
+                height: 35px !important;
+                background: rgba(242, 242, 242, 0.8) !important;
+                backdrop-filter: blur(4px);
+            }
+        }
+    .search-badge:hover {
+        transform: translateY(-2px);
+        background: #FFF4F9;
+        box-shadow: 0 10px 20px rgba(92, 45, 98, 0.08);
     }
 
     .search-badge-dot {
@@ -122,6 +177,12 @@
         border-color: #DD3888;
         transform: translateY(-2px);
         box-shadow: 0 8px 18px rgba(221, 56, 136, 0.18);
+    }
+
+    .search-select-wrap:hover {
+        transform: translateY(-2px);
+        border-color: #E9C9DA;
+        box-shadow: 0 10px 22px rgba(92, 45, 98, 0.08);
     }
 
     .search-select-trigger {
@@ -226,12 +287,46 @@
         font-size: 16px;
         color: #FFFFFF;
         cursor: pointer;
+        transition: transform 240ms cubic-bezier(.2,.9,.3,1), box-shadow 240ms ease, background-color 220ms ease;
+    }
+
+    .search-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 32px rgba(221, 56, 136, 0.28);
+        background: #C92F7A;
+    }
+
+    .search-submit:active {
+        transform: translateY(-1px);
     }
 
     .search-submit-icon {
         width: 24px;
         height: 24px;
         stroke: #FFFFFF;
+        transition: transform 220ms ease;
+    }
+
+    .search-submit:hover .search-submit-icon {
+        transform: translateX(3px) scale(1.05);
+    }
+
+    @keyframes heartBeat {
+        0%, 100% {
+            transform: scale(1);
+        }
+        10% {
+            transform: scale(1.08);
+        }
+        18% {
+            transform: scale(0.98);
+        }
+        26% {
+            transform: scale(1.12);
+        }
+        34% {
+            transform: scale(1);
+        }
     }
 
     @media (max-width: 1024px) {
@@ -257,31 +352,148 @@
         }
 
         .search-hero-badges {
-            width: 100%;
-            flex-wrap: wrap;
+            display: none;
+        }
+    }
+
+    @media (max-width: 425px) {
+        .search-hero-badges {
+            display: none !important;
+        }
+
+        .search-badge {
+            width: 310px !important;
+            max-width: 310px !important;
+            height: 35px !important;
+            background: rgba(242, 242, 242, 0.9) !important;
+            border-radius: 999px !important;
+            padding: 0 12px !important;
+        }
+
+        .search-hero-card {
+            width: 360px !important;
+            min-width: 360px !important;
+            max-width: 360px !important;
+            height: 386px !important;
+            min-height: 386px !important;
+            max-height: 386px !important;
+            padding: 24px !important;
+            box-sizing: border-box !important;
+            margin: 0 auto !important;
+            border-radius: 16px !important;
+            position: relative !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+            overflow: visible !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+        }
+
+        .search-hero-top {
+            margin-bottom: 20px !important;
+        }
+
+        .search-hero-title {
+            font-size: 18px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+
+        .search-hero-heart {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .search-hero-form-row {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+
+        .search-hero-field.region,
+        .search-hero-field.age {
+            width: 310px !important;
+            max-width: 310px !important;
+            margin: 0 auto !important;
+        }
+
+        .search-select-wrap {
+            width: 310px !important;
+            height: 60px !important;
+            margin: 0 auto !important;
+        }
+
+        .search-select-trigger {
+            width: 310px !important;
+            height: 60px !important;
+            padding: 0 64px 0 16px !important;
+            font-size: 14px !important;
+        }
+
+        .search-submit {
+            width: 310px !important;
+            height: 60px !important;
+            margin-top: 5px !important;
+        }
+    }
+
+    @media (max-width: 359px) {
+        .search-hero-card {
+            width: calc(100vw - 16px) !important;
+            min-width: 0 !important;
+            max-width: calc(100vw - 16px) !important;
+            left: auto !important;
+            transform: none !important;
+        }
+
+        .search-hero-field.region,
+        .search-hero-field.age,
+        .search-select-wrap,
+        .search-select-trigger,
+        .search-submit,
+        .search-badge {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .search-hero-card,
+        .search-hero-card::before,
+        .search-hero-heart,
+        .search-badge,
+        .search-select-wrap,
+        .search-submit,
+        .search-submit-icon {
+            animation: none;
+            transition: none;
         }
     }
 </style>
 
-<div class="search-hero-card" x-data="{ openRegion: false, openAge: false, regionValue: @js($region ?: 'Hlavní město Praha'), ageValue: @js($age_range ?: '18'), ages: @js($this->ageRangeOptions) }" @click.outside="openRegion = false; openAge = false" @keydown.escape.window="openRegion = false; openAge = false">
+<div class="search-hero-card" x-data="{ openRegion: false, openAge: false, regionValue: @js($region ?: ($this->allRegions[0] ?? '')), ageValue: @js($age_range ?: '18'), ages: @js($this->ageRangeOptions) }" @click.outside="openRegion = false; openAge = false" @keydown.escape.window="openRegion = false; openAge = false">
     <div class="search-hero-top">
         <h4 class="search-hero-title">
             <svg class="search-hero-heart" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M12 21s-6.716-4.35-9.11-8.028C.927 10.024 2.08 5.96 5.82 5.14 8.001 4.67 9.83 5.5 11 7.01c1.17-1.51 2.999-2.34 5.18-1.87 3.74.82 4.893 4.885 2.93 7.832C18.716 16.65 12 21 12 21Z" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span>Najděte si společnost...</span>
+            <span>{{ __('front.profiles.search.title') }}</span>
         </h4>
 
         <div class="search-hero-badges" aria-hidden="true">
             <div class="search-badge">
                 <span class="search-badge-dot"></span>
-                <span class="search-badge-strong">1 420 dívek</span>
-                <span class="search-badge-soft">registrováno</span>
+                <span class="search-badge-strong">1 420 {{ __('front.profiles.search.girls') }}</span>
+                <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
             </div>
             <div class="search-badge">
                 <span class="search-badge-dot"></span>
-                <span class="search-badge-strong">382 mužů</span>
-                <span class="search-badge-soft">registrováno</span>
+                <span class="search-badge-strong">382 {{ __('front.profiles.search.men') }}</span>
+                <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
             </div>
         </div>
     </div>
@@ -289,7 +501,7 @@
     <form wire:submit.prevent="search">
         <div class="search-hero-form-row">
             <div class="search-hero-field region">
-                <label class="search-hero-label" for="region-select">Vyberte kraj</label>
+                <label class="search-hero-label" for="region-select">{{ __('front.profiles.search.select_region') }}</label>
                 <div class="search-select-wrap" x-bind:class="{ 'is-open': openRegion }">
                     <button id="region-select" type="button" class="search-select-trigger" @click="openRegion = !openRegion; openAge = false">
                         <span x-text="regionValue"></span>
@@ -309,10 +521,10 @@
             </div>
 
             <div class="search-hero-field age">
-                <label class="search-hero-label" for="age-select">Věk dívky</label>
+                <label class="search-hero-label" for="age-select">{{ __('front.profiles.search.girl_age') }}</label>
                 <div class="search-select-wrap" x-bind:class="{ 'is-open': openAge }">
                     <button id="age-select" type="button" class="search-select-trigger" @click="openAge = !openAge; openRegion = false">
-                        <span x-text="ages[ageValue] || '18 let'"></span>
+                        <span x-text="ages[ageValue] || ''"></span>
                     </button>
                     <span class="search-arrow-box">
                         <svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -329,8 +541,8 @@
             </div>
 
             <button type="submit" class="search-submit" wire:loading.attr="disabled" wire:loading.class="opacity-80">
-                <span wire:loading.remove wire:target="search">Vyhledat</span>
-                <span wire:loading wire:target="search">Vyhledávám</span>
+                <span wire:loading.remove wire:target="search">{{ __('front.profiles.search.search_button') }}</span>
+                <span wire:loading wire:target="search">{{ __('front.profiles.search.searching_button') }}</span>
                 <svg wire:loading.remove wire:target="search" class="search-submit-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <circle cx="11" cy="11" r="7" stroke-width="2"/>
                     <path d="M16.5 16.5L21 21" stroke-width="2" stroke-linecap="round"/>

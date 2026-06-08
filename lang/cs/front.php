@@ -2,9 +2,11 @@
 
 return [
     'landing' => [
-        'wearecommunity' => 'Jsme komunita lidí co rádi',
-        'fucking' => 'šukají',
-        'girlsregisternow' => 'Dívky registrujte se ještě dnes a získejte nové zákazníky',
+        'wearecommunity' => 'Jsme komunita lidí',
+        'fucking' => 'co rádi šukají.',
+        'fucking_prefix' => 'co rádi',
+        'fucking_keyword' => 'šukají',
+        'girlsregisternow' => 'Dívky, zaregistrujte se dnes<br>a získejte nové klienty.',
         'findprofiles' => 'Najděte si společnost',
         'girls_registered' => 'registrovaných dívek',
         'gents_registered' => 'registrovaných pánů',
@@ -21,10 +23,12 @@ return [
         'profile' => 'Profil',
         'myaccount' => 'Můj účet',
         'adminpanel' => 'Admin Panel',
-        'register' => 'Zaregistrovat se',
-        'login' => 'Přihlásit se',
+        'register' => 'Registrace',
+        'login' => 'Login',
         'accountdashboard' => 'Účet Dashboard',
-        'logout' => 'Odhlásit se'
+        'logout' => 'Odhlásit se',
+        'czech' => 'Česky',
+        'english' => 'Anglicky',
     ],
     'footer' => [
         'registration' => 'Registrace',
@@ -162,6 +166,11 @@ return [
         'resend_verification' => 'Znovu odeslat ověřovací e-mail',
         'want_different_account' => 'Chcete použít jiný účet?',
         'log_out' => 'Odhlásit se',
+        'back_to_login' => 'Zpět na přihlášení',
+        'reset_password' => 'Obnovit heslo',
+        'new_password' => 'Nové heslo',
+        'confirm_password' => 'Potvrdit heslo',
+        'new_password_instruction' => 'Prosím zadejte níže své nové heslo.',
         'login' => [
             'title' => 'Přihlášení',
             'signin' => 'Přihlášení do vašeho účtu',
@@ -217,6 +226,14 @@ return [
             'signinhere' => 'Přihlaste se zde'
         ]
     ],
+    'reset_modal' => [
+        'forgot_password' => 'Zapomenuté heslo',
+        'instruction' => 'Zadejte svůj e-mail a pošleme vám odkaz pro obnovení hesla.',
+        'email_label' => 'E-mailová adresa',
+        'email_placeholder' => 'Zadejte svůj e-mail',
+        'send_button' => 'Poslat odkaz pro obnovení',
+        'error_message' => 'Při odesílání odkazu pro obnovení hesla došlo k chybě. Zkuste to prosím znovu.',
+    ],
     'messages' => [
         'title' => 'Zprávy',
         'inbox' => 'Doručená pošta',
@@ -235,6 +252,7 @@ return [
         'detail_page' => [
             'vip' => 'VIP',
             'photos_unverified' => 'FOTO NEOVĚŘENO',
+            'call' => 'Zavolat',
             'give_rating' => 'Dát hodnocení',
             'refresh_access' => 'Obnovit přístup',
             'report_profile' => 'Nahlásit profil',
@@ -258,6 +276,14 @@ return [
             'intro_video' => 'Úvodní video'
         ],
         'search' => [
+            'title' => 'Najděte si společnost...',
+            'girls' => 'dívek',
+            'men' => 'mužů',
+            'registered' => 'registrováno',
+            'select_region' => 'Vyberte kraj',
+            'girl_age' => 'Věk dívky',
+            'search_button' => 'Vyhledat',
+            'searching_button' => 'Vyhledávám',
             'city' => 'Město',
             'entercity' => 'Zadejte nebo vyberte město...',
             'region' => 'Kraj',
@@ -299,8 +325,8 @@ return [
             'new' => 'Nové',
             'filters_active' => ':count filtr(ů) aktivních',
             'rating' => 'Hodnocení',
-            'eco_friendly' => 'Náš projekt je ekologický',
-            'eco_friendly_desc' => '– Díky systému ověření dívek nepojedete nikam zbytečně.'
+            'eco_friendly' => 'Our project is eco-friendly',
+            'eco_friendly_desc' => '– Thanks to the girl verification system, you won\'t travel anywhere unnecessarily.'
         ],
         'form' => [
             'personal' => 'Osobní údaje',

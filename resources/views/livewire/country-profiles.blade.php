@@ -292,18 +292,19 @@
 
                                 <!-- Details Button -->
                                 <a href="{{ route('profiles.show', $profile) }}"
-                                    class="w-full py-3 px-5 rounded-lg bg-secondary-600 hover:bg-secondary-700 text-white font-semibold transition-colors duration-200 flex items-center justify-between">
+                                    class="w-full py-3 px-5 rounded-lg text-white font-semibold transition-colors duration-200 flex items-center justify-between"
+                                    style="background:#5C2D62;">
                                     <span class="text-lg">{{ __('front.profiles.list.detail') }}</span>
                                     <x-icons name="search" class="w-5 h-5 text-white" strokeWidth="3" />
                                 </a>
 
                                 <!-- Rating/Evaluation -->
                                 <div>
-                                    <div class="flex bg-gray-200 rounded-lg justify-between">
-                                        <div class="flex-1 bg-gray-100 rounded-lg p-3 py-2">
-                                            <div class="text-sm font-medium text-gray-700">{{ __('front.profiles.list.rating') }}</div>
+                                    <div class="flex bg-gray-200 rounded-lg" style="height:30px;">
+                                        <div class="bg-gray-100 rounded-lg flex items-center justify-center" style="width:82px;height:100%;padding:0 12px;">
+                                            <div class="text-sm font-medium text-gray-700 leading-none">{{ __('front.profiles.list.rating') }}</div>
                                         </div>
-                                        <div class="flex-1 rounded-r-lg px-2 py-2 flex items-center justify-center gap-1">
+                                        <div class="rounded-r-lg flex items-center justify-center gap-1 px-2" style="width:88px;height:100%;padding:0 10px;">
                                             @if($profile->getTotalRatings() > 0)
                                                 <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />

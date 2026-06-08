@@ -1,12 +1,19 @@
-<nav class="fixed top-0 left-0 right-0 z-100 bg-transparent rounded-b-3xl transition-all duration-300" id="navbar" x-data>
+<nav class="fixed top-0 left-0 right-0 z-100 bg-transparent rounded-b-3xl transition-all duration-300" id="navbar" x-data="{ mobileMenuOpen: false }" @click.outside="mobileMenuOpen = false">
     <style>
         body.modal-open #navbar { display: none !important; }
+
+        #navbar {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: clip;
+        }
 
         .navbar-shell {
             width: 1136px;
             max-width: calc(100% - 32px);
             height: 80px;
             margin: 0 auto;
+            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -15,7 +22,6 @@
         .navbar-desktop-grid {
             width: 100%;
             height: 100%;
-            display: grid;
             grid-template-columns: auto 440px 1fr;
             align-items: center;
             column-gap: 12px;
@@ -79,18 +85,60 @@
         }
 
         @media (max-width: 1023px) {
+            #navbar {
+                background: #FFFFFF !important;
+            }
+
             .navbar-shell {
                 width: 100%;
-                max-width: calc(100% - 24px);
+                max-width: 100%;
                 height: 56px;
+                padding-left: 25px;
+                padding-right: 25px;
             }
 
             #nav-logo {
                 padding-right: 0;
             }
+
+            #nav-logo-mobile {
+                display: inline-flex;
+                align-items: center;
+                margin-left: 0;
+                min-width: 0;
+                max-width: calc(100% - 44px);
+            }
+
+            #nav-logo-mobile .brand-mark {
+                font-size: 24px !important;
+            }
+
+            #mobile-menu-button {
+                flex: 0 0 auto;
+                width: 32px;
+                min-width: 32px;
+            }
+        }
+
+        @media (max-width: 425px) {
+            #nav-logo-mobile .brand-mark {
+                font-size: 24px !important;
+            }
+        }
+
+        @media (max-width: 375px) {
+            #nav-logo-mobile .brand-mark {
+                font-size: 24px !important;
+            }
+        }
+
+        @media (max-width: 320px) {
+            #nav-logo-mobile .brand-mark {
+                font-size: 24px !important;
+            }
         }
     </style>
-    <div class="container mx-auto px-4 ">
+    <div class="container mx-auto px-0 sm:px-4">
         <div class="navbar-shell">
             <!-- Left Side: Logo + Navigation Links -->
             <div class="navbar-desktop-grid hidden lg:grid">
@@ -104,15 +152,39 @@
                 <!-- Navigation Links - Desktop -->
                 <div class="navbar-links justify-self-center">
                     @php
+                        $navTranslationKeys = [
+                            'home' => 'front.nav.home',
+                            'countries' => 'front.nav.countries',
+                            'vip' => 'front.nav.vip',
+                            'vip-premium' => 'front.nav.vip',
+                            'faq' => 'front.nav.faq',
+                            'ethics' => 'front.nav.ethics',
+                            'etika' => 'front.nav.ethics',
+                            'contact' => 'front.nav.contact',
+                            'kontakt' => 'front.nav.contact',
+                        ];
+
                         $resolvedNavPages = collect($navPages ?? [])->values();
                         if ($resolvedNavPages->isEmpty()) {
                             $resolvedNavPages = collect([
-                                (object) ['id' => 'home', 'slug' => '', 'title' => 'Úvod'],
-                                (object) ['id' => 'vip', 'slug' => 'vip-premium', 'title' => 'VIP a Premium'],
-                                (object) ['id' => 'faq', 'slug' => 'faq', 'title' => 'FAQ'],
-                                (object) ['id' => 'ethics', 'slug' => 'etika', 'title' => 'Etika'],
-                                (object) ['id' => 'contact', 'slug' => 'kontakt', 'title' => 'Kontakt'],
+                                (object) ['id' => 'home', 'slug' => '', 'title' => __('front.nav.home')],
+                                (object) ['id' => 'vip', 'slug' => 'vip-premium', 'title' => __('front.nav.vip')],
+                                (object) ['id' => 'faq', 'slug' => 'faq', 'title' => __('front.nav.faq')],
+                                (object) ['id' => 'ethics', 'slug' => 'etika', 'title' => __('front.nav.ethics')],
+                                (object) ['id' => 'contact', 'slug' => 'kontakt', 'title' => __('front.nav.contact')],
                             ]);
+                        } else {
+                            $resolvedNavPages = $resolvedNavPages->map(function ($page) use ($navTranslationKeys) {
+                                $pageId = (string) data_get($page, 'id', '');
+                                $pageSlug = trim((string) data_get($page, 'slug', ''), '/');
+                                $translationKey = $navTranslationKeys[$pageId] ?? $navTranslationKeys[$pageSlug] ?? null;
+
+                                return (object) [
+                                    'id' => $pageId !== '' ? $pageId : ($pageSlug !== '' ? \Illuminate\Support\Str::slug($pageSlug) : 'page'),
+                                    'slug' => $pageSlug,
+                                    'title' => $translationKey ? __($translationKey) : data_get($page, 'title'),
+                                ];
+                            })->values();
                         }
                     @endphp
                     @foreach($resolvedNavPages as $page)
@@ -188,13 +260,13 @@
                     <!-- Register Button - Desktop Only -->
                     <div class="hidden lg:inline-block">
                         <button @click="$dispatch('show-register-modal')" class="btn-primary">
-                            Registrace
+                            {{ __('front.nav.register') }}
                         </button>
                     </div>
                     <!-- Login Link - Desktop Only -->
                     <div class="hidden lg:inline-block">
                          <button @click="$dispatch('show-login-modal')" class="btn-light" id="nav-login">
-                             Login
+                             {{ __('front.nav.login') }}
                          </button>
                     </div>
                     @endauth
@@ -220,7 +292,7 @@
                                 <a href="{{ url()->current() }}?locale=cs" 
                                    class="language-dropdown-item {{ app()->getLocale() === 'cs' ? 'active' : '' }}"
                                    @click="languageOpen = false"
-                                   title="Čeština">
+                                   title="{{ __('front.nav.czech') }}">
                                     <img src="{{ asset('flags/cs.png') }}" alt="Czech">
                                 </a>
                             </div>
@@ -236,8 +308,8 @@
                     </span>
                 </a>
                 <!-- Mobile menu button -->
-                <div class="lg:hidden" x-data="{ mobileMenuOpen: false }" @click.outside="mobileMenuOpen = false">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="flex items-center justify-center text-text-default hover:text-primary-600 focus:outline-none focus:text-primary-600" id="mobile-menu-button">
+                <div class="lg:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="flex items-center justify-center text-text-default hover:text-primary-600 focus:outline-none focus:text-primary-600" id="mobile-menu-button" :aria-expanded="mobileMenuOpen.toString()" aria-controls="mobile-menu">
                         <x-icons name="burger" x-show="!mobileMenuOpen" strokeWidth="2" class="h-2 w-6" block="false"/>
                         <x-icons name="close" x-show="mobileMenuOpen" strokeWidth="2" class="h-6 w-6" />
                     </button>
@@ -246,7 +318,7 @@
         </div>
 
         <!-- Mobile menu -->
-        <div class="lg:hidden hidden" id="mobile-menu">
+        <div class="lg:hidden" id="mobile-menu" x-show="mobileMenuOpen" x-cloak x-transition.opacity.duration.180ms>
             <div class="flex flex-wrap p-4 py-5 pt-6 space-y-2 bg-white rounded-2xl">
                 
                 @auth
@@ -273,7 +345,7 @@
                     </div>
                 @endauth
                 
-                @foreach($navPages ?? [] as $page)
+                @foreach($resolvedNavPages as $page)
                     <a href="{{ url('/' . $page->slug) }}" class="nav-link-mobile group">
                         {{ $page->title }}
                         <span class="underline"></span>
@@ -295,10 +367,10 @@
                     <!-- Auth Buttons -->
                     <div class="w-full space-y-3 pt-4">
                         <button @click="$dispatch('show-register-modal')" class="w-full btn-primary py-3 text-center">
-                            Registrace
+                            {{ __('front.nav.register') }}
                         </button>
                         <button @click="$dispatch('show-login-modal')" class="w-full btn-light py-3 text-center">
-                            Login
+                            {{ __('front.nav.login') }}
                         </button>
                     </div>
                 @endauth
@@ -308,11 +380,11 @@
                     <div class="flex justify-center gap-4">
                         <a href="{{ url()->current() }}?locale=cs" class="flex items-center gap-2 {{ app()->getLocale() === 'cs' ? 'opacity-100' : 'opacity-50' }}">
                             <img src="{{ asset('flags/cs.png') }}" alt="Czech" class="w-8 h-8 rounded-full">
-                            <span class="text-sm">Česky</span>
+                            <span class="text-sm">{{ __('front.nav.czech') }}</span>
                         </a>
                         <a href="{{ url()->current() }}?locale=en" class="flex items-center gap-2 {{ app()->getLocale() === 'en' ? 'opacity-100' : 'opacity-50' }}">
                             <img src="{{ asset('flags/en.png') }}" alt="English" class="w-8 h-8 rounded-full">
-                            <span class="text-sm">English</span>
+                            <span class="text-sm">{{ __('front.nav.english') }}</span>
                         </a>
                     </div>
                 </div>
@@ -324,17 +396,7 @@
 
 
 <script>
-    // Mobile menu toggle
     document.addEventListener('DOMContentLoaded', function() {
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
-
         // Language dropdown functionality (fallback for browsers without Alpine.js)
         const languageDropdowns = document.querySelectorAll('.language-dropdown');
         languageDropdowns.forEach(dropdown => {

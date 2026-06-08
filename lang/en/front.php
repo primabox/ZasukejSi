@@ -2,9 +2,11 @@
 
 return [
     'landing' => [
-        'wearecommunity' => 'We are community of people who like to',
-        'fucking' => 'fuck',
-        'girlsregisternow' => 'Girls register now and get new customers.',
+        'wearecommunity' => 'We are a community',
+        'fucking' => 'of people who enjoy sex',
+        'fucking_prefix' => 'of people who enjoy',
+        'fucking_keyword' => 'sex',
+        'girlsregisternow' => 'Girls, sign up today<br>and gain new clients.',
         'findprofiles' => 'Find companionship',
         'girls_registered' => 'girls registered',
         'gents_registered' => 'gents registered',
@@ -24,7 +26,9 @@ return [
         'register' => 'Register Now',
         'login' => 'Login',
         'accountdashboard' => 'Account Dashboard',
-        'logout' => 'Logout'
+        'logout' => 'Logout',
+        'czech' => 'Czech',
+        'english' => 'English',
     ],
     'footer' => [
         'registration' => 'Registration',
@@ -118,6 +122,7 @@ return [
             'title' => 'Change Password',
             'update' => 'Update Password',
             'updated' => 'Your password has been updated successfully!',
+            'success' => 'Your password has been updated successfully!',
             'description' => 'Ensure your account is using a secure password to stay protected.',
             'current' => 'Current Password',
             'new' => 'New Password',
@@ -146,6 +151,11 @@ return [
         'resend_verification' => 'Resend Verification Email',
         'want_different_account' => 'Want to use a different account?',
         'log_out' => 'Log out',
+        'back_to_login' => 'Back to login',
+        'reset_password' => 'Reset Password',
+        'new_password' => 'New Password',
+        'confirm_password' => 'Confirm Password',
+        'new_password_instruction' => 'Please enter your new password below.',
         'login' => [
             'title' => 'Login',
             'signin' => 'Sign in to your account',
@@ -201,6 +211,14 @@ return [
             'signinhere' => 'Sign in here'
         ]
     ],
+    'reset_modal' => [
+        'forgot_password' => 'Forgot password',
+        'instruction' => 'Enter your email and we will send you a password reset link.',
+        'email_label' => 'Email address',
+        'email_placeholder' => 'Enter your email',
+        'send_button' => 'Send reset link',
+        'error_message' => 'There was an error sending the password reset link. Please try again.',
+    ],
     'messages' => [
         'title' => 'Messages',
         'inbox' => 'Inbox',
@@ -219,6 +237,7 @@ return [
         'detail_page' => [
             'vip' => 'VIP',
             'photos_unverified' => 'PHOTOS UNVERIFIED',
+            'call' => 'Call',
             'give_rating' => 'Give Rating',
             'refresh_access' => 'Refresh Access',
             'report_profile' => 'Report Profile',
@@ -242,6 +261,14 @@ return [
             'intro_video' => 'Intro Video'
         ],
         'search' => [
+            'title' => 'Find your company...',
+            'girls' => 'girls',
+            'men' => 'men',
+            'registered' => 'registered',
+            'select_region' => 'Select region',
+            'girl_age' => 'Girl\'s age',
+            'search_button' => 'Search',
+            'searching_button' => 'Searching',
             'city' => 'City',
             'entercity' => 'Enter or select a city...',
             'region' => 'Region',
