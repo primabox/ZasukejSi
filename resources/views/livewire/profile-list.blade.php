@@ -484,25 +484,13 @@
                 @foreach ($this->profiles() as $profile)
                     {{-- Insert Advert Hero after second row (10 items on xl screens) --}}
                     @if ($loop->iteration === 6)
-                        <div class="col-span-full my-4">
-                            <div class="shadow md:shadow-none transition rounded-2xl py-3.5 px-4 md:px-6 mx-auto" style="background-color: #E6FEE8;">
-                                <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-center">
-                                    <x-icons name="eco" class="w-7 h-7 md:w-5 md:h-5 text-green-600 flex-shrink-0" />
-                                    <p class="text-xs md:text-sm m-0">
-                                        <span style="font-family: 'Poppins', sans-serif; font-weight:800; font-size:11px; color:#00B80F; display:inline-block; line-height:1;">
-                                            Our project is eco-friendly
-                                        </span>
-                                        <span style="font-family: 'Poppins', sans-serif; font-weight:500; font-size:11px; color:#505050; display:inline-block; margin-left:8px; line-height:1;">
-                                            – Thanks to the girl verification system, you won’t travel anywhere unnecessarily.
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
+                        <div class="col-span-full my-4 flex justify-center px-2">
+                            <x-ecobadge />
                         </div>
                     @endif
 
                     @if ($loop->iteration === 11)
-                        <div class="col-span-full hidden lg:block -my-20 -mx-6 md:-mx-8 lg:-mx-12 relative z-0">
+                        <div class="col-span-full my-6 lg:-my-20 -mx-2 md:-mx-8 lg:-mx-12 relative z-0">
                             <x-advert-hero />
                         </div>
                     @endif

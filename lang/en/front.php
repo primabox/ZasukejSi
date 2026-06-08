@@ -40,7 +40,7 @@ return [
         'premiummale' => 'Premium account for men',
         'discreet' => 'We are a 100% discreet platform with professional personal data protection',
         'ecological' => 'Our project is Ecological',
-        'verification' => '- Thanks to the girl verification system you won\'t travel anywhere unnecessarily',
+        'verification' => 'Thanks to the girl verification system you won\'t travel anywhere unnecessarily',
         'copyright' => '© 2025 ZasukejSi.cz'
     ],
     'countries' => [

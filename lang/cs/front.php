@@ -40,7 +40,7 @@ return [
         'premiummale' => 'Prémiový účet pro pány',
         'discreet' => 'Jsme 100% diskrétní platforma s profesionální ochranou osobních údajů',
         'ecological' => 'Náš projekt je Ekologický',
-        'verification' => '- Díky systému ověření dívek nepojedete nikam zbytečně',
+        'verification' => 'Díky systému ověření dívek nepojedete nikam zbytečně',
         'copyright' => '© 2025 ZasukejSi.cz'
     ],
     'countries' => [
