@@ -62,12 +62,88 @@
     .hero-subtitle {
         font-family: 'Poppins', sans-serif;
         font-weight: 400;
-        font-size: 20px;
+        font-size: 26px;
         line-height: 1.3;
         color: #5C5C5C;
         max-width: 430px;
         margin-bottom: 0;
     }
+
+    .hero-desktop-badges {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+        align-items: center;
+    }
+
+    /* Reuse search-badge styles so hero badges match the search component */
+    .search-badge {
+        width: 167px;
+        height: 26px;
+        border-radius: 999px;
+        background: #F2F2F2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-sizing: border-box;
+        padding: 0 10px;
+        transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+    }
+
+    @media (max-width: 425px) {
+        .search-badge {
+            width: 310px !important;
+            height: 35px !important;
+            background: rgba(242, 242, 242, 0.8) !important;
+            backdrop-filter: blur(4px);
+        }
+    }
+
+    .search-badge:hover {
+        transform: translateY(-2px);
+        background: #FFF4F9;
+        box-shadow: 0 10px 20px rgba(92, 45, 98, 0.08);
+    }
+
+    .search-badge-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00B80F;
+        flex: 0 0 10px;
+    }
+
+    .search-badge-strong {
+        font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        color: #505050;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .search-badge-soft {
+        font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        color: #A6A6A6;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    @if (app()->getLocale() === 'en')
+        /* On English homepage, badges should have white background */
+        .search-badge {
+            background: #FFFFFF;
+        }
+
+        @media (max-width: 425px) {
+            .search-badge {
+                background: #FFFFFF !important;
+            }
+        }
+    @endif
 
     .hero-copy-block {
         transform: translateX(15px) translateY(45px);
@@ -233,6 +309,9 @@
             max-width: 310px;
             margin: 24px auto 0;
         }
+        .hero-desktop-badges {
+            display: none !important;
+        }
     }
 
     @media (max-width: 359px) {
@@ -256,8 +335,33 @@
             transform: none;
         }
     }
+
+    @if (app()->getLocale() === 'en')
+        @media (max-width: 640px) {
+            body {
+                background: #FFFFFF;
+            }
+
+            .profiles-section-wrap,
+            .homepage-profiles-surface {
+                background: #FFFFFF;
+            }
+
+            .homepage-mobile-blur {
+                display: none;
+            }
+
+            .homepage-profiles-surface {
+                margin-top: 40px;
+            }
+        }
+    @endif
 </style>
 <!-- Hero Section  max-w-[1331px] -->
+@php
+    $isEnglishHomepage = app()->getLocale() === 'en';
+@endphp
+
 <div class="hero-bg homepage-hero" style="background-image: url('/images/header.png');">
     <div class="hero-inner container mx-auto px-4 pt-16 md:pt-24 pb-8 flex flex-col min-h-[420px] md:min-h-[520px]">
         <div class="max-w-2xl px-4 md:pl-16 py-10 md:py-16 hero-copy-block hero-animate hero-animate-delay-1">
@@ -270,6 +374,19 @@
                 <p class="hero-subtitle">
                     {!! __('front.landing.girlsregisternow') !!}
                 </p>
+
+                <div class="hero-desktop-badges" aria-hidden="true">
+                    <div class="search-badge">
+                        <span class="search-badge-dot"></span>
+                        <span class="search-badge-strong">1 420 {{ __('front.profiles.search.girls') }}</span>
+                        <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
+                    </div>
+                    <div class="search-badge">
+                        <span class="search-badge-dot"></span>
+                        <span class="search-badge-strong">382 {{ __('front.profiles.search.men') }}</span>
+                        <span class="search-badge-soft">{{ __('front.profiles.search.registered') }}</span>
+                    </div>
+                </div>
 
                 <div class="hero-mobile-badges" aria-hidden="true">
                     <div class="search-badge">
@@ -286,24 +403,35 @@
             </div>
         </div>
 
-        <div class="hero-search-wrap hero-animate hero-animate-delay-2">
-            <!-- Search Card -->
-            <livewire:search-profiles />
-        </div>
+        @unless($isEnglishHomepage)
+            <div class="hero-search-wrap hero-animate hero-animate-delay-2">
+                <!-- Search Card -->
+                <livewire:search-profiles />
+            </div>
+        @endunless
     </div>
 </div>
 
 <!-- Profiles Section -->
 
-<div class="container mx-auto px-4 pt-10 md:pt-20 profiles-section-wrap homepage-profiles-surface">
-    <livewire:profile-list />
+<div class="container mx-auto px-4 {{ $isEnglishHomepage ? 'pt-8 md:pt-10' : 'pt-10 md:pt-20' }} profiles-section-wrap homepage-profiles-surface">
+    @if($isEnglishHomepage)
+        <div class="lg:grid lg:grid-cols-[208px_minmax(0,1fr)] lg:gap-8 lg:items-start">
+            <x-english-country-sidebar />
+            <div class="min-w-0">
+                <livewire:profile-list />
+            </div>
+        </div>
+    @else
+        <livewire:profile-list />
+    @endif
 </div>
 
 <!-- Blog pages list gallery -->
 <x-blog-listing :posts="$blogPosts" />
 
 
-<div class="-z-10 absolute top-[620px] left-0 right-0 -bottom-1 overflow-x-hidden">
+<div class="homepage-mobile-blur -z-10 absolute top-[620px] left-0 right-0 -bottom-1 overflow-x-hidden">
     <div class="radial-blur"></div>
     <div class="radial-blur-secondary radial-blur-right"></div>
     <div class="radial-blur-secondary "></div>

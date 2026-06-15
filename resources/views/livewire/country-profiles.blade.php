@@ -1,25 +1,34 @@
+@php
+    $isEnglishHomepage = app()->getLocale() === 'en' && request()->routeIs('profiles.index');
+@endphp
+
 <div>
     <div class="grid grid-cols-1 lg:grid-cols-4">
         <!-- Left Panel - Countries List -->
         <div class="lg:col-span-1">
             <div class="p-6 sticky top-24">
-                <div class="space-y-2">
+                <div class="{{ $isEnglishHomepage ? 'mx-auto w-[208px] space-y-[6px]' : 'space-y-2' }}">
+                    @if($isEnglishHomepage)
+                    <div class="mx-auto mb-6 hidden md:flex h-20 w-[208px] items-center justify-center rounded-[8px] border-2 border-[#F2F2F2] bg-transparent">
+                        <span style="font-family:'Poppins', sans-serif;font-weight:700;font-size:18px;color:#5C2D62;line-height:1;">{{ __('front.profiles.list.topresults') }}</span>
+                    </div>
+                    @endif
 
                     <!-- Individual Countries -->
                     @foreach($countries as $country)
-                    <div class="space-y-1">
+                    <div class="{{ $isEnglishHomepage ? 'space-y-1.5' : 'space-y-1' }}">
                         <!-- Country Button -->
                         <button wire:click="toggleCountryExpansion('{{ $country->country_code }}')"
-                            class="w-full flex items-center gap-3 p-1 text-left transition-all duration-200 {{ $selectedCountryCode === $country->country_code && !$selectedRegion ? 'bg-primary-50 text-primary-700' : '' }}">
-                            <div class="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                            class="w-full flex items-center text-left transition-all duration-200 {{ $isEnglishHomepage ? 'gap-[10px] px-0 py-[2px]' : 'gap-3 p-1' }} {{ $selectedCountryCode === $country->country_code && !$selectedRegion ? ($isEnglishHomepage ? 'opacity-100' : 'bg-primary-50 text-primary-700') : '' }}">
+                            <div class="overflow-hidden flex-shrink-0 flex items-center justify-center {{ $isEnglishHomepage ? 'w-5 h-5 rounded-full' : 'w-7 h-7 rounded-full bg-gray-200' }}">
                                   <img src="https://flagcdn.com/{{ strtolower($country->country_code) }}.svg"
                                       alt="{{ $country->country_name }}"
                                       class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1">
-                                <div class="font-medium text-sm">{{ __('codes.' . strtolower($country->country_code)) }}</div>
+                                <div class="{{ $isEnglishHomepage ? 'text-[14px] font-normal text-[#505050]' : 'font-medium text-sm' }}">{{ $country->country_name ?? __('codes.' . strtolower($country->country_code)) }}</div>
                             </div>
-                            <div class="text-sm text-gray-500 ml-auto">
+                            <div class="ml-auto {{ $isEnglishHomepage ? 'text-[12px] font-normal text-[#B8B8B8]' : 'text-sm text-gray-500' }}">
                                 {{ $country->profiles_count }}
                             </div>
                         </button>
@@ -27,12 +36,17 @@
                         <!-- Regions Dropdown -->
                         @if($country->regions && count($country->regions) > 0 && in_array($country->country_code, $expandedCountries))
                         <div class="flex justify-end" >
-                            <div class="w-10/12 rounded-2xl space-y-0.5">
+                            <div class="{{ $isEnglishHomepage ? 'w-[178px] rounded-xl space-y-1' : 'w-10/12 rounded-2xl space-y-0.5' }}">
                                 @foreach($country->regions as $region)
                                 <button wire:click="selectRegion('{{ $country->country_code }}', '{{ $region['region'] }}')"
-                                    class="w-full bg-gray-100 hover:bg-primary hover:text-white flex items-center gap-3 p-1 px-3 text-left text-sm {{ $selectedCountryCode === $country->country_code && $selectedRegion == $region['region'] ? 'bg-primary text-white' : '' }} {{ $loop->first ? 'rounded-t-lg' : '' }} {{ $loop->last ? 'rounded-b-lg' : '' }}">
-                                    <div class="flex-1">
-                                        <div class="font-medium text-sm">{{ $region['region'] }}</div>
+                                    class="w-full bg-gray-100 hover:bg-primary hover:text-white flex items-center gap-3 text-left text-sm {{ $isEnglishHomepage ? 'px-3 py-2 rounded-lg' : 'p-1 px-3' }} {{ $selectedCountryCode === $country->country_code && $selectedRegion == $region['region'] ? 'bg-primary text-white' : '' }} {{ $isEnglishHomepage ? '' : ($loop->first ? 'rounded-t-lg' : '') }} {{ $isEnglishHomepage ? '' : ($loop->last ? 'rounded-b-lg' : '') }}">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <div class="flex-shrink-0">
+                                            <img src="{{ asset('images/icons/location.svg') }}" alt="" class="w-4 h-4 inline-block mr-2" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-sm">{{ $region['region'] }}</div>
+                                        </div>
                                     </div>
                                     <div class="text-xs hover:bg-primary hover:text-white ml-auto">
                                         {{ $region['profiles_count'] }}
@@ -53,14 +67,14 @@
             <!-- Header -->
             <div class="mb-6">
                 @if($selectedCountry || $selectedRegion)
-                <div class="flex items-center gap-4 px-6 py-4 border-2 border-gray-200 rounded-xl min-h-[120px]">
-                    <x-icons name="location" class="w-12 h-full text-primary-500 flex-shrink-0" />
+                <div class="mx-auto w-full max-w-[904px] h-[100px] border-2 border-[#F2F2F2] rounded-xl flex items-center gap-4 px-6">
+                    <img src="/images/icons/MapPinned.svg" alt="map pinned" class="w-[48px] h-[48px] flex-shrink-0" />
                     <div class="flex flex-col justify-center flex-1">
-                        <h2 class="text-2xl font-bold text-primary-600 leading-tight">
-                            {{ $selectedCountry ? __('codes.' . strtolower($selectedCountry->country_code)) : __('front.countries.all_profiles') }}
-                        </h2>
                         @if($selectedRegion)
-                        <p class="text-lg text-secondary-600 leading-tight">{{ $selectedRegion }}</p>
+                            <div style="font-family:'Poppins', sans-serif; font-weight:700; font-size:30px; color:#5C2D62; line-height:1;">{{ $selectedRegion }}</div>
+                            <div style="font-family:'Poppins', sans-serif; font-weight:400; font-size:14px; color:#DD3888;">{{ $selectedCountry ? __('codes.' . strtolower($selectedCountry->country_code)) : '' }}</div>
+                        @else
+                            <div style="font-family:'Poppins', sans-serif; font-weight:700; font-size:30px; color:#5C2D62; line-height:1;">{{ $selectedCountry ? __('codes.' . strtolower($selectedCountry->country_code)) : __('front.countries.all_profiles') }}</div>
                         @endif
                     </div>
                     <!-- Clear Location Button -->
@@ -237,7 +251,7 @@
                                     <div class="bg-green-100 text-green-500 p-1 px-0.5 rounded-xl flex flex-wrap justify-center">
                                         <x-icons name="camera" class="w-5 h-5" />
                                         <p class="text-xs font-bold w-full text-center">
-                                            OVĚŘENO
+                                            {{ __('front.profiles.list.verified') }}
                                         </p>
                                     </div>
                                 </div>
@@ -367,17 +381,7 @@
                 </div>
             @else
                 <!-- Empty State -->
-                <div class="text-center py-16" wire:loading.remove>
-                    <svg class="w-24 h-24 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <h3 class="text-gray-500 mb-2">{{ __('front.profiles.list.nofound') }}</h3>
-                    <p class="text-gray-600 mb-6">{{ __('front.profiles.list.tryadjusting') }}</p>
-
-                    <button wire:click="resetFilters" class="btn btn-primary">
-                        {{ __('front.profiles.list.showall') }}
-                    </button>
-                </div>
+                <x-filter-empty-state wire:loading.remove class="mt-6" />
             @endif
         </div>
     </div>

@@ -65,6 +65,9 @@
         "translations:audit": [
             "@php artisan translations:audit"
         ],
+        "translations:sync-en": [
+            "@php artisan translations:sync-en"
+        ],
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"

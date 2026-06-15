@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'deepl' => [
+        'api_key' => env('DEEPL_API_KEY') ?: 'PASTE_DEEPL_API_KEY_HERE',
+        'url' => env('DEEPL_API_URL', 'https://api-free.deepl.com/v2/translate'),
+        'formality' => env('DEEPL_FORMALITY', 'default'),
+        'glossary_id' => env('DEEPL_GLOSSARY_ID'),
+    ],
+
 ];

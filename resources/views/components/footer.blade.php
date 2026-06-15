@@ -3,14 +3,12 @@
         <!-- Logo -->
         <div class="text-center mb-6 md:mb-8">
             <h2 class="text-xl md:text-2xl font-extrabold">
-                <span class="text-secondary-500">ZAŠUKEJ</span>
-                <span class="text-primary-500">SI</span>
-                <span class="text-dark-gray">.CZ</span>
+                <span style="color:#5C2D62">ZAŠUKEJ</span><span style="color:#DD3888">SI</span><span style="color:#8C8C8C;opacity:0.78">.CZ</span>
             </h2>
         </div>
 
         <!-- Footer Content -->
-        <div class="footer-main mx-auto w-full max-w-[1136px] h-[275px] flex items-center justify-between mb-6 md:mb-8">
+        <div class="footer-main mx-auto h-[275px] flex items-center justify-between mb-6 md:mb-8">
             <!-- Left: Registration Button -->
             <div class="flex-shrink-0">
                 @guest

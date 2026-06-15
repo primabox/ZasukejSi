@@ -7,6 +7,35 @@
 @endphp
 
 @section('account-content')
+    <!-- Warning Banner -->
+    <div class="w-full h-[50px] bg-[#FFE0E5] rounded-[8px] flex items-center justify-between px-4 mb-8">
+        <div class="flex items-center gap-3">
+            <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+            <span class="font-medium text-[14px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">
+                Dokončete registraci Oprávněné aniž i odstoupil o <span class="underline">snadno osoby</span> vede grafikou osobami
+            </span>
+        </div>
+        <button class="text-[#DD3888] font-bold">X</button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        @php
+            $cards = [
+                ['icon' => 'eye', 'value' => '10 458', 'label' => 'Celkové zobrazení profilu'],
+                ['icon' => 'thumbsup', 'value' => '4.78/5', 'label' => 'Moje hodnocení'],
+                ['icon' => 'MessageCircleMore', 'value' => '12', 'label' => 'moje recenze'],
+            ];
+        @endphp
+        @foreach($cards as $card)
+            <div class="w-full h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-b from-[#FFFFFF] to-[#E6E6E6]">
+                <img src="{{ asset('images/icons/' . $card['icon'] . '.svg') }}" class="w-[28px] h-[28px] mb-1" alt="{{ $card['label'] }}">
+                <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">{{ $card['value'] }}</span>
+                <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">{{ $card['label'] }}</span>
+            </div>
+        @endforeach
+    </div>
+
     {{-- Email Not Verified Warning --}}
     @if (!auth()->user()->hasVerifiedEmail())
         <div class="mb-6 rounded-lg p-4 bg-red-50 border border-red-200">

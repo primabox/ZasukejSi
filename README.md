@@ -56,6 +56,42 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Translation Sync
+
+This project keeps Czech source translations in `lang/cs` and can generate or refresh English files in `lang/en`.
+
+1. Add a DeepL API key to `.env`:
+
+```env
+DEEPL_API_KEY=your-key
+DEEPL_API_URL=https://api-free.deepl.com/v2/translate
+DEEPL_FORMALITY=default
+```
+
+2. Preview changes without writing files:
+
+```bash
+php artisan translations:sync-en --dry-run
+```
+
+3. Sync all English files from Czech:
+
+```bash
+php artisan translations:sync-en
+```
+
+4. Re-translate existing English values when needed:
+
+```bash
+php artisan translations:sync-en --overwrite
+```
+
+5. Limit sync to one file:
+
+```bash
+php artisan translations:sync-en --file=front.php
+```
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

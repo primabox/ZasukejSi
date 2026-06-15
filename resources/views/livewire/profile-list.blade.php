@@ -1,8 +1,24 @@
+@php
+    $isEnglishHomepage = app()->getLocale() === 'en' && request()->routeIs('profiles.index');
+    $profileGridClasses = $isEnglishHomepage
+        ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 profile-list-cards-grid'
+        : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 profile-list-cards-grid';
+    $ecoBadgeInsertAt = $isEnglishHomepage ? 5 : 6;
+    $advertInsertAt = $isEnglishHomepage ? 9 : 11;
+    $hasSelectedLocation = filled($region) || filled($country);
+    $selectedLocationTitle = filled($region) ? $region : $country;
+    $selectedLocationSubtitle = filled($region) && filled($country) ? $country : null;
+    $showSelectedCountryFlag = blank($region) && filled($countryCode);
+    $selectedCountryFlagUrl = $showSelectedCountryFlag ? 'https://flagcdn.com/' . mb_strtolower($countryCode) . '.svg' : null;
+@endphp
+
 <div>
+    @unless($isEnglishHomepage)
     <div class="mt-1 md:mt-2 md:px-8 lg:px-12 py-4 md:py-9 flex items-center gap-2 md:gap-4">
         <x-icons name="search" class="w-5 h-5 md:w-7 md:h-7 text-primary-600" />
         <h1 class="text-2xl md:text-4xl font-bold text-secondary">{{ __('front.profiles.list.topresults') }}</h1>
     </div>
+    @endunless
 
     <!-- Quick Filters -->
     <div class="mb-4 md:mb-8 md:px-8 lg:px-12" x-data="{
@@ -95,7 +111,7 @@
             }
 
             .mobile-top-results {
-                padding: 300px 16px 0 8px;
+                padding: {{ $isEnglishHomepage ? '40px 16px 0 16px' : '300px 16px 0 8px' }};
             }
 
             .mobile-top-results-heading {
@@ -113,6 +129,78 @@
                 font-weight: 700;
                 color: #5C2D62;
                 white-space: nowrap;
+            }
+
+            .mobile-top-results-search {
+                display: flex;
+                justify-content: center;
+                margin: 0 0 24px;
+            }
+
+            /* Mobile opener overlay button to reliably open fullscreen country search */
+            #mobile-country-open {
+                display: none;
+            }
+
+            @media (max-width: 425px) {
+                .mobile-top-results-search {
+                    width: 100%;
+                }
+
+                #mobile-country-open {
+                    display: block;
+                    position: absolute;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: calc(100vw - 32px);
+                    height: auto;
+                    min-height: 60px;
+                    border: 0;
+                    background: transparent;
+                    z-index: 190;
+                    top: unset;
+                    bottom: unset;
+                    margin: 0 auto 12px;
+                }
+
+                .mobile-top-results-search .search-hero-card {
+                    width: min(360px, calc(100vw - 32px)) !important;
+                    height: auto !important;
+                    left: auto !important;
+                    min-height: 0 !important;
+                    max-height: none !important;
+                    min-width: 0 !important;
+                    transform: none !important;
+                }
+
+                .mobile-top-results-search .search-select-wrap.is-open {
+                    height: auto !important;
+                }
+
+                .mobile-top-results-search .search-dropdown-panel,
+                .mobile-top-results-search .search-dropdown-panel--region {
+                    position: static !important;
+                    left: auto !important;
+                    top: auto !important;
+                    width: 100% !important;
+                    max-height: 240px !important;
+                    margin-top: -2px !important;
+                    padding: 12px 16px 14px !important;
+                    border-top: 0 !important;
+                    border-radius: 0 0 16px 16px !important;
+                    box-shadow: none !important;
+                }
+
+                .mobile-top-results-search .search-dropdown-item,
+                .mobile-top-results-search .search-dropdown-item--region,
+                .mobile-top-results-search .search-dropdown-item--region::after {
+                    width: 100% !important;
+                }
+
+                .mobile-top-results-search .search-dropdown-item--region::after {
+                    left: 0 !important;
+                    transform: none !important;
+                }
             }
 
             .mobile-filter-group {
@@ -198,6 +286,40 @@
                 transition: transform 0.2s ease-in-out;
             }
 
+            .selected-location-banner {
+                animation: selectedLocationBannerIn 280ms cubic-bezier(0.22, 1, 0.36, 1);
+                transform-origin: top center;
+                box-shadow: 0 18px 42px rgba(92, 45, 98, 0.08);
+            }
+
+            .selected-location-banner__title {
+                font-family: 'Poppins', sans-serif;
+                font-size: 30px;
+                font-weight: 700;
+                line-height: 1.05;
+                color: #5C2D62;
+            }
+
+            .selected-location-banner__subtitle {
+                font-family: 'Poppins', sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 1.3;
+                color: #DD3888;
+            }
+
+            @keyframes selectedLocationBannerIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px) scale(0.98);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
             .mobile-filter-pill.is-active .mobile-filter-switch {
                 background: #DD3888;
             }
@@ -220,6 +342,10 @@
                     padding-right: 12px;
                 }
 
+                .selected-location-banner__title {
+                    font-size: 24px;
+                }
+
                 .mobile-top-results-heading {
                     gap: 8px;
                 }
@@ -239,13 +365,77 @@
                     display: none;
                 }
             }
+
+            @media (max-width: 767px) {
+                .selected-location-banner {
+                    height: auto;
+                    min-height: 100px;
+                    padding-top: 18px;
+                    padding-bottom: 18px;
+                }
+
+                .selected-location-banner__title {
+                    font-size: 28px;
+                }
+            }
         </style>
+
+        @if ($isEnglishHomepage && $hasSelectedLocation)
+            <div class="mb-5 md:mb-6">
+                <div class="selected-location-banner mx-auto flex w-full max-w-[904px] items-center gap-4 rounded-xl border-2 border-[#F2F2F2] bg-white px-5 md:h-[100px] md:px-6">
+                    @if ($showSelectedCountryFlag)
+                        <img src="{{ $selectedCountryFlagUrl }}" alt="{{ $selectedLocationTitle }}" class="h-8 w-8 shrink-0 rounded-full object-cover">
+                    @else
+                        <img src="{{ asset('images/icons/MapPinned.svg') }}" alt="Selected location" class="h-12 w-12 shrink-0">
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <div class="selected-location-banner__title">{{ $selectedLocationTitle }}</div>
+                        @if (filled($selectedLocationSubtitle))
+                            <div class="selected-location-banner__subtitle">{{ $selectedLocationSubtitle }}</div>
+                        @endif
+                    </div>
+                    <button wire:click="clearLocation"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DD3888] text-white transition-transform duration-200 hover:scale-105"
+                        title="{{ __('front.profiles.list.clear_all_filters') }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
 
         <div class="mobile-top-results md:hidden">
             <div class="mobile-top-results-heading mb-5">
                 <x-icons name="search" class="mobile-top-results-icon w-[27px] h-[27px] text-[#DD3888]" />
                 <h1 class="mobile-top-results-title">{{ __('front.profiles.list.topresults') }}</h1>
             </div>
+
+            @if ($isEnglishHomepage)
+                <div class="mobile-top-results-search">
+                    <!-- Mobile-only opener for fullscreen country search (fallback) -->
+                    <button id="mobile-country-open" type="button" class="mobile-country-open-button md:hidden" aria-label="{{ __('front.profiles.search.open_mobile_search') }}" onclick="(function(){var p=document.querySelector('.search-country-mobile-picker'); if(p){p.style.display='block'; document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden';}})()"></button>
+                    <script>
+                        (function(){
+                            try {
+                                var b = document.getElementById('mobile-country-open');
+                                if (!b) return;
+                                b.addEventListener('click', function (e) {
+                                    try {
+                                        var p = document.querySelector('.search-country-mobile-picker');
+                                        if (p) {
+                                            p.style.display = 'block';
+                                            document.documentElement.style.overflow = 'hidden';
+                                            document.body.style.overflow = 'hidden';
+                                        }
+                                    } catch (err2) {}
+                                }, true);
+                            } catch (err) {}
+                        })();
+                    </script>
+                    <livewire:search-profiles :key="'en-mobile-search'" />
+                </div>
+            @endif
 
             <div class="mobile-filter-group mb-5">
                 <button wire:click.debounce.300ms="toggleAgeGroup('')"
@@ -480,16 +670,15 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 profile-list-cards-grid">
+            <div class="{{ $profileGridClasses }}">
                 @foreach ($this->profiles() as $profile)
-                    {{-- Insert Advert Hero after second row (10 items on xl screens) --}}
-                    @if ($loop->iteration === 6)
+                    @if ($loop->iteration === $ecoBadgeInsertAt)
                         <div class="col-span-full my-4 flex justify-center px-2">
                             <x-ecobadge />
                         </div>
                     @endif
 
-                    @if ($loop->iteration === 11)
+                    @if ($loop->iteration === $advertInsertAt)
                         <div class="col-span-full my-6 lg:-my-20 -mx-2 md:-mx-8 lg:-mx-12 relative z-0">
                             <x-advert-hero />
                         </div>
@@ -528,28 +717,77 @@
             @endphp
 
             @if ($lastPage > 1)
-                <div class="flex items-center justify-center gap-3 mt-16 md:mt-20 lg:mt-24">
-                    @php
-                        $arrowSvgPath = public_path('images/icons/arrowFilled.svg');
-                        if (file_exists($arrowSvgPath)) {
-                            $arrowSvg = file_get_contents($arrowSvgPath);
-                            $arrowSvg = preg_replace([
-                                '/\bwidth="[^"]*"/',
-                                '/\bheight="[^"]*"/',
-                                '/\bfill="[^"]*"/',
-                                '/<svg/'
-                            ], [
-                                '',
-                                '',
-                                'fill="currentColor"',
-                                '<svg '
-                            ], $arrowSvg);
-                            $arrowSvg = preg_replace('/<svg([^>]*)>/', '<svg$1 width="16" height="16">', $arrowSvg, 1);
-                        } else {
-                            // Fallback minimal SVG (same shape) with currentColor fill
-                            $arrowSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10.6667 12.6668V3.3335L3.33335 8.00016L10.6667 12.6668Z"/></svg>';
-                        }
-                    @endphp
+                @php
+                    $arrowSvgPath = public_path('images/icons/arrowFilled.svg');
+                    if (file_exists($arrowSvgPath)) {
+                        $arrowSvg = file_get_contents($arrowSvgPath);
+                        $arrowSvg = preg_replace([
+                            '/\bwidth="[^"]*"/',
+                            '/\bheight="[^"]*"/',
+                            '/\bfill="[^"]*"/',
+                            '/<svg/'
+                        ], [
+                            '',
+                            '',
+                            'fill="currentColor"',
+                            '<svg '
+                        ], $arrowSvg);
+                        $arrowSvg = preg_replace('/<svg([^>]*)>/', '<svg$1 width="16" height="16">', $arrowSvg, 1);
+                    } else {
+                        // Fallback minimal SVG (same shape) with currentColor fill
+                        $arrowSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10.6667 12.6668V3.3335L3.33335 8.00016L10.6667 12.6668Z"/></svg>';
+                    }
+                @endphp
+
+                @php
+                    // Compute mobile pagination window (max 4 pages visible)
+                    $mobileWindow = 4;
+                    if ($lastPage <= $mobileWindow) {
+                        $mobileStart = 1;
+                        $mobileEnd = $lastPage;
+                    } else {
+                        $half = floor($mobileWindow / 2);
+                        $mobileStart = max(1, min($currentPage - $half, $lastPage - $mobileWindow + 1));
+                        $mobileEnd = min($lastPage, $mobileStart + $mobileWindow - 1);
+                    }
+                @endphp
+
+                {{-- Mobile: show limited window of pages, hide full pagination --}}
+                <div class="flex items-center justify-center gap-2 mt-16 md:mt-20 lg:hidden">
+                    @php $prevDisabled = $currentPage <= 1; @endphp
+                    <button
+                        wire:click="gotoPage({{ max(1, $currentPage - 1) }})"
+                        @if($prevDisabled) disabled aria-disabled="true" @endif
+                        class="flex items-center justify-center"
+                        style="width:40px;height:40px;border-radius:8px;{{ $prevDisabled ? 'background:#F2F2F2;' : 'background:#5C2D62;' }}">
+                        <span class="inline-block transform {{ $prevDisabled ? 'text-[#5C2D62]' : 'text-white' }}">
+                            {!! $arrowSvg !!}
+                        </span>
+                    </button>
+
+                    @for ($i = $mobileStart; $i <= $mobileEnd; $i++)
+                        @php $isActive = $i == $currentPage; @endphp
+                        <button wire:click="gotoPage({{ $i }})"
+                            class="flex items-center justify-center font-semibold"
+                            style="width:40px;height:40px;border-radius:8px;{{ $isActive ? 'background:#DD3888;color:#FFFFFF;' : 'background:transparent;color:#505050;' }}font-family: 'Poppins', sans-serif; font-size:14px;">
+                            {{ $i }}
+                        </button>
+                    @endfor
+
+                    @php $nextDisabled = $currentPage >= $lastPage; @endphp
+                    <button
+                        wire:click="gotoPage({{ min($lastPage, $currentPage + 1) }})"
+                        @if($nextDisabled) disabled @endif
+                        class="flex items-center justify-center"
+                        style="width:40px;height:40px;border-radius:8px;{{ $nextDisabled ? 'background:#F2F2F2;' : 'background:#5C2D62;' }}">
+                        <span class="inline-block transform rotate-180 {{ $nextDisabled ? 'text-[#5C2D62]' : 'text-white' }}">
+                            {!! $arrowSvg !!}
+                        </span>
+                    </button>
+                </div>
+
+                {{-- Desktop / full pagination (hidden on mobile) --}}
+                <div class="hidden lg:flex items-center justify-center gap-3 mt-16 md:mt-20 lg:mt-24">
                     @php $prevDisabled = $currentPage <= 1; @endphp
                     <button
                         wire:click="gotoPage({{ max(1, $currentPage - 1) }})"
@@ -585,19 +823,7 @@
         </div>
     @else
         <!-- Empty State -->
-        <div class="text-center py-16" wire:loading.remove>
-            <svg class="w-24 h-24 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <h3 class="text-gray-500 mb-2">{{ __('front.profiles.list.nofound') }}</h3>
-            <p class="text-gray-600 mb-6">{{ __('front.profiles.list.tryadjusting') }}</p>
-
-            <button wire:click="resetFilters" class="btn btn-primary">
-                {{ __('front.profiles.list.showall') }}
-            </button>
-        </div>
+        <x-filter-empty-state wire:loading.remove class="mt-6" />
     @endif
 
 

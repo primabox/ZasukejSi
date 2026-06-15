@@ -148,7 +148,10 @@ class CountryProfiles extends Component
      */
     public function resetFilters()
     {
-        $this->reset(['ageGroup', 'sortRecommendation', 'hasVerifiedPhoto', 'hasVideo', 'isPornActress', 'sortNew', 'hasRating']);
+        $this->reset(['region', 'ageGroup', 'sortRecommendation', 'hasVerifiedPhoto', 'hasVideo', 'isPornActress', 'sortNew', 'hasRating']);
+        $this->selectedCountryCode = null;
+        $this->selectedRegion = null;
+        $this->expandedCountries = [];
         $this->resetPage();
     }
 
@@ -229,6 +232,10 @@ class CountryProfiles extends Component
 
     public function getCountriesProperty()
     {
+        if ($this->usesEnglishHomepageMockCountries()) {
+            return $this->getEnglishHomepageCountries();
+        }
+
         $codes = include base_path('lang/en/codes.php');
         $regions = DB::table('profiles')
             ->join('cities', function ($join) {
@@ -243,6 +250,26 @@ class CountryProfiles extends Component
             ->select('profiles.country_code', 'cities.admin_name', DB::raw('COUNT(*) as profiles_count'))
             ->groupBy('profiles.country_code', 'cities.admin_name')
             ->get();
+
+        if ($regions->isEmpty()) {
+            return DB::table('profiles')
+                ->where('profiles.is_public', true)
+                ->whereNotNull('profiles.country_code')
+                ->whereNotNull('profiles.verified_at')
+                ->select('profiles.country_code', DB::raw('COUNT(*) as profiles_count'))
+                ->groupBy('profiles.country_code')
+                ->get()
+                ->map(function ($country) use ($codes) {
+                    return (object) [
+                        'country_code' => $country->country_code,
+                        'country_name' => $codes[strtolower($country->country_code)] ?? $country->country_code,
+                        'profiles_count' => $country->profiles_count,
+                        'regions' => collect(),
+                    ];
+                })
+                ->sortBy('country_name')
+                ->values();
+        }
 
         return $regions
             ->groupBy('country_code')
@@ -261,6 +288,65 @@ class CountryProfiles extends Component
                 ];
             })
             ->sortBy('country_name')
+            ->values();
+    }
+
+    private function usesEnglishHomepageMockCountries(): bool
+    {
+        return app()->getLocale() === 'en' && request()->routeIs('profiles.index');
+    }
+
+    private function getEnglishHomepageCountries()
+    {
+        $primaryCountries = [
+            ['country_code' => 'al', 'country_name' => 'Albánie', 'profiles_count' => 484, 'regions' => []],
+            ['country_code' => 'ad', 'country_name' => 'Andorra', 'profiles_count' => 45, 'regions' => []],
+            ['country_code' => 'am', 'country_name' => 'Arménie', 'profiles_count' => 24, 'regions' => []],
+            ['country_code' => 'be', 'country_name' => 'Belgie', 'profiles_count' => 114, 'regions' => []],
+            ['country_code' => 'by', 'country_name' => 'Bělorusko', 'profiles_count' => 20, 'regions' => []],
+            [
+                'country_code' => 'ba',
+                'country_name' => 'Bosna a Hercegovina',
+                'profiles_count' => 50,
+                'regions' => [
+                    ['region' => 'Bihać', 'profiles_count' => 484],
+                    ['region' => 'Brčko', 'profiles_count' => 45],
+                    ['region' => 'Doboj', 'profiles_count' => 24],
+                    ['region' => 'Foča', 'profiles_count' => 114],
+                    ['region' => 'Jahorina', 'profiles_count' => 457],
+                    ['region' => 'Konjic', 'profiles_count' => 87],
+                    ['region' => 'Neum', 'profiles_count' => 70],
+                    ['region' => 'Prijedor', 'profiles_count' => 457],
+                    ['region' => 'Šamac', 'profiles_count' => 87],
+                ],
+            ],
+            ['country_code' => 'bg', 'country_name' => 'Bulharsko', 'profiles_count' => 457, 'regions' => []],
+            ['country_code' => 'me', 'country_name' => 'Černá Hora', 'profiles_count' => 87, 'regions' => []],
+            ['country_code' => 'cz', 'country_name' => 'Česká republika', 'profiles_count' => 70, 'regions' => []],
+        ];
+
+        $repeatedCountries = [
+            ['country_code' => 'al', 'country_name' => 'Albánie', 'profiles_count' => 484, 'regions' => []],
+            ['country_code' => 'ad', 'country_name' => 'Andorra', 'profiles_count' => 45, 'regions' => []],
+            ['country_code' => 'am', 'country_name' => 'Arménie', 'profiles_count' => 24, 'regions' => []],
+            ['country_code' => 'be', 'country_name' => 'Belgie', 'profiles_count' => 114, 'regions' => []],
+            ['country_code' => 'by', 'country_name' => 'Bělorusko', 'profiles_count' => 20, 'regions' => []],
+            ['country_code' => 'bg', 'country_name' => 'Bulharsko', 'profiles_count' => 457, 'regions' => []],
+            ['country_code' => 'me', 'country_name' => 'Černá Hora', 'profiles_count' => 87, 'regions' => []],
+            ['country_code' => 'cz', 'country_name' => 'Česká republika', 'profiles_count' => 70, 'regions' => []],
+        ];
+
+        return collect($primaryCountries)
+            ->concat($repeatedCountries)
+            ->concat($repeatedCountries)
+            ->map(function (array $country) {
+                return (object) [
+                    'country_code' => $country['country_code'],
+                    'country_name' => $country['country_name'],
+                    'profiles_count' => $country['profiles_count'],
+                    'regions' => collect($country['regions'] ?? []),
+                ];
+            })
             ->values();
     }
 
@@ -384,6 +470,16 @@ class CountryProfiles extends Component
         if (!$this->selectedCountryCode) {
             return null;
         }
+
+        $selectedCountry = $this->countries->firstWhere('country_code', $this->selectedCountryCode);
+
+        if ($selectedCountry) {
+            return (object) [
+                'country_code' => $selectedCountry->country_code,
+                'country_name' => $selectedCountry->country_name,
+            ];
+        }
+
         $codes = include base_path('lang/en/codes.php');
         return (object) [
             'country_code' => $this->selectedCountryCode,

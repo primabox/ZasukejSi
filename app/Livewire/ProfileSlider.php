@@ -28,6 +28,7 @@ class ProfileSlider extends Component
     // Display options
     public string $title = '';
     public string $sliderId = '';
+    public string $cardVariant = 'default';
     
     public function mount(
         bool $vipOnly = false,
@@ -42,7 +43,8 @@ class ProfileSlider extends Component
         string $sortDirection = 'desc',
         int $limit = 10,
         string $title = '',
-        ?string $sliderId = null
+        ?string $sliderId = null,
+        string $cardVariant = 'default'
     ) {
         $this->vipOnly = $vipOnly;
         $this->verifiedOnly = $verifiedOnly;
@@ -57,6 +59,7 @@ class ProfileSlider extends Component
         $this->limit = $limit;
         $this->title = $title;
         $this->sliderId = $sliderId ?? 'profile-slider-' . uniqid();
+        $this->cardVariant = $cardVariant;
     }
 
     #[Computed]
@@ -102,10 +105,25 @@ class ProfileSlider extends Component
             $this->applyAgeGroupFilter($query, $this->ageGroup);
         }
 
-        // Apply sorting
-        $this->applySorting($query);
+        $sortedQuery = clone $query;
+        $this->applySorting($sortedQuery);
+        $profiles = $sortedQuery->limit($this->limit)->get();
 
-        return $query->limit($this->limit)->get();
+        if ($profiles->isEmpty() && $this->sortBy === 'rating_this_month') {
+            $fallbackQuery = clone $query;
+            $fallbackQuery->withAvg('ratings', 'rating')
+                ->orderByDesc('ratings_avg_rating')
+                ->orderByDesc('created_at');
+
+            $profiles = $fallbackQuery->limit($this->limit)->get();
+        }
+
+        if ($profiles->isEmpty()) {
+            $fallbackQuery = clone $query;
+            $profiles = $fallbackQuery->orderByDesc('created_at')->limit($this->limit)->get();
+        }
+
+        return $profiles;
     }
 
     /**

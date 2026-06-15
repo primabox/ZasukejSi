@@ -1,7 +1,7 @@
-@props(['profile', 'imageOverride' => null, 'imagesOverride' => null])
+@props(['profile', 'imageOverride' => null, 'imagesOverride' => null, 'variant' => null])
 
 @php
-    $shouldBlur = false;
+    $shouldBlur = $variant === 'vip-detail';
     $cardContent = is_array($profile->content) ? $profile->content : [];
     $cardLocation = $cardContent['card_location'] ?? $profile->city;
     $cardHeightCm = $cardContent['card_height_cm'] ?? 168;
@@ -11,7 +11,7 @@
     <!-- Profile Image -->
     <div class="relative overflow-hidden home-profile-card-media" style="width: 210px; height: 265px; border-radius: 15px;">
 
-        @if($profile->isVerified() || $profile->isVip())
+        @if((!$shouldBlur) && ($profile->isVerified() || $profile->isVip()))
         <div class="absolute top-3 left-3 z-20 home-profile-card-badge-stack">
             <!-- Verified Badge -->
             @if($profile->isVerified())
@@ -19,7 +19,7 @@
                 <div class="bg-green-100 text-green-500 p-1 px-0.5 rounded-xl flex flex-wrap justify-center home-profile-card-verified-badge">
                     <x-icons name="camera" class="w-5 h-5 home-profile-card-verified-camera" />
                     <p class="text-xs font-bold w-full text-center home-profile-card-verified-copy">
-                        OVĚŘENO
+                        {{ __('front.profiles.list.verified') }}
                     </p>
                     <span class="home-profile-card-verified-check" aria-hidden="true">
                         <img src="{{ asset('images/icons/check.svg') }}" alt="" />
@@ -29,7 +29,7 @@
             @endif
 
             @if($profile->isVip())
-            <div class="home-profile-card-vip home-profile-card-vip-mobile" style="width:50px;height:26px;border-radius:999px;background:#FFB700;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <div class="home-profile-card-vip home-profile-card-vip-mobile" style="width:50px;height:26px;border-radius:999px;background:#FFB700;">
                 <x-icons name="star" class="inline-block" style="width:14px;height:14px;color:#FFFFFF;" />
                 <span style="font-family:'Poppins', sans-serif; font-weight:900; font-size:10px; color:#FFFFFF; line-height:1;">VIP</span>
             </div>
@@ -40,7 +40,7 @@
         @if($shouldBlur)
         <div class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
             <span class="inline-flex items-center justify-center bg-white rounded-full p-5 shadow-lg">
-                <x-icons name="lock" strokeWidth="1" class="w-8 h-8 text-primary-500 -translate-y-0.5" />
+                <x-icons name="lock" strokeWidth="1" class="w-8 h-8 -translate-y-0.5" style="color: #DD3888;" />
             </span>
         </div>
         @endif
@@ -85,8 +85,8 @@
     <!-- Profile Info -->
     <div class="p-4 space-y-3 home-profile-card-content">
         <!-- Name and VIP Badge -->
-        <div class="flex items-center justify-between py-3 home-profile-card-header">
-            <h4 class="text-gray-700 flex-grow-0 truncate max-w-[80%] home-profile-card-name" style="font-family: 'Poppins', sans-serif; font-weight:700; font-size:18px; color:#333;">
+        <div class="flex items-center justify-between py-1 home-profile-card-header">
+            <h4 class="text-gray-700 flex-grow-0 truncate max-w-[80%] home-profile-card-name {{ $shouldBlur ? 'blur-md' : '' }}" style="font-family: 'Poppins', sans-serif; font-weight:700; font-size:18px; color:#333;">
                 {{ $profile->display_name }}
             </h4>
             @if($profile->isVip())
@@ -105,28 +105,16 @@
             <x-icons name="search" class="inline-block" style="width:24px;height:24px;color:#FFFFFF;" />
         </a>
 
-            <!-- Rating/Evaluation (attached pill) -->
+            <!-- Age and Height Stats -->
         <div class="home-profile-card-rating-wrap">
-            <div class="home-profile-card-rating" style="display:flex;background:#F2F2F2;border-radius:12px;overflow:hidden;height:30px;">
-                <div class="home-profile-card-rating-label" style="width:82px;display:flex;align-items:center;justify-content:center;background:#F7F7F7;height:100%;padding:0;">
-                    <div style="font-family:'Plus Jakarta Sans', sans-serif;font-weight:600;font-size:11px;color:#505050;line-height:1;">{{ __('front.profiles.list.rating') }}</div>
+            <div class="flex justify-between gap-x-3 home-profile-card-stats">
+                <div class="home-profile-card-stat" style="width:82px;height:30px;border-radius:8px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;">
+                    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:11px;color:#505050;">{{ $cardHeightCm }} cm</div>
                 </div>
-                <div class="home-profile-card-rating-value" style="width:88px;display:flex;align-items:center;justify-content:center;height:100%;padding:0;">
-                    @if($profile->getTotalRatings() > 0)
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="color:#FFC107;">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span style="font-family:'Plus Jakarta Sans', sans-serif;font-weight:600;font-size:11px;color:#505050;line-height:1;">{{ number_format($profile->getAverageRating(), 1) }}</span>
-                        </div>
-                    @else
-                        <div style="display:flex;align-items:center;justify-content:center;padding:0 8px;height:100%;">
-                            <x-icons name="lock" class="inline-block home-profile-card-lock" style="width:18px;height:18px;color:#FF4DA6;" />
-                        </div>
-                    @endif
+                <div class="home-profile-card-stat" style="width:82px;height:30px;border-radius:8px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;">
+                    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:11px;color:#505050;">{{ $profile->age }} {{ __('front.profiles.list.years') }}</div>
                 </div>
             </div>
-
 
             <!-- Location -->
             <div class="flex py-2 justify-center items-center gap-x-2 home-profile-card-location">
@@ -136,13 +124,11 @@
                 @endif
             </div>
 
-            <div class="flex justify-between gap-x-3 home-profile-card-stats">
-                <div class="home-profile-card-stat" style="width:82px;height:30px;border-radius:8px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;">
-                    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:11px;color:#505050;">{{ $cardHeightCm }} cm</div>
-                </div>
-                <div class="home-profile-card-stat" style="width:82px;height:30px;border-radius:8px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;">
-                    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:11px;color:#505050;">{{ $profile->age }} {{ __('front.profiles.list.years') }}</div>
-                </div>
+            <!-- Rating Badge -->
+            <div class="home-profile-card-rating-badge" style="display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border-radius:8px;background:#E6FEE8;padding:0 12px;">
+                <div style="font-family:'Plus Jakarta Sans', sans-serif;font-weight:600;font-size:11px;color:#505050;line-height:1;">Hodnocení:</div>
+                <div style="font-family:'Poppins', sans-serif;font-weight:600;font-size:14px;color:#5C2D62;line-height:1;">{{ $profile->getTotalRatings() > 0 ? number_format($profile->getAverageRating(), 1) : (4.5 + (($profile->id % 5) * 0.1)) }}/5</div>
+                <x-icons name="HeartFilled" class="inline-block flex-shrink-0" style="width:20px;height:20px;" preserveColors="true" />
             </div>
 
         </div>

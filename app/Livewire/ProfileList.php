@@ -18,6 +18,8 @@ class ProfileList extends Component
     
     // Current filters (synced with search component)
     public $region = '';
+    public $country = '';
+    public $countryCode = '';
     public $ageMin = '';
     public $ageMax = '';
     public $verified = false;
@@ -33,6 +35,8 @@ class ProfileList extends Component
     
     protected $queryString = [
         'region' => ['except' => ''],
+        'country' => ['except' => ''],
+        'countryCode' => ['except' => '', 'as' => 'country_code'],
         'ageMin' => ['except' => '', 'as' => 'age_min'],
         'ageMax' => ['except' => '', 'as' => 'age_max'],
         'verified' => ['except' => false],
@@ -49,6 +53,8 @@ class ProfileList extends Component
     {
         // Set filters from URL parameters
         $this->region = request('region', request('city', ''));
+        $this->country = request('country', '');
+        $this->countryCode = request('country_code', '');
         $this->ageMin = request('age_min', '');
         $this->ageMax = request('age_max', '');
         $this->verified = request()->boolean('verified');
@@ -86,6 +92,12 @@ class ProfileList extends Component
     public function resetFilters()
     {
         $this->reset(['region', 'ageMin', 'ageMax', 'verified', 'ageGroup', 'sortRecommendation', 'hasVerifiedPhoto', 'hasVideo', 'isPornActress', 'sortNew', 'hasRating']);
+        $this->resetPage();
+    }
+
+    public function clearLocation()
+    {
+        $this->reset(['region', 'country', 'countryCode']);
         $this->resetPage();
     }
 
@@ -168,46 +180,48 @@ class ProfileList extends Component
     #[Computed]
     public function profiles()
     {
-        // Get showcase profiles (identified by content->is_showcase = true or by emails)
-        $showcaseQuery = Profile::with(['user:id,name', 'media'])
-            ->approved()
-            ->public()
-            ->select($this->getPublicProfileColumns())
-            ->where('content->is_showcase', true)
-            ->orderBy('created_at', 'desc');
+        if ($this->usesShowcaseProfiles()) {
+            // Get showcase profiles (identified by content->is_showcase = true or by emails)
+            $showcaseQuery = Profile::with(['user:id,name', 'media'])
+                ->approved()
+                ->public()
+                ->select($this->getPublicProfileColumns())
+                ->where('content->is_showcase', true)
+                ->orderBy('created_at', 'desc');
 
-        $showcaseProfiles = $showcaseQuery->get();
+            $showcaseProfiles = $showcaseQuery->get();
 
-        // If we have showcase profiles, create a repeated virtual list and paginate it
-        if ($showcaseProfiles->count() > 0) {
-            // Number of pages to expose in pagination (repeat showcase profiles)
-            $pagesCount = 6; // show 6 pages by default
-            $total = $this->perPage * $pagesCount;
+            // If we have showcase profiles, create a repeated virtual list and paginate it
+            if ($showcaseProfiles->count() > 0) {
+                // Number of pages to expose in pagination (repeat showcase profiles)
+                $pagesCount = 6; // show 6 pages by default
+                $total = $this->perPage * $pagesCount;
 
-            // Determine current page (Livewire maintains $this->page when using WithPagination)
-            $currentPage = $this->page ?? request()->get('page', 1);
+                // Determine current page (Livewire maintains $this->page when using WithPagination)
+                $currentPage = $this->page ?? request()->get('page', 1);
 
-            // Build a large repeated collection to cover total items
-            $needed = $total;
-            $result = collect();
-            while ($result->count() < $needed) {
-                $result = $result->concat($showcaseProfiles);
+                // Build a large repeated collection to cover total items
+                $needed = $total;
+                $result = collect();
+                while ($result->count() < $needed) {
+                    $result = $result->concat($showcaseProfiles);
+                }
+
+                // Slice the items for the current page
+                $offset = ($currentPage - 1) * $this->perPage;
+                $items = $result->slice($offset, $this->perPage)->values();
+
+                // Create a paginator manually with the requested total and current page
+                $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $items,
+                    $total,
+                    $this->perPage,
+                    $currentPage,
+                    ['path' => request()->url(), 'pageName' => 'page']
+                );
+
+                return $paginator;
             }
-
-            // Slice the items for the current page
-            $offset = ($currentPage - 1) * $this->perPage;
-            $items = $result->slice($offset, $this->perPage)->values();
-
-            // Create a paginator manually with the requested total and current page
-            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-                $items,
-                $total,
-                $this->perPage,
-                $currentPage,
-                ['path' => request()->url(), 'pageName' => 'page']
-            );
-
-            return $paginator;
         }
 
         // Fallback to normal query if no showcase profiles exist
@@ -218,6 +232,10 @@ class ProfileList extends Component
             ->orderBy('created_at', 'desc');
 
         // Apply search filters (from search component)
+        if ($this->countryCode) {
+            $query->whereRaw('LOWER(country_code) = ?', [mb_strtolower($this->countryCode)]);
+        }
+
         if ($this->region) {
             $this->applyRegionFilter($query, $this->region);
         }
@@ -323,6 +341,23 @@ class ProfileList extends Component
     public function render()
     {
         return view('livewire.profile-list');
+    }
+
+    private function usesShowcaseProfiles(): bool
+    {
+        return $this->region === ''
+            && $this->country === ''
+            && $this->countryCode === ''
+            && $this->ageMin === ''
+            && $this->ageMax === ''
+            && $this->verified === false
+            && $this->ageGroup === ''
+            && $this->sortRecommendation === ''
+            && $this->hasVerifiedPhoto === false
+            && $this->hasVideo === false
+            && $this->isPornActress === false
+            && $this->sortNew === ''
+            && $this->hasRating === false;
     }
 
     /**

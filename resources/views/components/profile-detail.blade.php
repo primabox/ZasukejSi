@@ -1,799 +1,2970 @@
 @props(['profile'])
 
-<div class="max-w-7xl mx-auto px-4 py-8 pt-30">
-    <!-- Top Action Bar -->
-    <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-4">
-            <!-- VIP Profile Badge -->
-            @if($profile->isVip())
-            <div class="bg-gold-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-2">
-                <x-icons name="star" class="w-4 h-4" />
-                {{ __('front.profiles.detail_page.vip') }}
+@php
+    $images = $profile->getAllImages();
+    $gallerySlides = $images->map(fn ($image) => $image->getUrl())->values();
+    $galleryFallbacks = collect([
+        asset('images/models/model6.png'),
+        asset('images/models/model10.png'),
+        asset('images/models/model12.png'),
+    ]);
+    while ($gallerySlides->count() < 3) {
+        $gallerySlides->push($galleryFallbacks[$gallerySlides->count() % $galleryFallbacks->count()]);
+    }
+    $averageRating = $profile->getAverageRating();
+    $totalRatings = $profile->getTotalRatings();
+    $isNewProfile = $totalRatings === 0 || optional($profile->created_at)->gt(now()->subDays(30));
+    $contacts = collect($profile->contacts ?? []);
+    $phoneContact = $contacts->firstWhere('type', 'phone');
+    $whatsAppContact = $contacts->firstWhere('type', 'whatsapp');
+    $telegramContact = $contacts->firstWhere('type', 'telegram');
+    $prices = collect($profile->local_prices ?? [])->filter(fn ($price) => filled($price['time_hours'] ?? null))->values();
+    $displayPrices = $prices->isNotEmpty()
+        ? $prices
+        : collect([
+            ['time_hours' => 0.5, 'incall_price' => 4000, 'outcall_price' => null],
+            ['time_hours' => 1, 'incall_price' => 6000, 'outcall_price' => null],
+            ['time_hours' => 2, 'incall_price' => 14000, 'outcall_price' => null],
+            ['time_hours' => 3, 'incall_price' => 18000, 'outcall_price' => null],
+        ]);
+    $displayServices = ($profile->services && $profile->services->count() > 0)
+        ? $profile->services->pluck('name')
+        : collect(['Běžné fotografie', 'Vaginální sex', 'Páry', 'Běžné fotografie', 'Páry', 'Výstřik na tělo', 'Lízaní', 'Nadávání', 'Výstřik na tělo', 'Lízaní', 'Lízaní', 'Nadávání', 'Dominantní', 'Erotická masáž']);
+    $languages = $profile->languages ?? 'Česky, Rusky, Anglicky';
+    $aboutText = trim((string) ($profile->about ?? '')) !== '' ? $profile->about : 'Profesionální VIP profil připravený pro nové klienty.';
+    $weightLbs = $profile->weight_lbs ?? ($profile->weight ? (string) round($profile->weight * 2.20462) : null);
+    $heightFeet = $profile->height_feet ?? null;
+    $videoPoster = $images->first()?->getUrl() ?: asset('images/models/model16.png');
+    $messageRouteAvailable = \Illuminate\Support\Facades\Route::has('messages.show');
+    $registerRouteAvailable = \Illuminate\Support\Facades\Route::has('register');
+    $availabilityEntries = collect($profile->availability_hours ?? [])->filter(function ($value) {
+        return filled($value);
+    })->values();
+    $availabilityStart = '18';
+    $availabilityEnd = '18';
+    $availabilityCaption = 'Každý den';
+    $isVerifiedProfile = $profile->isVerified();
+    $photoStatusLabel = $isVerifiedProfile ? 'FOTO OVĚŘENO' : 'FOTO NEOVĚŘENO';
+
+    if ($availabilityEntries->isNotEmpty()) {
+        $rawAvailability = $availabilityEntries->first();
+
+        if (is_array($rawAvailability)) {
+            $rawAvailability = implode(' - ', array_values($rawAvailability));
+        }
+
+        if (preg_match('/(\d{1,2})(?::\d{2})?\D+(\d{1,2})(?::\d{2})?/', (string) $rawAvailability, $matches)) {
+            $availabilityStart = $matches[1];
+            $availabilityEnd = $matches[2];
+        } elseif ($availabilityEntries->count() >= 2) {
+            $availabilityStart = (string) $availabilityEntries->get(0);
+            $availabilityEnd = (string) $availabilityEntries->get(1);
+        } elseif (filled($rawAvailability)) {
+            $availabilityCaption = (string) $rawAvailability;
+        }
+    }
+
+    $heroSlides = $gallerySlides->take(3)->values();
+    while ($heroSlides->count() < 3) {
+        $heroSlides->push($galleryFallbacks[$heroSlides->count() % $galleryFallbacks->count()]);
+    }
+@endphp
+
+<style>
+    .vip-profile-page {
+        position: relative;
+        max-width: 1564px;
+        margin: 0 auto;
+        padding: 32px 20px 96px 200px;
+        overflow: visible;
+    }
+
+    .vip-profile-page::before,
+    .vip-profile-page::after {
+        display: none;
+    }
+
+    .vip-profile-page > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .vip-profile-hero {
+        display: grid;
+        grid-template-columns: 198px minmax(0, 1fr);
+        gap: 58px;
+        align-items: start;
+        margin-bottom: 64px;
+    }
+
+    .vip-profile-panel {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 14px 14px 18px;
+        position: sticky;
+        top: 106px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .vip-profile-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .vip-profile-status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 93px;
+        min-width: 93px;
+        height: 30px;
+        border-radius: 8px;
+        padding: 0 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .vip-profile-status-pill::before {
+        content: none;
+    }
+
+    .vip-profile-status-pill--primary {
+        background: #FFB81C;
+        color: #ffffff;
+    }
+
+    .vip-profile-status-pill--verification {
+        width: 131px;
+        min-width: 131px;
+        background: #E8E8E8;
+        color: #A4A4A4;
+        font-family: 'Poppins', sans-serif;
+        font-size: 10px;
+    }
+
+    .vip-profile-availability-card {
+        border-radius: 20px;
+        padding: 12px 12px 14px;
+        margin-bottom: 12px;
+        background: linear-gradient(180deg, #7f4aff 0%, #a659f5 100%);
+        color: #ffffff;
+        box-shadow: 0 18px 34px rgba(127, 74, 255, 0.24);
+    }
+
+    .vip-profile-availability-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 10px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.92;
+    }
+
+    .vip-profile-availability-label::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ffcf48;
+        box-shadow: 0 0 0 5px rgba(255, 207, 72, 0.18);
+    }
+
+    .vip-profile-availability-hours {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 38px;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+    }
+
+    .vip-profile-availability-hours span:nth-child(2) {
+        font-size: 24px;
+        line-height: 1;
+        opacity: 0.7;
+    }
+
+    .vip-profile-availability-caption {
+        margin-top: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.84;
+    }
+
+    .vip-profile-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .vip-profile-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .vip-profile-chip--warm {
+        background: linear-gradient(135deg, #ffcf48 0%, #ffb700 100%);
+        color: #ffffff;
+    }
+
+    .vip-profile-chip--soft {
+        background: #f5f5f7;
+        color: #8c8795;
+    }
+
+    .vip-profile-name {
+        margin: 0 0 10px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 38px;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #5c2d62;
+        text-align: center;
+    }
+
+    .vip-profile-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 16px;
+        margin: 0 0 18px;
+    }
+
+    .vip-profile-link {
+        color: #71717A;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+    }
+
+    .vip-profile-rating-summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: stretch;
+        gap: 1px;
+        margin-bottom: 14px;
+        padding: 0;
+        border: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f2f2f2;
+        font-size: 13px;
+        color: #505050;
+    }
+
+    .vip-profile-rating-summary strong {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        background: #f7f7f7;
+        color: #505050;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .vip-profile-rating-icons {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 0 12px;
+        background: #f2f2f2;
+        color: #505050;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .vip-profile-meta-location {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        color: #505050;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .vip-profile-meta-location img {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+    }
+
+    .vip-profile-meta-table {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 16px;
+    }
+
+    .vip-profile-meta-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 8px;
+        font-size: 13px;
+        position: relative;
+        padding-bottom: 16px;
+    }
+
+    .vip-profile-meta-row::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 231px;
+        height: 1px;
+        background-color: #f3edf5;
+    }
+
+    .vip-profile-meta-row:last-child {
+        padding-bottom: 0;
+    }
+
+    .vip-profile-meta-row:last-child::after {
+        display: none;
+    }
+
+    .vip-profile-meta-label {
+        color: #dd3888;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .vip-profile-meta-value {
+        text-align: right;
+        color: #505050;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .vip-profile-flags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .vip-profile-flag {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 113px;
+        min-width: 113px;
+        height: 40px;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        box-sizing: border-box;
+    }
+
+    .vip-profile-flag--incall {
+        background: #e9ffeb;
+        color: #dd3888;
+    }
+
+    .vip-profile-flag--outcall {
+        background: transparent;
+        color: #a6a6a6;
+    }
+
+    .vip-profile-flag-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+    }
+
+    .vip-profile-flag-status img {
+        width: 20px;
+        height: 20px;
+        display: block;
+    }
+
+    .vip-profile-flag-status--no {
+        color: inherit;
+    }
+
+    .vip-profile-message {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 231px;
+        height: 50px;
+        gap: 8px;
+        border-radius: 8px;
+        padding: 0;
+        background: #DD3888;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        text-decoration: none;
+        transition: transform 180ms ease;
+        margin-top: 12px;
+    }
+
+    .vip-profile-message img {
+        width: 20px;
+        height: 20px;
+        filter: none;
+    }
+
+    .vip-profile-contacts {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .vip-profile-contact-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        text-decoration: none;
+    }
+
+    .vip-profile-contact-circle--whatsapp {
+        background: #25D366;
+    }
+
+    .vip-profile-contact-circle--telegram {
+        background: #2AABEE;
+    }
+
+    .vip-profile-phone {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #505050;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        text-decoration: none;
+    }
+
+    .vip-profile-main {
+        min-width: 0;
+        padding-top: 120px;
+    }
+
+    .vip-profile-gallery-card {
+        position: relative;
+        margin-bottom: 28px;
+    }
+
+    .vip-profile-gallery-mobile {
+        display: block;
+    }
+
+    .vip-gallery-desktop {
+        display: none;
+    }
+
+    .vip-profile-gallery-card .swiper {
+        overflow: visible;
+    }
+
+    .vip-gallery-slide {
+        position: relative;
+        width: 100%;
+        height: 410px;
+        border: 0;
+        border-radius: 26px;
+        overflow: hidden;
+        padding: 0;
+        background: #eee7f0;
+        cursor: pointer;
+        display: block;
+    }
+
+    .vip-gallery-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+    .vip-profile-gallery-swiper .swiper-slide {
+        opacity: 0.7;
+        transform: scale(0.94);
+        transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+    .vip-profile-gallery-swiper .swiper-slide-active,
+    .vip-profile-gallery-swiper .swiper-slide-next,
+    .vip-profile-gallery-swiper .swiper-slide-prev {
+        opacity: 1;
+    }
+
+    .vip-profile-gallery-swiper .swiper-slide-active {
+        transform: scale(1);
+    }
+
+    .vip-gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 3;
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 10px;
+        background: #dd3888;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 26px rgba(221, 56, 136, 0.25);
+    }
+
+    .vip-gallery-nav--prev {
+        left: -15px;
+    }
+
+    .vip-gallery-nav--next {
+        right: -15px;
+    }
+
+    .vip-gallery-desktop-card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 26px;
+        overflow: hidden;
+        padding: 0;
+        cursor: pointer;
+        background: #eee7f0;
+    }
+
+    .vip-gallery-desktop-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .vip-gallery-desktop-main {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        min-height: 462px;
+    }
+
+    .vip-gallery-desktop-left {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        min-height: 462px;
+    }
+
+    .vip-gallery-desktop-right {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        min-height: 462px;
+    }
+
+    .vip-gallery-desktop-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        width: 45px;
+        height: 45px;
+        border: 0;
+        border-radius: 8px;
+        background: #dd3888;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vip-gallery-desktop-nav.vip-gallery-desktop-prev {
+        left: -14px;
+    }
+
+    .vip-gallery-desktop-nav.vip-gallery-desktop-next {
+        right: -14px;
+    }
+
+    .vip-profile-favorite {
+        position: absolute;
+        top: 0;
+        left: 16px;
+        z-index: 4;
+    }
+
+    .vip-profile-favorite button {
+        width: 80px !important;
+        height: 90px !important;
+        padding: 0 !important;
+        border-radius: 0 0 8px 8px !important;
+        background: #FFFFFF !important;
+        color: #d54b92 !important;
+        border: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important;
+    }
+
+    .vip-profile-favorite button span {
+        display: block !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #71717A !important;
+        margin-top: 2px;
+    }
+
+    .vip-profile-static-favorite {
+        width: 80px;
+        height: 90px;
+        border-radius: 0 0 8px 8px;
+        border: 0;
+        background: #FFFFFF;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .vip-profile-static-favorite img {
+        width: 38px !important;
+        height: 38px !important;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .vip-profile-static-favorite img.heart-animate {
+        animation: heartSwap 0.4s ease-in-out;
+    }
+
+    @keyframes heartSwap {
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .vip-profile-static-favorite::after {
+        content: 'uložit';
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #71717A;
+        margin-top: 2px;
+    }
+
+    .vip-about-card {
+        margin-bottom: 34px;
+    }
+
+    .vip-section-title {
+        margin: 0 0 14px;
+        color: #5c2d62;
+        font-size: 34px;
+        line-height: 0.98;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    .vip-about-copy {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        color: #5C5C5C;
+        line-height: 1.85;
+        max-width: 820px;
+    }
+
+    .vip-media-grid {
+        display: grid;
+        grid-template-columns: 242px minmax(0, 1fr);
+        gap: 26px;
+        align-items: start;
+        margin-bottom: 72px;
+    }
+
+    .vip-media-grid--single {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vip-video-card,
+    .vip-pricing-card,
+    .vip-cta,
+    .vip-slider-shell {
+        background: #ffffff;
+        border-radius: 28px;
+    }
+
+    .vip-video-card {
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 24px 54px rgba(92, 45, 98, 0.08);
+    }
+
+    .vip-pricing-card h3 {
+        margin: 0 0 18px;
+        font-family: 'Poppins', sans-serif;
+        color: #5C2D62;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    .vip-video-card-title {
+        padding: 0 0 24px;
+        font-family: 'Poppins', sans-serif;
+        color: #5C2D62;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    .vip-video-surface {
+        position: relative;
+        width: 254px;
+        height: 460px;
+        overflow: hidden;
+        border-radius: 15px;
+        background: #241c2a;
+    }
+
+    .vip-video-surface video,
+    .vip-video-surface img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .vip-video-play {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.24) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vip-video-play__inner {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #5C2D62;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vip-pricing-card {
+        padding: 10px 0 0;
+        background: transparent;
+        border-radius: 0;
+    }
+
+    .vip-pricing-head,
+    .vip-pricing-body,
+    .vip-services-wrap {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .vip-pricing-table {
+        width: 526px;
+        border-collapse: collapse;
+    }
+
+    .vip-pricing-table th,
+    .vip-pricing-table td {
+        padding: 12px 6px;
+        border-bottom: 1px solid #f0e7f3;
+        font-size: 14px;
+    }
+
+    .vip-pricing-table th {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        color: #505050;
+        text-align: center;
+        padding: 0;
+        border-bottom: none;
+    }
+
+    .vip-pricing-table th:first-child {
+        background: #F2F2F2;
+        border-radius: 8px;
+        width: 137px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .vip-pricing-table th:nth-child(2),
+    .vip-pricing-table th:nth-child(3),
+    .vip-pricing-table td:nth-child(2),
+    .vip-pricing-table td:nth-child(3) {
+        text-align: center;
+    }
+
+    .vip-pricing-table th:nth-child(2) .vip-price-pill,
+    .vip-pricing-table th:nth-child(3) .vip-price-pill {
+        margin: 0 auto;
+    }
+
+    .vip-pricing-table td:first-child {
+        text-align: center;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #DD3888;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .vip-pricing-table td:nth-child(2),
+    .vip-pricing-table td:nth-child(3) {
+        text-align: center;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #505050;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .vip-price-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 8px;
+        background: #f7f4f8;
+        padding: 8px 12px;
+        width: auto;
+        height: 40px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .vip-pricing-table th:nth-child(2) .vip-price-pill {
+        background: #E9FFEB;
+        color: #DD3888;
+        width: 188px;
+    }
+
+    .vip-pricing-table th:nth-child(3) .vip-price-pill {
+        background: transparent;
+        color: #A6A6A6;
+        width: 187px;
+    }
+
+    .vip-services-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+        width: 526px;
+    }
+
+    .vip-service-pill {
+        border-radius: 999px;
+        border: 2px solid #F2F2F2;
+        padding: 8px 14px;
+        color: #505050;
+        font-family: 'Poppins', sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        background: #ffffff;
+    }
+
+    .vip-slider-section {
+        margin-bottom: 70px;
+        margin-left: 315px;
+        overflow: visible;
+    }
+
+    .vip-slider-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+    }
+
+    .vip-slider-kicker {
+        color: #dd3888;
+        font-size: 30px;
+        line-height: 0.95;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    .vip-slider-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #d5a31b;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .vip-rec-slider {
+        position: relative;
+        width: 1050px;
+        height: 540px;
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    .vip-rec-slider .profile-slider-container,
+    .vip-rec-slider .swiper {
+        width: 1050px !important;
+        height: 540px !important;
+        max-width: 100%;
+    }
+
+    .vip-rec-slider [class*="swiper-button-prev-"],
+    .vip-rec-slider [class*="swiper-button-next-"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .vip-rec-slider [class*="swiper-button-prev-"] {
+        left: -60px;
+    }
+
+    .vip-rec-slider [class*="swiper-button-next-"] {
+        right: -60px;
+    }
+
+    .vip-rec-slider [class*="swiper-button-prev-"] > div,
+    .vip-rec-slider [class*="swiper-button-next-"] > div {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        background: #dd3888;
+        box-shadow: 0 14px 26px rgba(221, 56, 136, 0.25);
+    }
+
+    .vip-rec-slider .swiper-wrapper {
+        padding-top: 6px;
+        padding-bottom: 18px;
+        gap: 0px;
+    }
+
+    .vip-video-section {
+        margin-top: 20px;
+        margin-left: 135px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .vip-video-heading {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-left: -335px;
+    }
+
+    .vip-video-heading-line1 {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 36px !important;
+        color: #5C2D62 !important;
+        line-height: 1.2 !important;
+    }
+
+    .vip-video-heading-line2 {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 36px !important;
+        color: #DD3888 !important;
+        line-height: 1.2 !important;
+    }
+
+    .vip-video-container {
+        position: relative;
+        width: 850px;
+        height: 450px;
+        border-radius: 15px;
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('{{ asset('images/models/vipVideo2.png') }}') center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .vip-video-play-btn {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #5C2D62;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 26px rgba(92, 45, 98, 0.25);
+        cursor: pointer;
+    }
+
+    .vip-video-badges {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+    }
+
+    .vip-video-register-btn {
+        width: 460px;
+        height: 60px;
+        border-radius: 8px;
+        background: #DD3888;
+        border: none;
+        color: #FFFFFF;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 200ms ease;
+    }
+
+    .vip-video-register-btn:hover {
+        background: #c4286f;
+    }
+
+    .vip-video-badge {
+        width: 268px;
+        height: 85px;
+        border-radius: 8px;
+        background: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+        box-shadow: 0 12px 24px rgba(92, 45, 98, 0.06);
+    }
+
+    .vip-video-badge img {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+    }
+
+    .vip-video-badge span {
+        flex: 1;
+        text-align: left;
+    }
+
+    .vip-cta {
+        padding: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbf8fc 100%);
+        box-shadow: 0 24px 54px rgba(92, 45, 98, 0.08);
+        margin-top: 20px;
+    }
+
+    .vip-cta-media {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        overflow: hidden;
+        border-radius: 24px;
+        height: 220px;
+        margin-bottom: 18px;
+    }
+
+    .vip-cta-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(0.82);
+    }
+
+    .vip-cta-play {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 82px;
+        height: 82px;
+        border-radius: 999px;
+        background: #6f2d77;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 24px 40px rgba(111, 45, 119, 0.25);
+    }
+
+    .vip-cta-benefits {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .vip-cta-benefit {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 18px;
+        background: #ffffff;
+        padding: 16px 18px;
+        box-shadow: 0 12px 24px rgba(92, 45, 98, 0.06);
+        color: #7a7380;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .vip-cta-register {
+        display: block;
+        width: min(320px, 100%);
+        margin: 0 auto;
+        border-radius: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, #dd3888 0%, #c72f7a 100%);
+        color: #ffffff;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 16px 28px rgba(221, 56, 136, 0.24);
+    }
+
+    .vip-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(255, 255, 255, 0.74);
+        backdrop-filter: blur(16px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .vip-lightbox.is-open {
+        display: flex;
+    }
+
+    .vip-lightbox-stage {
+        position: relative;
+        width: min(1120px, 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .vip-lightbox-main {
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 75px;
+    }
+
+    .vip-lightbox-swiper {
+        width: 100%;
+    }
+
+    .vip-lightbox .swiper-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vip-lightbox .swiper-slide img {
+        max-width: 100%;
+        max-height: 60vh;
+        object-fit: contain;
+        border-radius: 24px;
+    }
+
+    .vip-lightbox-close,
+    .vip-lightbox-prev,
+    .vip-lightbox-next {
+        position: absolute;
+        z-index: 3;
+        border: 0;
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        background: #dd3888;
+        color: #ffffff;
+        box-shadow: 0 16px 28px rgba(221, 56, 136, 0.24);
+        cursor: pointer;
+    }
+
+    .vip-lightbox-close {
+        top: -8px;
+        right: -8px;
+    }
+
+    .vip-lightbox-prev,
+    .vip-lightbox-next {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .vip-lightbox-prev {
+        left: 30px;
+    }
+
+    .vip-lightbox-next {
+        right: 30px;
+    }
+
+    .vip-lightbox-thumbnails {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .vip-lightbox-thumbnail {
+        width: 80px;
+        height: 123px;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+        overflow: hidden;
+        opacity: 0.3;
+        transition: opacity 0.2s ease;
+    }
+
+    .vip-lightbox-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .vip-lightbox-thumbnail.active {
+        border-color: #dd3888;
+        opacity: 1;
+    }
+
+    .blurred {
+        position: relative;
+    }
+
+    .blurred img {
+        filter: blur(10px);
+    }
+
+    .blurred [class*="name"],
+    .blurred [class*="title"] {
+        filter: blur(10px);
+    }
+
+    .blurred::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70px;
+        height: 70px;
+        background: white;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .blurred .lock-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 32px;
+        height: 32px;
+        z-index: 11;
+    }
+
+    @media (max-width: 1100px) {
+        .vip-profile-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .vip-profile-panel {
+            position: static;
+            max-width: 520px;
+        }
+
+        .vip-media-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (min-width: 840px) {
+        .vip-gallery-desktop {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(180px, 0.88fr) minmax(280px, 1.18fr) minmax(150px, 0.78fr);
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        .vip-profile-gallery-mobile {
+            display: none;
+        }
+
+        .vip-gallery-nav {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .vip-profile-hero {
+            grid-template-columns: 261px minmax(0, 1239px);
+            gap: 58px;
+        }
+
+        .vip-profile-panel {
+            width: 261px;
+            min-width: 261px;
+            height: 575px;
+            padding: 12px;
+        }
+
+        .vip-profile-status-bar {
+            margin-bottom: 16px;
+        }
+
+        .vip-profile-availability-card {
+            display: none;
+        }
+
+        .vip-profile-badges {
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .vip-profile-chip {
+            padding: 4px 8px;
+            font-size: 8px;
+        }
+
+        .vip-profile-name {
+            margin-bottom: 10px;
+            font-size: 36px;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+        }
+
+        .vip-profile-rating-summary {
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .vip-profile-meta-location {
+            gap: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .vip-profile-meta-table {
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+
+        .vip-profile-meta-row {
+            gap: 12px;
+            padding-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .vip-profile-flags {
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .vip-profile-flag {
+            width: 113px;
+            min-width: 113px;
+            height: 40px;
+            border-radius: 8px;
+            padding: 0 10px;
+            font-size: 12px;
+        }
+
+        .vip-profile-flag-status {
+            width: 20px;
+            height: 20px;
+        }
+
+        .vip-profile-message {
+            width: 231px;
+            height: 50px;
+            border-radius: 8px;
+            padding: 0;
+            font-size: 16px;
+        }
+
+        .vip-profile-contacts {
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .vip-profile-contact-circle {
+            width: 40px;
+            height: 40px;
+        }
+
+        .vip-profile-phone {
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        .vip-profile-main {
+            width: 1239px;
+            max-width: 1239px;
+        }
+
+        .vip-gallery-desktop {
+            grid-template-columns: 337px 537px 337px;
+            gap: 14px;
+        }
+
+        .vip-gallery-desktop-left,
+        .vip-gallery-desktop-main,
+        .vip-gallery-desktop-right {
+            min-height: 537px;
+            height: 537px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .vip-profile-page {
+            padding: 18px 14px 64px;
+        }
+
+        .vip-section-title,
+        .vip-slider-kicker {
+            font-size: 28px;
+        }
+
+        .vip-profile-panel {
+            padding: 8px 10px 14px;
+        }
+
+        .vip-profile-status-bar {
+            margin-bottom: 16px;
+        }
+
+        .vip-profile-availability-card {
+            display: none;
+        }
+
+        .vip-profile-badges {
+            display: none;
+        }
+
+        .vip-profile-name {
+            margin-bottom: 14px;
+            font-size: 36px;
+        }
+
+        .vip-profile-rating-summary {
+            margin-bottom: 12px;
+        }
+
+        .vip-profile-meta-location {
+            margin-bottom: 14px;
+        }
+
+        .vip-profile-meta-table {
+            margin-bottom: 14px;
+        }
+
+        .vip-profile-gallery-card {
+            margin-left: -4px;
+            margin-right: -4px;
+        }
+
+        .vip-profile-availability-hours {
+            font-size: 34px;
+        }
+
+        .vip-gallery-slide {
+            height: 280px;
+            border-radius: 20px;
+        }
+
+        .vip-gallery-nav--prev {
+            left: 6px;
+        }
+
+        .vip-gallery-nav--next {
+            right: 6px;
+        }
+
+        .vip-slider-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .vip-slider-note {
+            white-space: normal;
+        }
+
+        .vip-cta-benefits {
+            grid-template-columns: 1fr;
+        }
+
+        .vip-cta-media {
+            height: 180px;
+        }
+
+        .vip-lightbox {
+            padding: 12px;
+        }
+
+        .vip-lightbox-prev,
+        .vip-lightbox-next {
+            display: none;
+        }
+    }
+
+    /* Mobile layout for 425px and lower */
+    @media (max-width: 425px) {
+        .vip-profile-page {
+            max-width: 425px;
+            padding: 64px 0 48px 0 !important;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .vip-profile-hero {
+            display: grid !important;
+            grid-template-columns: 1fr auto;
+            column-gap: 6px;
+            row-gap: 8px;
+            align-items: start;
+            margin-bottom: 12px !important;
+            padding: 0 25px 0 25px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .vip-profile-panel,
+        .vip-profile-main,
+        .vip-profile-gallery-card,
+        .vip-media-grid {
+            display: contents !important;
+        }
+
+        .vip-profile-availability-card,
+        .vip-gallery-desktop {
+            display: none !important;
+        }
+
+        .vip-profile-status-bar {
+            grid-column: 1;
+            grid-row: 1;
+            gap: 6px;
+            margin: 0;
+            align-self: center;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+            min-height: 30px;
+        }
+
+        .vip-profile-status-pill {
+            height: 30px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+            padding: 0 !important;
+            font-family: 'Poppins', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .vip-profile-status-pill--primary {
+            width: 100px;
+            min-width: 100px;
+            background: #FFB700;
+            color: #FFFFFF;
+        }
+
+        .vip-profile-status-pill--primary img {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+        }
+
+        .vip-profile-status-pill--verification {
+            width: 131px;
+            min-width: 131px;
+            background: #E8E8E8;
+            color: #A4A4A4;
+        }
+
+        .vip-profile-status-pill--verification img {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+        }
+
+        .vip-profile-favorite {
+            position: relative;
+            top: auto;
+            left: auto;
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: end;
+            align-self: center;
+            z-index: 2;
+        }
+
+        .vip-profile-favorite button,
+        .vip-profile-static-favorite {
+            width: 38px !important;
+            min-width: 38px !important;
+            height: 38px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 20px rgba(221, 56, 136, 0.14);
+            gap: 0 !important;
+            padding: 0 !important;
+            background: #FFFFFF;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .vip-profile-favorite button span,
+        .vip-profile-static-favorite::after {
+            display: none !important;
+        }
+
+        .vip-profile-static-favorite img,
+        .vip-profile-favorite button img {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .vip-profile-name {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            margin: 8px 0 0 0;
+            text-align: left;
+            font-size: 38px;
+            line-height: 1.05;
+            font-weight: 800;
+            color: #5C2D62;
+        }
+
+        .vip-profile-links {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            justify-content: flex-start;
+            margin: 8px 0 0;
+        }
+
+        .vip-profile-gallery-mobile {
+            grid-column: 1 / -1;
+            grid-row: 4;
+            width: 310px;
+            margin: 12px auto 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .vip-profile-gallery-swiper {
+            width: 310px !important;
+            margin: 0 !important;
+            display: flex;
+            justify-content: center;
+            overflow: visible !important;
+        }
+
+        .vip-profile-gallery-swiper .swiper-wrapper {
+            display: flex !important;
+            gap: 3px !important;
+            align-items: stretch;
+        }
+
+        .vip-profile-gallery-swiper .swiper-slide {
+            width: 310px !important;
+            flex: 0 0 310px !important;
+            opacity: 1 !important;
+            transform: none !important;
+            display: flex;
+            justify-content: center;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .vip-gallery-slide {
+            width: 310px !important;
+            height: 443px !important;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .vip-gallery-nav {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #DD3888;
+            border: none;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .vip-gallery-nav--prev {
+            left: -50px;
+        }
+
+        .vip-gallery-nav--next {
+            right: -50px;
+        }
+
+        .vip-profile-rating-summary,
+        .vip-profile-meta-location,
+        .vip-profile-meta-table,
+        .vip-profile-flags,
+        .vip-profile-message,
+        .vip-profile-contacts,
+        .vip-about-card,
+        .vip-video-card-wrap,
+        .vip-pricing-card {
+            grid-column: 1 / -1;
+            width: 100%;
+            max-width: 425px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .vip-profile-rating-summary {
+            grid-row: 5;
+            margin-top: 12px;
+            margin-bottom: 0;
+            font-size: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .vip-profile-meta-location {
+            grid-row: 6;
+            margin-top: 12px;
+            margin-bottom: 0;
+            justify-content: center;
+            gap: 6px;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #505050;
+        }
+
+        .vip-profile-meta-table {
+            grid-row: 7;
+            gap: 0;
+            margin-top: 12px;
+            margin-bottom: 0;
+            padding: 0 12px;
+            background: white;
+        }
+
+        .vip-profile-meta-row {
+            padding: 12px 0;
+            font-size: 12px;
+            gap: 12px;
+        }
+
+        .vip-profile-meta-row::after {
+            width: 100%;
+            height: 1px;
+            background: #F0F0F0;
+        }
+
+        .vip-profile-meta-label {
+            color: #DD3888;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vip-profile-meta-value {
+            text-align: right;
+            color: #505050;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vip-profile-flags {
+            grid-row: 8;
+            margin-top: 12px;
+            margin-bottom: 0;
+            gap: 8px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .vip-profile-flag {
+            flex: 1 1 calc(50% - 4px);
+            min-width: calc(50% - 4px);
+            height: 36px;
+            padding: 0 12px;
+            font-size: 12px;
+            gap: 6px;
+            border-radius: 8px;
+            border: 1.5px solid #F2F2F2;
+        }
+
+        .vip-profile-flag--incall {
+            background: #E9FFEB;
+            color: #DD3888;
+            border: none !important;
+            border-color: transparent !important;
+        }
+
+        .vip-profile-flag--outcall {
+            background: transparent;
+            color: #A6A6A6;
+            border: none !important;
+            border-color: transparent !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vip-profile-flag-status,
+        .vip-profile-flag-status img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .vip-profile-message {
+            grid-row: 9;
+            width: 100%;
+            max-width: 425px;
+            margin-top: 12px;
+            height: 40px;
+            font-size: 13px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #DD3888;
+            color: white;
+            text-decoration: none;
+        }
+
+        .vip-profile-contacts {
+            grid-row: 10;
+            margin-top: 12px;
+            gap: 12px;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .vip-profile-contact-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: none;
+        }
+
+        .vip-profile-contact-circle--whatsapp {
+            background: #25D366;
+        }
+
+        .vip-profile-contact-circle--telegram {
+            background: #2AABEE;
+        }
+
+        .vip-profile-contact-circle img {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .vip-profile-phone {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #505050;
+            text-decoration: none;
+            gap: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .vip-video-card-wrap {
+            grid-row: 11;
+        }
+
+        .vip-video-card-title {
+            padding: 0;
+            margin: 0 0 10px;
+            font-size: 24px;
+        }
+
+        .vip-video-card {
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .vip-video-surface {
+            width: 300px;
+            height: 560px;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        .vip-about-card {
+            grid-row: 12;
+            margin-bottom: 0;
+        }
+
+        .vip-section-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .vip-about-copy {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #5C5C5C;
+            line-height: 1.7;
+        }
+
+        .vip-pricing-card {
+            grid-row: 13;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 0;
+        }
+
+        .vip-services-block {
+            order: 1;
+            margin-top: 12px !important;
+            width: 100%;
+            max-width: 425px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .vip-prices-block {
+            order: 2;
+            width: 100%;
+            max-width: 425px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 12px;
+        }
+
+        .vip-pricing-card h3 {
+            margin: 0 0 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #5C2D62;
+        }
+
+        .vip-about-card {
+            margin-top: 12px;
+            width: 100%;
+            max-width: 425px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .vip-about-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .vip-about-card p {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .vip-services-grid,
+        .vip-pricing-table {
+            width: 100%;
+        }
+
+        .vip-services-grid {
+            gap: 8px;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .vip-service-pill {
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            background: white;
+            border: 1.5px solid #E0E0E0;
+            border-radius: 20px;
+            color: #505050;
+            white-space: nowrap;
+        }
+
+        .vip-pricing-table {
+            width: 307px;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+            font-size: 12px;
+        }
+
+        .vip-pricing-table th {
+            text-align: center;
+            padding: 0 0 5px 0;
+            background: transparent;
+            border-bottom: 1px solid #E8E8E8;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #505050;
+        }
+
+        .vip-pricing-table th:first-child {
+            width: 80px;
+            min-width: 80px;
+            height: 40px;
+            text-align: left;
+        }
+
+        .vip-pricing-table th:nth-child(2) {
+            padding-left: 6px;
+        }
+
+        .vip-pricing-table th:nth-child(3) {
+            padding-right: 6px;
+        }
+
+        .vip-pricing-table tbody tr {
+            height: 38px;
+        }
+
+        .vip-pricing-table td {
+            padding: 6px 8px;
+            text-align: center;
+            border-bottom: 1px solid #F0F0F0;
+            color: #505050;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .vip-pricing-table td:last-child,
+        .vip-pricing-table td:nth-child(2) {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #505050;
+        }
+
+        .vip-pricing-table td:first-child {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .vip-price-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 10px;
+            gap: 6px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1;
+            background: white;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .vip-pricing-table th:first-child .vip-price-pill,
+        .vip-pricing-table td:first-child .vip-price-pill {
+            width: 80px !important;
+            min-width: 80px !important;
+            height: 40px !important;
+            border-radius: 9px;
+            background: #F2F2F2;
+            border: none;
+            color: #505050;
+        }
+
+        .vip-pricing-table th:nth-child(2) .vip-price-pill,
+        .vip-pricing-table td:nth-child(2) .vip-price-pill {
+            width: 110px;
+            min-width: 110px;
+            height: 40px;
+            border-radius: 8px;
+            background: #E9FFEB;
+            border: none;
+            color: #DD3888;
+        }
+
+        .vip-pricing-table th:nth-child(3) .vip-price-pill,
+        .vip-pricing-table td:nth-child(3) .vip-price-pill {
+            width: 110px;
+            min-width: 110px;
+            height: 40px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: #A6A6A6;
+        }
+
+        .vip-pricing-table .vip-price-pill img {
+            width: 20px !important;
+            height: 20px !important;
+            flex: 0 0 20px;
+        }
+
+        .vip-pricing-table th:nth-child(2) .vip-price-pill,
+        .vip-pricing-table th:nth-child(3) .vip-price-pill {
+            width: 110px;
+            min-width: 110px;
+            height: 40px;
+        }
+        .vip-pricing-table td:nth-child(2),
+        .vip-pricing-table td:nth-child(3) {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #505050;
+            padding: 0 8px 5px 8px;
+        }
+
+        .vip-slider-section {
+            margin: 12px auto 24px;
+            width: 314px;
+            max-width: 314px;
+            overflow: hidden;
+        }
+
+        .vip-rec-slider {
+            width: 100%;
+            max-width: 425px;
+            height: auto;
+        }
+
+        .vip-rec-slider .profile-slider-container,
+        .vip-rec-slider .swiper {
+            width: 100% !important;
+            max-width: 425px !important;
+            height: auto !important;
+        }
+
+        .vip-rec-slider [class*="swiper-button-prev-"] {
+            position: static;
+            left: auto;
+            transform: none;
+            display: inline-flex;
+            margin-top: 8px;
+        }
+
+        .vip-rec-slider [class*="swiper-button-next-"] {
+            position: static;
+            right: auto;
+            transform: none;
+            display: inline-flex;
+            margin-top: 8px;
+        }
+
+        .vip-rec-slider .swiper-pagination {
+            position: relative;
+            bottom: auto;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .vip-rec-slider .swiper-pagination-bullet {
+            width: 8px;
+            height: 8px;
+            background: #E0E0E0 !important;
+            opacity: 1 !important;
+        }
+
+        .vip-rec-slider .swiper-pagination-bullet-active {
+            background: #DD3888 !important;
+            opacity: 1 !important;
+        }
+
+        .vip-video-section {
+            margin: 12px auto 0 !important;
+            width: 313px !important;
+            max-width: 313px !important;
+            align-items: stretch;
+            gap: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vip-video-heading {
+            width: 100%;
+            max-width: 425px;
+            margin: 0 !important;
+            padding: 0;
+        }
+
+        .vip-video-heading-line1 {
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            color: #5C2D62 !important;
+            margin: 0 !important;
+        }
+
+        .vip-video-heading-line2 {
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            color: #DD3888 !important;
+            margin: 0 !important;
+        }
+
+        .vip-video-container {
+            width: 310px !important;
+            max-width: 310px !important;
+            height: 165px !important;
+            margin: 0 !important;
+            border-radius: 12px;
+        }
+
+        .vip-video-play-btn {
+            width: 60px !important;
+            height: 60px !important;
+            background: #5C2D62 !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vip-video-play-btn img {
+            width: 23px !important;
+            height: 23px !important;
+        }
+
+        .vip-video-badges {
+            display: grid;
+            gap: 10px;
+            width: 313px !important;
+            max-width: 313px !important;
+            margin: 0;
+        }
+
+        .vip-video-badge {
+            width: 313px !important;
+            min-height: 75px;
+            height: 75px;
+            padding: 10px 12px;
+            gap: 8px;
+            justify-content: center;
+            background: #FFFFFF;
+            border-radius: 8px;
+            border: 1px solid #F0F0F0;
+            box-sizing: border-box;
+        }
+
+        .vip-video-badge img {
+            width: 40px !important;
+            height: 40px !important;
+            flex-shrink: 0;
+        }
+
+        .vip-video-badge span {
+            width: 207px !important;
+            height: 15px !important;
+            font-size: 14px !important;
+            line-height: 1.3;
+            text-align: left !important;
+        }
+
+        .vip-video-register-btn {
+            width: 313px !important;
+            max-width: 313px !important;
+            height: 60px !important;
+            margin: 0 !important;
+            font-size: 16px !important;
+            border-radius: 8px;
+            background: #DD3888;
+            color: white;
+        }
+    }
+</style>
+
+<div class="vip-profile-page">
+    <section class="vip-profile-hero">
+        <aside class="vip-profile-panel">
+            <div class="vip-profile-status-bar">
+                <span class="vip-profile-status-pill vip-profile-status-pill--primary">
+                    <img src="{{ asset('images/icons/star.svg') }}" alt="star" style="width: 18px; height: 18px; margin-right: 6px;">
+                    VIP PROFIL
+                </span>
+                <span class="vip-profile-status-pill vip-profile-status-pill--verification">
+                    <img src="{{ asset('images/icons/CameraOff.svg') }}" alt="camera-off" style="width: 18px; height: 18px; margin-right: 4px;">
+                    {{ $photoStatusLabel }}
+                </span>
             </div>
-            @endif
 
-            <!-- Unverified Photo Badge -->
-            @if(!$profile->isVerified())
-            <div class="bg-gray-400 text-white px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-2">
-                <x-icons name="camera" class="w-4 h-4" />
-                {{ __('front.profiles.detail_page.photos_unverified') }}
-            </div>
-            @else
-            <div class="bg-green-500 text-white px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-2">
-                <x-icons name="camera" class="w-4 h-4" />
-                {{ __('front.profiles.list.verified') }}
-            </div>
-            @endif
-        </div>
-
-        <!-- Top Right Actions -->
-        <div class="flex items-center gap-3">
-            <!-- Rating Badge -->
-            <!-- <div class="flex items-center text-pink-500 text-sm font-medium">
-                <span>{{ __('front.profiles.detail_page.give_rating') }}</span>
-            </div> -->
-
-            <!-- Refresh Access Button -->
-            <!-- <button class="flex items-center gap-2 text-pink-500 text-sm font-medium hover:text-pink-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                {{ __('front.profiles.detail_page.refresh_access') }}
-            </button> -->
-
-            <!-- Report Profile -->
-            <!-- <button class="flex items-center gap-2 text-red-500 text-sm font-medium hover:text-red-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.866-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                {{ __('front.profiles.detail_page.report_profile') }}
-            </button> -->
-        </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
-        <!-- Left Sidebar - Profile Info -->
-        <div class="lg:col-span-1 order-2 lg:order-1">
-            <div class="py-4 md:p-6">
-                <!-- Profile Header -->
-                <div class="text-center mb-6">
-                    <h1 class="text-3xl font-bold text-secondary mb-2">{{ $profile->display_name ?? 'Alexandrina' }}</h1>
-
-                    <!-- Rating Section -->
-                    <div class="mb-4">
-                        @livewire('profile-rating', ['profile' => $profile])
-                    </div>
+            <div class="vip-profile-availability-card">
+                <div class="vip-profile-availability-label">Dostupnost</div>
+                <div class="vip-profile-availability-hours">
+                    <span>{{ $availabilityStart }}</span>
+                    <span>×</span>
+                    <span>{{ $availabilityEnd }}</span>
                 </div>
+                <div class="vip-profile-availability-caption">{{ $availabilityCaption }}</div>
+            </div>
 
-                <!-- Profile Details -->
-                <div class="space-y-4">
-                    <!-- Location -->
-                    <div class="flex items-center justify-center text-pink-500">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+            <h1 class="vip-profile-name">{{ $profile->display_name ?? 'Alexandrina' }}</h1>
+
+            <div class="vip-profile-links" aria-label="Profilové akce">
+                <a href="#" class="vip-profile-link">Obnovit přístup</a>
+                <a href="#" class="vip-profile-link">Dát hodnocení</a>
+                <a href="#" class="vip-profile-link">Nahlásit</a>
+            </div>
+
+            <div class="vip-profile-rating-summary">
+                <strong>{{ __('front.profiles.list.rating') }}</strong>
+                <span class="vip-profile-rating-icons">
+                    @if($totalRatings > 0)
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="color:#FFC107;">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        <span>{{ $profile->city ?? 'Jihomoravský kraj' }}</span>
-                    </div>
+                        <span>{{ number_format($averageRating, 1) }}</span>
+                    @else
+                        <x-icons name="lock" class="inline-block" style="width:18px;height:18px;color:#FF4DA6;" />
+                    @endif
+                </span>
+            </div>
 
-                    <!-- Profile Stats -->
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-pink-500 font-medium">{{ __('front.profiles.detail_page.age') }}</span>
-                            <span class="text-gray-900">{{ $profile->age ?? '19' }} {{ __('front.profiles.detail_page.years') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-pink-500 font-medium">{{ __('front.profiles.detail_page.weight') }}</span>
-                            <span class="text-gray-900">{{ $profile->weight ?? '57' }} {{ __('front.profiles.detail_page.kg') }} / {{ $profile->weight_lbs ?? '126' }} {{ __('front.profiles.detail_page.lbs') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-pink-500 font-medium">{{ __('front.profiles.detail_page.height') }}</span>
-                            <span class="text-gray-900">{{ $profile->height ?? '168' }} {{ __('front.profiles.detail_page.cm') }} / {{ $profile->height_feet ?? "5'9\"" }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-pink-500 font-medium">{{ __('front.profiles.detail_page.bust') }}</span>
-                            <span class="text-gray-900">{{ $profile->bust_size ?? 'C' }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-pink-500 font-medium">{{ __('front.profiles.detail_page.languages') }}</span>
-                            <span class="text-gray-900 text-right">{{ $profile->languages ?? 'Česky, Rusky, Anglicky' }}</span>
-                        </div>
-                    </div>
+            <div class="vip-profile-meta-location">
+                <img src="{{ asset('images/icons/location.svg') }}" alt="" aria-hidden="true">
+                <span>{{ $profile->city ?? 'Jihomoravský kraj' }}</span>
+            </div>
 
-                    <!-- Action Buttons -->
-                    <div class="space-y-3 pt-4">
-                        <!-- Call Buttons -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <button class="{{ $profile->incall ? 'btn-light-green' : 'btn-transparent' }} flex items-center justify-center gap-2">
-                                <span class="w-7 h-7 {{ $profile->incall ? 'bg-green-600' : 'bg-red-600' }} rounded-full flex items-center justify-center">
-                                    @if($profile->incall)
-                                        <svg class="w-4 h-4 text-white fill-current translate-y-px" viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M16.707 5.293l-8 8-4-4" />
-                                        </svg>
-                                    @else
-                                        <svg class="w-4 h-4 text-white fill-current" viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M4.293 4.293l11.414 11.414M15.707 4.293L4.293 15.707" />
-                                        </svg>
-                                    @endif
-                                </span>
-                                {{ __('front.profiles.detail_page.incall') }}
-                            </button>
-                            <button class="{{ $profile->outcall ? 'btn-light-green' : 'btn-transparent' }} flex items-center justify-center gap-2">
-                                <span class="w-7 h-7 {{ $profile->outcall ? 'bg-green-600' : 'bg-red-600' }} rounded-full flex items-center justify-center">
-                                    @if($profile->outcall)
-                                        <svg class="w-4 h-4 text-white fill-current translate-y-px" viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M16.707 5.293l-8 8-4-4" />
-                                        </svg>
-                                    @else
-                                        <svg class="w-4 h-4 text-white fill-current" viewBox="0 0 20 20">
-                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M4.293 4.293l11.414 11.414M15.707 4.293L4.293 15.707" />
-                                        </svg>
-                                    @endif
-                                </span>
-                                {{ __('front.profiles.detail_page.outcall') }}
-                            </button>
-                        </div>
-
-                        <!-- Send Message Button -->
-                        @auth
-                            @if($profile->user_id && $profile->user_id !== Auth::id())
-                                <a href="{{ route('messages.show', $profile->user) }}" class="btn-primary w-full flex items-center justify-center gap-2">
-                                    {{ __('front.profiles.detail_page.send_message') }}
-                                    <x-icons name="message" class="w-5 h-5" />
-                                </a>
-                            @else
-                                <button class="btn-primary w-full opacity-50 cursor-not-allowed" disabled>
-                                    {{ __('front.profiles.detail_page.send_message') }}
-                                </button>
-                            @endif
-                        @else
-                            <button onclick="alert('{{ __('Please login to send messages') }}')" class="btn-primary w-full">
-                                {{ __('front.profiles.detail_page.send_message') }}
-                            </button>
-                        @endauth
-
-                        <!-- Favorite Button - Only for logged in male users -->
-                        @auth
-                            @if(Auth::user()->isMale())
-                                @livewire('favorite-button', ['profile' => $profile])
-                            @endif
-                        @endauth
-
-                        <!-- Contact Info -->
-                        @if($profile->contacts && count($profile->contacts) > 0)
-                        <div class="flex flex-wrap items-center gap-3 pt-2">
-                            @foreach($profile->contacts as $contact)
-                                @if($contact['type'] === 'whatsapp')
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $contact['value']) }}" 
-                                       target="_blank"
-                                       class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors"
-                                       title="WhatsApp: {{ $contact['value'] }}">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-                                        </svg>
-                                    </a>
-                                @elseif($contact['type'] === 'telegram')
-                                    <a href="https://t.me/{{ ltrim($contact['value'], '@') }}" 
-                                       target="_blank"
-                                       class="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
-                                       title="Telegram: {{ $contact['value'] }}">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-                                        </svg>
-                                    </a>
-                                @elseif($contact['type'] === 'phone')
-                                    <a href="tel:{{ $contact['value'] }}" 
-                                       class="flex items-center gap-2 text-gray-700 font-medium hover:text-primary transition-colors"
-                                       title="{{ __('front.profiles.detail_page.call') }}">
-                                        <span class="bg-gray-200 text-gray-700 p-3 rounded-full">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                            </svg>
-                                        </span>
-                                        <span>{{ $contact['value'] }}</span>
-                                    </a>
-                                @endif
-                            @endforeach
-                        </div>
-                        @endif
-                    </div>
+            <div class="vip-profile-meta-table">
+                <div class="vip-profile-meta-row">
+                    <span class="vip-profile-meta-label">Věk</span>
+                    <span class="vip-profile-meta-value">{{ $profile->age ?? '19' }} let</span>
+                </div>
+                <div class="vip-profile-meta-row">
+                    <span class="vip-profile-meta-label">Váha</span>
+                    <span class="vip-profile-meta-value">
+                        {{ ($profile->weight ?? '57') . ' kg' . ($weightLbs ? ' / ' . $weightLbs . ' lbs' : '') }}
+                    </span>
+                </div>
+                <div class="vip-profile-meta-row">
+                    <span class="vip-profile-meta-label">Výška</span>
+                    <span class="vip-profile-meta-value">
+                        {{ ($profile->height ?? '168') . ' cm' . ($heightFeet ? ' / ' . $heightFeet : '') }}
+                    </span>
+                </div>
+                <div class="vip-profile-meta-row">
+                    <span class="vip-profile-meta-label">Prsa</span>
+                    <span class="vip-profile-meta-value">{{ $profile->bust_size ?? 'C' }}</span>
+                </div>
+                <div class="vip-profile-meta-row">
+                    <span class="vip-profile-meta-label">Jazyky</span>
+                    <span class="vip-profile-meta-value">{{ $languages }}</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Right Side - Photo Gallery and Content -->
-        <div class="lg:col-span-2 order-1 lg:order-2">
-            <div class="py-4 md:p-6">
-                <!-- Photo Gallery -->
-                @if($profile->getAllImages()->count() > 0)
-                <div class="mb-6">
-                    @if($profile->hasMultipleImages())
-                    <!-- Swiper gallery for main images -->
-                    <div class="relative bg-gradient-to-br ">
-                        <div class="swiper profile-detail-swiper w-full h-96 rounded-xl">
+            <div class="vip-profile-flags">
+                <div class="vip-profile-flag vip-profile-flag--incall">
+                    <span class="vip-profile-flag-status">
+                        <img src="{{ asset('images/icons/CircleCheck.svg') }}" alt="" aria-hidden="true">
+                    </span>
+                    <span>InCall</span>
+                </div>
+                <div class="vip-profile-flag vip-profile-flag--outcall">
+                    <span class="vip-profile-flag-status">
+                        <img src="{{ asset('images/icons/CircleX.svg') }}" alt="" aria-hidden="true">
+                    </span>
+                    <span>OutCall</span>
+                </div>
+            </div>
+
+            @auth
+                @if($profile->user_id && $profile->user_id !== auth()->id() && $messageRouteAvailable)
+                    <a href="{{ route('messages.show', $profile->user) }}" class="vip-profile-message">
+                        Poslat zprávu
+                        <img src="{{ asset('images/icons/message.svg') }}" alt="" aria-hidden="true" class="h-4 w-4 brightness-0 invert">
+                    </a>
+                @else
+                    <span class="vip-profile-message" style="opacity:.6;pointer-events:none;">Poslat zprávu</span>
+                @endif
+            @else
+                <a href="{{ $registerRouteAvailable ? route('register') : route('profiles.index') }}" class="vip-profile-message">
+                    Poslat zprávu
+                    <img src="{{ asset('images/icons/message.svg') }}" alt="" aria-hidden="true" class="h-4 w-4 brightness-0 invert">
+                </a>
+            @endauth
+
+            <div class="vip-profile-contacts">
+                <a class="vip-profile-contact-circle vip-profile-contact-circle--whatsapp" href="https://wa.me/420737155457" target="_blank" rel="noreferrer" title="WhatsApp">
+                    <img src="{{ asset('images/icons/whatsapp.svg') }}" alt="whatsapp" style="width: 20px; height: 20px;">
+                </a>
+                <a class="vip-profile-contact-circle vip-profile-contact-circle--telegram" href="https://t.me/alexandraprofil" target="_blank" rel="noreferrer" title="Telegram">
+                    <img src="{{ asset('images/icons/telegram.svg') }}" alt="telegram" style="width: 20px; height: 20px;">
+                </a>
+                <a href="tel:+420737155457" class="vip-profile-phone">
+                    <span>+420 737 155 457</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="vip-profile-main">
+            <div class="vip-profile-gallery-card">
+                <div class="vip-profile-favorite">
+                    @auth
+                        @if(auth()->user()->isMale())
+                            @livewire('favorite-button', ['profile' => $profile], key('favorite-'.$profile->id))
+                        @else
+                            <button type="button" class="vip-profile-static-favorite">
+                                <img src="{{ asset('images/icons/heart.svg') }}" alt="" aria-hidden="true">
+                            </button>
+                        @endif
+                    @else
+                        <button type="button" class="vip-profile-static-favorite">
+                            <img src="{{ asset('images/icons/heart.svg') }}" alt="" aria-hidden="true">
+                        </button>
+                    @endauth
+                </div>
+
+                <div class="vip-gallery-desktop">
+                    <button type="button" class="vip-gallery-desktop-card vip-gallery-desktop-left lightbox-trigger" data-index="0">
+                        <img src="{{ asset('images/models/vip1.png') }}" alt="{{ $profile->display_name }}">
+                    </button>
+                    <button type="button" class="vip-gallery-desktop-card vip-gallery-desktop-main lightbox-trigger" data-index="1">
+                        <img src="{{ asset('images/models/vip2.png') }}" alt="{{ $profile->display_name }}">
+                    </button>
+                    <button type="button" class="vip-gallery-desktop-card vip-gallery-desktop-right lightbox-trigger" data-index="2">
+                        <img src="{{ asset('images/models/vip3.png') }}" alt="{{ $profile->display_name }}">
+                    </button>
+                    @if($gallerySlides->count() > 1)
+                        <button type="button" class="vip-gallery-desktop-nav vip-gallery-desktop-prev" id="vip-gallery-desktop-prev" aria-label="Previous slide">&#10094;</button>
+                        <button type="button" class="vip-gallery-desktop-nav vip-gallery-desktop-next" id="vip-gallery-desktop-next" aria-label="Next slide">&#10095;</button>
+                    @endif
+                </div>
+
+                <div class="vip-profile-gallery-mobile">
+                    @if($gallerySlides->count() > 1)
+                        <button type="button" class="vip-gallery-nav vip-gallery-nav--prev" aria-label="Previous image">&#10094;</button>
+                        <button type="button" class="vip-gallery-nav vip-gallery-nav--next" aria-label="Next image">&#10095;</button>
+
+                        <div class="swiper vip-profile-gallery-swiper">
                             <div class="swiper-wrapper">
-                                @foreach($profile->getAllImages() as $index => $image)
-                                <div class="swiper-slide">
-                                    <img src="{{ $image->getUrl() }}" alt="{{ $profile->display_name }}"
-                                        class="w-full h-full object-cover cursor-pointer lightbox-trigger"
-                                        data-index="{{ $index }}">
-                                </div>
+                                @foreach($gallerySlides as $index => $imageUrl)
+                                    <div class="swiper-slide">
+                                        <button type="button" class="vip-gallery-slide lightbox-trigger" data-index="{{ $index }}">
+                                            <img src="{{ $imageUrl }}" alt="{{ $profile->display_name }}">
+                                        </button>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
-
-                        <!-- Custom Navigation buttons -->
-                        <div class="swiper-button-next-custom absolute top-1/2 -right-3 md:-right-5 transform -translate-y-1/2 z-10 cursor-pointer">
-                            <div class="w-8 h-8 md:w-10 md:h-10 bg-primary text-white rounded-md md:rounded-lg flex items-center justify-center hover:shadow-lg transition-all duration-200 text-sm md:text-base">
-                                ⏵
-                            </div>
-                        </div>
-                        <div class="swiper-button-prev-custom absolute top-1/2 -left-3 md:-left-5 transform -translate-y-1/2 z-10 cursor-pointer">
-                            <div class="w-8 h-8 md:w-10 md:h-10 bg-primary text-white rounded-md md:rounded-lg flex items-center justify-center hover:shadow-lg transition-all duration-200 text-sm md:text-base">
-                                ⏴
-                            </div>
-                        </div>
-
-                    </div>
+                    @elseif($gallerySlides->count() === 1)
+                        <button type="button" class="vip-gallery-slide lightbox-trigger" data-index="0">
+                            <img src="{{ $gallerySlides->first() }}" alt="{{ $profile->display_name }}">
+                        </button>
                     @else
-                    <!-- Single image display if only one image -->
-                    <div class="h-96 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-lg overflow-hidden">
-                        <img src="{{ $profile->getFirstImageUrl() }}" alt="{{ $profile->display_name }}"
-                            class="w-full h-full object-cover cursor-pointer lightbox-trigger"
-                            data-index="0">
-                    </div>
+                        <div class="vip-gallery-slide" style="display:flex;align-items:center;justify-content:center;">
+                            <svg class="h-20 w-20 text-[#d6c7dc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
                     @endif
                 </div>
-                @else
-                <!-- No images placeholder -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="aspect-[3/4] bg-gradient-to-br from-primary-100 to-secondary-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        <svg class="w-16 h-16 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </div>
-                    <div class="aspect-[3/4] bg-gradient-to-br from-primary-100 to-secondary-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        <svg class="w-16 h-16 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                </div>
-                @endif
+            </div>
 
-                <!-- About Section -->
-                <div>
-                    <h2 class="text-xl font-bold text-secondary mb-4">{{ __('front.profiles.detail_page.about_me') }}</h2>
-                    <div class="prose prose-gray max-w-none">
-                        <p class="text-gray-700 leading-relaxed">
-                            {{ $profile->about ?? 'No description available.' }}
-                        </p>
-                    </div>
-                </div>
+            <section class="vip-about-card">
+                <h2 class="vip-section-title">Více o mně</h2>
+                <div class="vip-about-copy">FOTO je original – koukni na můj web 🙂  MUJ INSTAGRAM    @arianka.a_     KDE NAJDEŠ MUJ ONLYFANS? NA INSTAGRAMU 🔥  Vítej můj drahý  ☺️  Já jsem Sára Pocházím z České republiky, 🙂 Jsem jedinečná zkušenost, pokud hledáš jedinečné vzrušující potěšení, dobrodružství, jsem tu pro tvoje potřeby. Jako důvěrná, diskrétní, elegantní dáma, která ráda sdílí potěšení, štěstí, jsem připravená společně vytvorit nezapomenutelné okamžiky. Jsem skutečný mladý poklad. Moje teplo, elegance a vášeň učiní  náš společný čas zvlástním. Miluji setkání s novými lidmi a užívám si kazdou chvíli naplno. Napiš mi na WhatsApp, můj  drahý ! Rychle reaguji a muzeme snadno Uspořádat Schůzku, abychom společně zažily něco opravdu úžasného.  🙂</div>
+            </section>
 
-                <!-- Prices Section -->
-                @if(!empty($profile->local_prices) && is_array($profile->local_prices) && count($profile->local_prices) > 0)
-                <div class="mt-8">
-                    <h2 class="text-2xl font-bold text-secondary mb-4">{{ __('front.profiles.detail_page.my_prices') }}</h2>
-                    
-                    <div class="flex flex-col lg:flex-row gap-8">
-                        <!-- Prices Table -->
-                        <div class="flex-1 overflow-hidden">
-                            <table class="w-full">
-                                <thead>
-                                    <tr>
-                                        <th class="w-1/4 px-1 py-3 text-left text-sm font-semibold text-gray-700">
-                                            <div class="text-center text-gray-700 bg-gray-100 rounded-lg py-3 px-4">
-                                                {{ __('front.profiles.detail_page.time') }}
-                                            </div>
-                                        </th>
-                                        <th class="px-1 py-3 text-center text-sm font-semibold">
-                                            <div class="flex items-center justify-center gap-2 {{ $profile->incall ? 'text-pink-500' : 'text-gray-400' }} bg-gray-100 rounded-lg py-3">
-                                                <span class="w-5 h-5 {{ $profile->incall ? 'bg-green-500' : 'bg-red-500' }} rounded-full flex items-center justify-center text-white">
-                                                    @if($profile->incall)
-                                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M16.707 5.293l-8 8-4-4" />
-                                                        </svg>
-                                                    @else
-                                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M4.293 4.293l11.414 11.414M15.707 4.293L4.293 15.707" />
-                                                        </svg>
-                                                    @endif
-                                                </span>
-                                                {{ __('front.profiles.detail_page.incall') }}
-                                            </div>
-                                        </th>
-                                        <th class="px-1 py-3 text-center text-sm font-semibold">
-                                            <div class="flex items-center justify-center gap-2 {{ $profile->outcall ? 'text-pink-500' : 'text-gray-400' }} bg-gray-100 rounded-lg py-3">
-                                                <span class="w-5 h-5 {{ $profile->outcall ? 'bg-green-500' : 'bg-red-500' }} rounded-full flex items-center justify-center text-white">
-                                                    @if($profile->outcall)
-                                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M16.707 5.293l-8 8-4-4" />
-                                                        </svg>
-                                                    @else
-                                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                                                            <path stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M4.293 4.293l11.414 11.414M15.707 4.293L4.293 15.707" />
-                                                        </svg>
-                                                    @endif
-                                                </span>
-                                                {{ __('front.profiles.detail_page.outcall') }}
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($profile->local_prices as $price)
-                                    <tr class="border-b border-gray-200">
-                                        <td class="px-4 py-4 text-pink-500 font-semibold">
-                                            {{ $price['time_hours'] ?? '' }} h
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-gray-900 font-medium">
-                                            @if(!empty($price['incall_price']) && $profile->incall)
-                                                {{ number_format($price['incall_price'], 0, ',', ' ') }} Kč
-                                            @else
-                                                <span class="text-gray-400">-</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-gray-900 font-medium">
-                                            @if(!empty($price['outcall_price']) && $profile->outcall)
-                                                {{ number_format($price['outcall_price'], 0, ',', ' ') }} Kč
-                                            @else
-                                                <span class="text-gray-400">-</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Profile Video -->
-                        @if($profile->hasVideo())
-                        <div class="lg:w-48 shrink-0">
-                            <div class="relative w-full aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-lg">
-                                <video 
-                                    id="profile-detail-video"
-                                    src="{{ $profile->getVideoUrl() }}" 
-                                    class="w-full h-full object-cover"
-                                    preload="metadata"
-                                    playsinline>
-                                </video>
-                                <!-- Custom Play Button Overlay -->
-                                <button 
-                                    type="button"
-                                    onclick="toggleProfileVideo()"
-                                    id="profile-video-play-btn"
-                                    class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-all duration-200 cursor-pointer">
-                                    <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary-600 hover:scale-110 transition-all duration-200">
-                                        <svg id="play-icon" class="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                        <svg id="pause-icon" class="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                                        </svg>
-                                    </div>
+            @if($profile->hasVideo() || $displayPrices->isNotEmpty() || $displayServices->isNotEmpty())
+                <section class="vip-media-grid">
+                    <div class="vip-video-card-wrap">
+                        <h3 class="vip-video-card-title">Video</h3>
+                        <div class="vip-video-card">
+                            <div class="vip-video-surface">
+                                @if($profile->hasVideo())
+                                    <video id="vip-profile-video" src="{{ $profile->getVideoUrl() }}" preload="metadata" playsinline poster="{{ asset('images/models/vipVideo.png') }}"></video>
+                                @else
+                                    <img src="{{ asset('images/models/vipVideo.png') }}" alt="{{ $profile->display_name }}">
+                                @endif
+                                <button type="button" class="vip-video-play" id="vip-profile-video-toggle" aria-label="Play video">
+                                    <span class="vip-video-play__inner">
+                                        <img id="vip-profile-video-play-icon" src="{{ asset('images/icons/arrowFilled.svg') }}" alt="" class="w-7 h-7" style="filter: brightness(0) invert(1); transform: rotate(180deg);">
+                                    </span>
                                 </button>
                             </div>
-                            <p class="text-center text-sm text-gray-500 mt-2">{{ __('front.profiles.detail_page.intro_video') }}</p>
                         </div>
+                    </div>
+
+                    <div class="vip-pricing-card">
+                        @if($displayPrices->isNotEmpty())
+                            <div class="vip-prices-block">
+                                <h3>Moje ceny</h3>
+                                <table class="vip-pricing-table">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="vip-price-pill">Čas</span></th>
+                                            <th>
+                                                <span class="vip-price-pill">
+                                                    @if($profile->incall || $prices->isEmpty())
+                                                        <img src="{{ asset('images/icons/CircleCheck.svg') }}" alt="" aria-hidden="true" class="w-5 h-5">
+                                                    @else
+                                                        <img src="{{ asset('images/icons/CircleX.svg') }}" alt="" aria-hidden="true" class="w-5 h-5">
+                                                    @endif
+                                                    InCall
+                                                </span>
+                                            </th>
+                                            <th>
+                                                <span class="vip-price-pill">
+                                                    @if($profile->outcall)
+                                                        <img src="{{ asset('images/icons/CircleCheck.svg') }}" alt="" aria-hidden="true" class="w-5 h-5">
+                                                    @else
+                                                        <img src="{{ asset('images/icons/CircleX.svg') }}" alt="" aria-hidden="true" class="w-5 h-5">
+                                                    @endif
+                                                    OutCall
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($displayPrices as $price)
+                                            <tr>
+                                                <td>{{ rtrim(rtrim((string) ($price['time_hours'] ?? ''), '0'), '.') }}h</td>
+                                                <td>
+                                                    @if(!empty($price['incall_price']) && ($profile->incall || $prices->isEmpty()))
+                                                        {{ number_format($price['incall_price'], 0, ',', ' ') }} Kč
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if(!empty($price['outcall_price']) && $profile->outcall)
+                                                        {{ number_format($price['outcall_price'], 0, ',', ' ') }} Kč
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+
+                        @if($displayServices->isNotEmpty())
+                            <div class="vip-services-block" style="margin-top:24px;">
+                                <h3 style="margin-bottom:14px;">Služby</h3>
+                                <div class="vip-services-grid">
+                                    @foreach($displayServices as $serviceName)
+                                        <span class="vip-service-pill">{{ $serviceName }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
                     </div>
-                </div>
-                @elseif($profile->hasVideo())
-                <!-- Only Video, No Prices -->
-                <div class="mt-8">
-                    <h2 class="text-2xl font-bold text-secondary mb-4">{{ __('front.profiles.detail_page.intro_video') }}</h2>
-                    <div class="w-64 mx-auto">
-                        <div class="relative w-full aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-lg">
-                            <video 
-                                id="profile-detail-video"
-                                src="{{ $profile->getVideoUrl() }}" 
-                                class="w-full h-full object-cover"
-                                preload="metadata"
-                                playsinline>
-                            </video>
-                            <!-- Custom Play Button Overlay -->
-                            <button 
-                                type="button"
-                                onclick="toggleProfileVideo()"
-                                id="profile-video-play-btn"
-                                class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-all duration-200 cursor-pointer">
-                                <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary-600 hover:scale-110 transition-all duration-200">
-                                    <svg id="play-icon" class="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8 5v14l11-7z" />
-                                    </svg>
-                                    <svg id="pause-icon" class="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                                    </svg>
-                                </div>
-                            </button>
+                </section>
+            @endif
+        </div>
+    </section>
+
+    <section class="vip-slider-section">
+        <div class="vip-slider-head">
+            <div>
+                <h2 class="vip-section-title" style="margin-bottom:4px;">Nejlépe hodnocené dívky</h2>
+                <div class="vip-slider-kicker">tento měsíc</div>
+            </div>
+            <div class="vip-slider-note">
+                <img src="{{ asset('images/icons/diamond.svg') }}" alt="" aria-hidden="true" class="h-4 w-4">
+                <span>Premium účet vám odemkne hodnocení</span>
+            </div>
+        </div>
+        <div class="vip-rec-slider">
+            <livewire:profile-slider sort-by="rating_this_month" sort-direction="desc" :limit="30" card-variant="vip-detail" :key="'vip-month-'.$profile->id" />
+        </div>
+    </section>
+
+    <section class="vip-slider-section">
+        <div class="vip-slider-head">
+            <div>
+                <h2 class="vip-section-title" style="margin-bottom:4px;">Nejlépe hodnocené dívky</h2>
+                <div class="vip-slider-kicker">za celou dobu</div>
+            </div>
+            <div class="vip-slider-note">
+                <img src="{{ asset('images/icons/diamond.svg') }}" alt="" aria-hidden="true" class="h-4 w-4">
+                <span>Premium účet vám odemkne hodnocení</span>
+            </div>
+        </div>
+        <div class="vip-rec-slider">
+            <livewire:profile-slider sort-by="rating_this_month" sort-direction="desc" :limit="30" card-variant="vip-detail" :key="'vip-all-'.$profile->id" />
+        </div>
+    </section>
+
+    <section class="vip-video-section">
+        <div class="vip-video-heading">
+            <div class="vip-video-heading-line1">Nový svět na dosah...</div>
+            <div class="vip-video-heading-line2">Staň se členem ZašukejSi.cz</div>
+        </div>
+        <div class="vip-video-container">
+            <div class="vip-video-play-btn">
+                <img src="{{ asset('images/icons/arrowFilled.svg') }}" alt="" aria-hidden="true" style="width:50px;height:50px;transform:rotate(180deg);filter:brightness(0) invert(1);">
+            </div>
+        </div>
+        <div class="vip-video-badges">
+            <div class="vip-video-badge">
+                <img src="{{ asset('images/icons/Banana.svg') }}" alt="" aria-hidden="true" style="width:40px;height:40px;">
+                <span style="font-family:'Poppins', sans-serif;font-weight:400;font-size:13px;color:#505050;text-align:left;line-height:1.3;">Swingers akce pro členy</span>
+            </div>
+            <div class="vip-video-badge">
+                <img src="{{ asset('images/icons/ThumbsUp.svg') }}" alt="" aria-hidden="true" style="width:40px;height:40px;">
+                <span style="font-family:'Poppins', sans-serif;font-weight:400;font-size:13px;color:#505050;text-align:left;line-height:1.3;">Hodnocení dívek od komunity</span>
+            </div>
+            <div class="vip-video-badge">
+                <img src="{{ asset('images/icons/icecreamPink.svg') }}" alt="" aria-hidden="true" style="width:40px;height:40px;">
+                <span style="font-family:'Poppins', sans-serif;font-weight:400;font-size:13px;color:#505050;text-align:left;line-height:1.3;">Databáze dívek na jednom místě</span>
+            </div>
+        </div>
+        <button class="vip-video-register-btn">Registrovat se ZDARMA</button>
+    </section>
+</div>
+
+@if(true)
+    <div class="vip-lightbox" id="vip-lightbox">
+        <div class="vip-lightbox-stage">
+            <div class="vip-lightbox-main">
+                <button type="button" class="vip-lightbox-close" id="vip-lightbox-close" aria-label="Close">&times;</button>
+                <button type="button" class="vip-lightbox-prev" id="vip-lightbox-prev" aria-label="Previous">&#10094;</button>
+                <button type="button" class="vip-lightbox-next" id="vip-lightbox-next" aria-label="Next">&#10095;</button>
+
+                <div class="swiper vip-lightbox-swiper">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="{{ asset('images/models/vip1.png') }}" alt="{{ $profile->display_name }}">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="{{ asset('images/models/vip2.png') }}" alt="{{ $profile->display_name }}">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="{{ asset('images/models/vip3.png') }}" alt="{{ $profile->display_name }}">
                         </div>
                     </div>
                 </div>
-                @endif
-
-
-                <!-- Services Section -->
-                @if($profile->services && $profile->services->count() > 0)
-                <div class="mt-8">
-                    <h2 class="text-2xl font-bold text-secondary mb-4">{{ __('front.profiles.detail_page.services') }}</h2>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($profile->services as $service)
-                        <span class="px-4 py-2 border-2 border-gray-200 rounded-full text-sm text-gray-700">
-                            {{ $service->name }}
-                        </span>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
             </div>
-        </div>
 
-    </div>
-    
-    {{-- Best rated profiles this month --}}
-    <div class="mt-12 mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-secondary">
-                {{ __('Nejlépe hodnocené dívky') }}
-            </h2>
-            <h3 class="text-2xl md:text-4xl font-bold text-primary">
-                {{ __('tento měsíc') }}
-            </h3>
-        </div>
-        <div class="flex items-center justify-center gap-2 text-gold-500 -translate-y-1.5">
-            <x-icons name="diamond" class="w-5 h-5 translate-y-px" />
-            <span class="text-sm md:text-base font-medium text-primary underline">{{ __('Premium účet vám odemkne hodnocení') }}</span>
-        </div>
-    </div>
-    
-    <livewire:profile-slider 
-        sort-by="rating_this_month"
-        sort-direction="desc"
-        :limit="10" 
-    />
-
-
-    {{-- Best rated profiles all time --}}
-    <div class="mt-12 mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-secondary">
-                {{ __('Nejlépe hodnocené dívky') }}
-            </h2>
-            <h3 class="text-2xl md:text-4xl font-bold text-primary">
-                {{ __('celkově') }}
-            </h3>
-        </div>
-        <div class="flex items-center justify-center gap-2 text-gold-500 -translate-y-1.5">
-            <x-icons name="diamond" class="w-5 h-5 translate-y-px" />
-            <span class="text-sm md:text-base font-medium text-primary underline">{{ __('Premium účet vám odemkne hodnocení') }}</span>
-        </div>
-    </div>
-    
-    <livewire:profile-slider 
-        sort-by="rating"
-        sort-direction="desc"
-        :limit="10" 
-    />
-
-</div>
-
-<!-- Lightbox Modal -->
-@if($profile->getAllImages()->count() > 0)
-<div id="lightbox-modal" class="fixed inset-0 z-50 backdrop-blur-lg hidden items-center justify-center" style="background-color: rgba(255, 255, 255, 0.7);">
-    <div class="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
-        <!-- Close Button -->
-        <button id="lightbox-close" class="absolute top-3 right-3 sm:top-6 sm:right-6 md:top-12 md:right-12 z-60 cursor-pointer">
-            <div class="w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-200">
-                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </div>
-        </button>
-
-
-        <!-- Lightbox Swiper -->
-        <div class="swiper lightbox-swiper w-full h-full flex items-center justify-center">
-            <div class="swiper-wrapper">
-                @foreach($profile->getAllImages() as $index => $image)
-                <div class="swiper-slide !flex items-center justify-center w-full h-full">
-                    <img src="{{ $image->getUrl() }}"
-                        alt="{{ $profile->display_name }}"
-                        class="max-w-[95vw] max-h-[85vh] sm:max-w-[90vw] sm:max-h-[90vh] rounded-lg sm:rounded-2xl object-contain mx-auto"
-                        data-index="{{ $index }}">
-                </div>
-                @endforeach
-            </div>
-        </div>
-
-        <!-- Navigation Buttons -->
-        <div class="lightbox-button-prev absolute left-0.5 sm:left-6 md:left-16 top-1/2 transform -translate-y-1/2 z-60 cursor-pointer">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-primary text-white rounded-md sm:rounded-lg flex items-center justify-center hover:shadow-lg transition-all duration-200 text-sm sm:text-base">
-                ⏴
-            </div>
-        </div>
-
-        <div class="lightbox-button-next absolute right-0.5 sm:right-6 md:right-16 top-1/2 transform -translate-y-1/2 z-60 cursor-pointer">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-primary text-white rounded-md sm:rounded-lg flex items-center justify-center hover:shadow-lg transition-all duration-200 text-sm sm:text-base">
-                ⏵
-            </div>
-        </div>
-
-        <!-- Thumbnail Navigation -->
-        <div class="absolute bottom-3 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-60 w-full max-w-xs sm:max-w-md px-2 sm:px-4">
-            <div class="swiper lightbox-thumbs-swiper">
-                <div class="swiper-wrapper">
-                    @foreach($profile->getAllImages() as $index => $image)
-                    <div class="swiper-slide">
-                        <div class="lightbox-thumb w-12 h-14 sm:w-16 sm:h-18 rounded-md sm:rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-white transition-all duration-200" data-index="{{ $index }}">
-                            <img src="{{ $image->getUrl() }}"
-                                alt="{{ $profile->display_name }}"
-                                class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+            <div class="vip-lightbox-thumbnails">
+                <button type="button" class="vip-lightbox-thumbnail active" data-slide="0" aria-label="Slide 1">
+                    <img src="{{ asset('images/models/vip1.png') }}" alt="{{ $profile->display_name }}">
+                </button>
+                <button type="button" class="vip-lightbox-thumbnail" data-slide="1" aria-label="Slide 2">
+                    <img src="{{ asset('images/models/vip2.png') }}" alt="{{ $profile->display_name }}">
+                </button>
+                <button type="button" class="vip-lightbox-thumbnail" data-slide="2" aria-label="Slide 3">
+                    <img src="{{ asset('images/models/vip3.png') }}" alt="{{ $profile->display_name }}">
+                </button>
             </div>
         </div>
     </div>
-</div>
 @endif
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if Swiper is available
-        if (typeof Swiper === 'undefined') {
-            console.error('Swiper is not loaded. Make sure to build assets with npm run build');
-            return;
-        }
-
-        // Initialize Swiper for profile detail
-        const profileDetailSwiper = new Swiper('.profile-detail-swiper', {
-            loop: true,
-            slidesPerView: 3,
-            spaceBetween: 16,
-            centeredSlides: true,
-
-            // Responsive breakpoints
-            breakpoints: {
-                320: {
-                    slidesPerView: 1,
-                    spaceBetween: 10
-                },
-                768: {
-                    slidesPerView: 2,
-                    spaceBetween: 12
-                },
-                1024: {
-                    slidesPerView: 3,
-                    spaceBetween: 16
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle static favorite button clicks
+        document.querySelectorAll('.vip-profile-static-favorite').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const img = this.querySelector('img');
+                if (img) {
+                    // Add animation class
+                    img.classList.add('heart-animate');
+                    
+                    // Toggle between heart.svg and heartFilled.svg
+                    if (img.src.includes('heart.svg') && !img.src.includes('heartFilled')) {
+                        img.src = "{{ asset('images/icons/heartFilled.svg') }}";
+                    } else {
+                        img.src = "{{ asset('images/icons/heart.svg') }}";
+                    }
+                    
+                    // Remove animation class after animation completes
+                    setTimeout(() => {
+                        img.classList.remove('heart-animate');
+                    }, 400);
                 }
-            },
-
-            navigation: {
-                nextEl: '.swiper-button-next-custom',
-                prevEl: '.swiper-button-prev-custom',
-            },
-
-            preloadImages: true,
-            autoplay: {
-                delay: 4000,
-                disableOnInteraction: false,
-            },
+            });
         });
 
-        // Initialize Lightbox Swiper
-        let lightboxSwiper = null;
-        let lightboxThumbsSwiper = null;
-        const lightboxModal = document.getElementById('lightbox-modal');
-        const lightboxClose = document.getElementById('lightbox-close');
+        if (typeof Swiper !== 'undefined') {
+            const galleryEl = document.querySelector('.vip-profile-gallery-swiper');
 
-        function initializeLightboxSwiper() {
-            if (!lightboxSwiper && lightboxModal) {
-                // Initialize thumbnails swiper first
-                lightboxThumbsSwiper = new Swiper('.lightbox-thumbs-swiper', {
-                    spaceBetween: 0,
-                    slidesPerView: 5,
-                    centeredSlides: true,
-                    watchSlidesProgress: true,
-                    slideToClickedSlide: true,
+            let gallerySwiper = null;
+
+            if (galleryEl) {
+                gallerySwiper = new Swiper(galleryEl, {
+                    loop: {{ $gallerySlides->count() > 3 ? 'true' : 'false' }},
+                    slidesPerView: window.innerWidth <= 425 ? 1 : 1.2,
+                    spaceBetween: window.innerWidth <= 425 ? 0 : 14,
+                    centeredSlides: window.innerWidth > 425,
+                    navigation: {
+                        nextEl: '.vip-gallery-nav--next',
+                        prevEl: '.vip-gallery-nav--prev',
+                    },
+                    breakpoints: {
+                        426: {
+                            slidesPerView: 1.2,
+                            spaceBetween: 14,
+                            centeredSlides: true,
+                        },
+                        768: {
+                            slidesPerView: 2.1,
+                            spaceBetween: 18,
+                        },
+                        1100: {
+                            slidesPerView: 2.75,
+                            spaceBetween: 20,
+                        }
+                    }
                 });
+            }
 
-                // Initialize main lightbox swiper
-                lightboxSwiper = new Swiper('.lightbox-swiper', {
+            const lightboxEl = document.querySelector('.vip-lightbox-swiper');
+            let lightboxSwiper = null;
+            const lightbox = document.getElementById('vip-lightbox');
+            const closeLightbox = document.getElementById('vip-lightbox-close');
+
+            if (lightboxEl && lightbox) {
+                lightboxSwiper = new Swiper(lightboxEl, {
                     loop: true,
                     slidesPerView: 1,
-                    spaceBetween: 0,
-                    centeredSlides: true,
-                    initialSlide: 0, // Always start at first slide, we'll manually navigate
-                    
                     navigation: {
-                        nextEl: '.lightbox-button-next',
-                        prevEl: '.lightbox-button-prev',
+                        nextEl: '#vip-lightbox-next',
+                        prevEl: '#vip-lightbox-prev',
                     },
-
                     keyboard: {
                         enabled: true,
                     },
+                });
 
-                    thumbs: {
-                        swiper: lightboxThumbsSwiper,
-                    },
-
-                    on: {
-                        slideChange: function() {
-                            console.log('Slide changed to realIndex:', this.realIndex); // Debug log
-                            updateThumbActiveState(this.realIndex);
-                        },
-                        init: function() {
-                            console.log('Swiper initialized with realIndex:', this.realIndex); // Debug log
-                            updateThumbActiveState(this.realIndex || 0);
-                        }
-                    }
-                });                // Add click handlers for thumbnails
-                document.querySelectorAll('.lightbox-thumb').forEach(function(thumb, index) {
-                    thumb.addEventListener('click', function() {
-                        const targetIndex = parseInt(this.dataset.index);
-                        if (lightboxSwiper) {
-                            lightboxSwiper.slideTo(targetIndex + 1, 300); // +1 for loop mode
-                        }
+                document.querySelectorAll('.lightbox-trigger').forEach(function (trigger) {
+                    trigger.addEventListener('click', function () {
+                        const index = Number(this.dataset.index || 0);
+                        lightbox.classList.add('is-open');
+                        document.body.style.overflow = 'hidden';
+                        lightboxSwiper.slideToLoop(index, 0);
                     });
+                });
+
+                function hideLightbox() {
+                    lightbox.classList.remove('is-open');
+                    document.body.style.overflow = '';
+                }
+
+                if (closeLightbox) {
+                    closeLightbox.addEventListener('click', hideLightbox);
+                }
+
+                lightbox.addEventListener('click', function (event) {
+                    if (event.target === lightbox) {
+                        hideLightbox();
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+                        hideLightbox();
+                    }
+                });
+
+                // Thumbnail navigation
+                document.querySelectorAll('.vip-lightbox-thumbnail').forEach(function (thumb) {
+                    thumb.addEventListener('click', function () {
+                        const slideIndex = Number(this.dataset.slide);
+                        lightboxSwiper.slideTo(slideIndex, 0);
+                        
+                        // Update active state
+                        document.querySelectorAll('.vip-lightbox-thumbnail').forEach(t => t.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+
+                // Update thumbnail active state on slide change
+                lightboxSwiper.on('slideChange', function () {
+                    const currentIndex = lightboxSwiper.activeIndex;
+                    document.querySelectorAll('.vip-lightbox-thumbnail').forEach((thumb, index) => {
+                        thumb.classList.toggle('active', index === currentIndex);
+                    });
+                });
+            }
+
+            const desktopNext = document.getElementById('vip-gallery-desktop-next');
+
+            if (desktopNext) {
+                desktopNext.addEventListener('click', function () {
+                    if (lightbox && lightboxSwiper) {
+                        lightbox.classList.add('is-open');
+                        document.body.style.overflow = 'hidden';
+                        lightboxSwiper.slideToLoop(1, 0);
+                        return;
+                    }
+
+                    if (gallerySwiper) {
+                        gallerySwiper.slideNext();
+                    }
                 });
             }
         }
 
-        function updateThumbActiveState(activeIndex) {
-            document.querySelectorAll('.lightbox-thumb').forEach(function(thumb, index) {
-                if (index === activeIndex) {
-                    thumb.classList.add('border-white', 'opacity-100');
-                    thumb.classList.remove('border-transparent', 'opacity-60');
+        const video = document.getElementById('vip-profile-video');
+        const toggle = document.getElementById('vip-profile-video-toggle');
+        const playIcon = document.getElementById('vip-profile-video-play-icon');
+        const pauseIcon = document.getElementById('vip-profile-video-pause-icon');
+
+        if (video && toggle) {
+            const syncIcons = function () {
+                const paused = video.paused;
+                if (playIcon) {
+                    playIcon.classList.toggle('hidden', !paused);
+                }
+                if (pauseIcon) {
+                    pauseIcon.classList.toggle('hidden', paused);
+                }
+                toggle.style.background = paused
+                    ? 'linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.24) 100%)'
+                    : 'transparent';
+            };
+
+            toggle.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (video.paused) {
+                    video.play();
                 } else {
-                    thumb.classList.add('border-transparent', 'opacity-60');
-                    thumb.classList.remove('border-white', 'opacity-100');
+                    video.pause();
                 }
-            });
-        }
-
-        // Open lightbox when image is clicked
-        document.querySelectorAll('.lightbox-trigger').forEach(function(trigger) {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Get the clicked image index
-                const targetIndex = parseInt(this.dataset.index);
-                console.log('Clicked image index:', targetIndex); // Debug log
-                
-                if (lightboxModal) {
-                    // Show modal first
-                    lightboxModal.classList.remove('hidden');
-                    lightboxModal.classList.add('flex');
-                    document.body.style.overflow = 'hidden';
-                    
-                    // Initialize swiper after modal is shown with longer delay
-                    setTimeout(() => {
-                        initializeLightboxSwiper();
-                        
-                        if (lightboxSwiper) {
-                            // Force update and then go to target slide
-                            lightboxSwiper.update();
-                            
-                            // For loop mode, we need to account for cloned slides
-                            const slideToIndex = targetIndex + 1; // +1 for loop mode
-                            console.log('Going to slide:', slideToIndex); // Debug log
-                            
-                            lightboxSwiper.slideTo(slideToIndex, 0);
-                            
-                            // Update thumbnail active state
-                            updateThumbActiveState(targetIndex);
-                        }
-                    }, 100); // Increased delay to ensure proper initialization
-                }
-            });
-        });        // Close lightbox function
-        function closeLightbox() {
-            if (lightboxModal) {
-                lightboxModal.classList.add('hidden');
-                lightboxModal.classList.remove('flex');
-                document.body.style.overflow = '';
-
-                // Destroy swiper instances to prevent memory leaks
-                if (lightboxSwiper) {
-                    lightboxSwiper.destroy(true, true);
-                    lightboxSwiper = null;
-                }
-                if (lightboxThumbsSwiper) {
-                    lightboxThumbsSwiper.destroy(true, true);
-                    lightboxThumbsSwiper = null;
-                }
-            }
-        }
-
-        // Close lightbox on close button click
-        if (lightboxClose) {
-            lightboxClose.addEventListener('click', closeLightbox);
-        }
-
-        // Close lightbox on background click
-        if (lightboxModal) {
-            lightboxModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeLightbox();
-                }
-            });
-        }
-
-        // Close lightbox on ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && lightboxModal && !lightboxModal.classList.contains('hidden')) {
-                closeLightbox();
-            }
-        });
-
-        // Add click event for thumbnails to change the main swiper slide
-        document.querySelectorAll('.image-thumbnail').forEach(function(thumbnail) {
-            thumbnail.addEventListener('click', function() {
-                const slideIndex = parseInt(this.dataset.index);
-                if (profileDetailSwiper) {
-                    profileDetailSwiper.slideTo(slideIndex + 1); // +1 because of loop mode
-                }
-            });
-        });
-    });
-
-    // Profile Video Playback Control
-    function toggleProfileVideo() {
-        const video = document.getElementById('profile-detail-video');
-        const playBtn = document.getElementById('profile-video-play-btn');
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
-        
-        if (!video) return;
-        
-        if (video.paused) {
-            video.play();
-            if (playBtn) playBtn.style.opacity = '0';
-            if (playIcon) playIcon.classList.add('hidden');
-            if (pauseIcon) pauseIcon.classList.remove('hidden');
-        } else {
-            video.pause();
-            if (playBtn) playBtn.style.opacity = '1';
-            if (playIcon) playIcon.classList.remove('hidden');
-            if (pauseIcon) pauseIcon.classList.add('hidden');
-        }
-    }
-
-    // Video event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        const video = document.getElementById('profile-detail-video');
-        const playBtn = document.getElementById('profile-video-play-btn');
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
-        
-        if (video) {
-            video.addEventListener('ended', function() {
-                if (playBtn) playBtn.style.opacity = '1';
-                if (playIcon) playIcon.classList.remove('hidden');
-                if (pauseIcon) pauseIcon.classList.add('hidden');
-            });
-            
-            video.addEventListener('pause', function() {
-                if (playBtn) playBtn.style.opacity = '1';
-                if (playIcon) playIcon.classList.remove('hidden');
-                if (pauseIcon) pauseIcon.classList.add('hidden');
+                syncIcons();
             });
 
-            video.addEventListener('play', function() {
-                if (playBtn) playBtn.style.opacity = '0';
-                if (playIcon) playIcon.classList.add('hidden');
-                if (pauseIcon) pauseIcon.classList.remove('hidden');
-            });
-
-            // Click on video to toggle playback
-            video.addEventListener('click', function(e) {
-                e.preventDefault();
-                toggleProfileVideo();
+            video.addEventListener('play', syncIcons);
+            video.addEventListener('pause', syncIcons);
+            video.addEventListener('ended', syncIcons);
+            syncIcons();
+        } else if (toggle) {
+            toggle.addEventListener('click', function (event) {
+                event.preventDefault();
             });
         }
     });

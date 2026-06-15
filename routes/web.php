@@ -190,6 +190,11 @@ Route::get('/test-components', function () {
     return view('test-components');
 })->name('test.components');
 
+// Preview route for the dashboard (added for testing)
+Route::get('/preview/dashboard', function () {
+    return view('account.dashboard_preview');
+})->name('preview.dashboard');
+
 // Dynamic Pages Route (must be last to avoid conflicts)
 Route::get('/{slug}', function ($slug) {
     $page = \App\Models\Page::where('slug', $slug)
