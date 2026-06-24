@@ -6,87 +6,7 @@
     <title>Preview - Dashboard</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        @media (max-width: 425px) {
-            .warning-banner {
-                width: 309px !important;
-                height: 110px !important;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            }
-            .warning-text-container {
-                width: 223px !important;
-                height: 83px !important;
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                text-align: left;
-            }
-            .warning-text-container span {
-                white-space: normal !important;
-                line-height: 1.2;
-                text-align: left;
-            }
-            .warning-banner-icon {
-                position: absolute;
-                top: 8px;
-                left: 8px;
-            }
-            .warning-banner-close {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-            }
-            /* Stats Cards Mobile */
-            .stats-container {
-                flex-direction: column !important;
-                align-items: center !important;
-                width: 100% !important;
-                gap: 30px !important;
-            }
-            .stats-card {
-                width: 313px !important;
-                height: 100px !important;
-            }
-            /* Field Containers Mobile */
-            .field-container-mobile {
-                width: 310px !important;
-                margin: 0 auto !important;
-            }
-            /* Input Forms Mobile */
-            .form-input-mobile {
-                width: 308px !important;
-            }
-            /* Mobile Divider */
-            .divider-mobile {
-                width: 313px !important;
-            }
-            /* Content Container Mobile */
-            .content-container-mobile {
-                width: 313px !important;
-                margin: 0 auto !important;
-            }
-            /* Sidebar Mobile Hide */
-            .sidebar-desktop {
-                display: none !important;
-            }
-            /* Status Info Mobile */
-            .status-container-mobile {
-                display: flex !important;
-                justify-content: space-between;
-                width: 312px !important;
-            }
-            /* Hide Desktop Status Info */
-            .status-container-desktop {
-                display: none !important;
-            }
-            /* Reordering Mobile */
-            .mobile-order-1 { order: 1; }
-            .mobile-order-2 { order: 2; }
-            .mobile-order-3 { order: 3; }
-        }
-    </style>
+
 </head>
 <body class="bg-white">
 
@@ -105,13 +25,31 @@
     </div>
     
     <!-- Stats Cards & Basic Info -->
-    <div class="mb-8 flex flex-col md:flex-row">
-        <!-- Title & Basic Info -->
-        <div class="mobile-order-1 flex flex-col items-center">
-            <h2 class="font-bold text-[36px] text-[#5C2D62] mb-8" style="font-family: 'Poppins', sans-serif;">Základní údaje</h2>
-            <div class="divider-mobile w-[843px] h-[1px] bg-[#E6E6E6] my-8"></div>
+    <div class="mb-[88px] stats-container flex flex-nowrap justify-end gap-4 mx-auto w-[1134px]">
+        <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
+            <img src="{{ asset('images/icons/eye.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Eye">
+            <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">10 458</span>
+            <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Celkové zobrazení profilu</span>
+        </div>
+
+        <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
+            <img src="{{ asset('images/icons/thumbsup.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Thumbsup">
+            <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">4.78/5</span>
+            <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Moje hodnocení</span>
+        </div>
+        
+        <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
+            <img src="{{ asset('images/icons/MessageCircleMore.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Message">
+            <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">12</span>
+            <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">moje recenze</span>
+        </div>
+    </div>
+    <!-- Title & Basic Info -->
+    <div class="flex flex-col items-end w-[1134px] mx-auto">
+        <div class="w-[843px] flex items-center justify-center relative">
+            <h2 class="font-bold text-[36px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">Základní údaje</h2>
             
-            <div class="status-container-mobile hidden mb-8">
+            <div class="absolute right-0 flex flex-col items-end gap-0.5">
                 <div class="flex items-center gap-1.5">
                     <div class="w-[14px] h-[14px] rounded-full bg-[#00B80F]"></div>
                     <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Nyní si online</span>
@@ -119,39 +57,12 @@
                 <span class="text-[13px] text-[#505050] underline" style="font-family: 'Poppins', sans-serif; color: #DD3888;">nastavení</span>
             </div>
         </div>
-
-        <!-- Stats Cards Container -->
-        <div class="mobile-order-2 stats-container flex flex-wrap justify-end gap-4 mb-8 w-[1134px] mx-auto">
-            <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
-                <img src="{{ asset('images/icons/eye.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Eye">
-                <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">10 458</span>
-                <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Celkové zobrazení profilu</span>
-            </div>
-
-            <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
-                <img src="{{ asset('images/icons/thumbsup.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Thumbsup">
-                <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">4.78/5</span>
-                <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Moje hodnocení</span>
-            </div>
-            
-            <div class="stats-card w-[272px] h-[100px] rounded-[8px] flex flex-col items-center justify-center bg-gradient-to-t from-[#FFFFFF] to-[#E6E6E6]">
-                <img src="{{ asset('images/icons/MessageCircleMore.svg') }}" class="w-[28px] h-[28px] mb-1" alt="Message">
-                <span class="font-bold text-[24px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">12</span>
-                <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">moje recenze</span>
-            </div>
-        </div>
-        <div class="status-container-desktop flex flex-col items-end">
-            <div class="flex items-center gap-1.5">
-                <div class="w-[14px] h-[14px] rounded-full bg-[#00B80F]"></div>
-                <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Nyní si online</span>
-            </div>
-            <span class="text-[13px] text-[#505050] underline" style="font-family: 'Poppins', sans-serif; color: #DD3888;">nastavení</span>
-        </div>
+        <div class="w-[843px] h-[1px] bg-[#E6E6E6] mt-8"></div>
     </div>
 
-    <div class="flex justify-center mb-8 gap-x-4">
-        <div class="sidebar-desktop flex flex-col w-[211px] gap-[10px]">
-            <div class="flex flex-col w-[211px] h-[290px] gap-[10px] mt-[30px]">
+    <div class="flex justify-end mb-8 gap-x-12">
+        <div class="flex flex-col w-[211px] gap-[10px]">
+            <div class="flex flex-col w-[211px] h-[290px] gap-[10px]">
                 <div class="w-[210px] h-[50px] rounded-[8px] border border-[#E6E6E6] flex items-center px-4 gap-3 font-medium text-[14px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">
                     <img src="{{ asset('images/icons/User.svg') }}" class="w-[20px] h-[20px]" alt="User" style="filter: invert(36%) sepia(87%) saturate(2222%) hue-rotate(309deg) brightness(90%) contrast(92%);">
                     základní udaje
@@ -177,33 +88,138 @@
                 <img src="{{ asset('images/dvert2.png') }}?v={{ time() }}" class="w-full h-full object-cover rounded-[8px]" alt="Advertisement">
             </div>
         </div>
-        <div class="content-container-mobile w-[843px] flex flex-col items-center">
-            <div class="divider-mobile w-[843px] h-[1px] bg-[#E6E6E6] my-8"></div>
+        <div class="w-[843px] flex flex-col items-center mt-12">
             
-            <!-- Moje údaje -->
-            <div class="moje-udaje-mobile flex flex-col w-[400px]">
-                <h3 class="font-bold text-[24px] text-[#5C2D62] mb-8 self-start" style="font-family: 'Poppins', sans-serif;">Moje údaje</h3>
+            <div x-data="{ 
+                zeme: '', 
+                mesto: '', 
+                openZeme: false, 
+                openMesto: false, 
+                countryCodes: {
+                    'Albánie': 'al', 'Andorra': 'ad', 'Arménie': 'am', 'Belgie': 'be', 
+                    'Bělorusko': 'by', 'Bosna a Hercegovina': 'ba', 'Bulharsko': 'bg', 
+                    'Černá Hora': 'me', 'Česká republika': 'cz'
+                },
+                countryData: {
+                    'Albánie': ['Tirana', 'Durrës', 'Vlorë', 'Shkodër', 'Fier'],
+                    'Andorra': ['Andorra la Vella', 'Escaldes-Engordany', 'Sant Julià de Lòria'],
+                    'Arménie': ['Jerevan', 'Gjumri', 'Vanadzor', 'Vagaršapat'],
+                    'Belgie': ['Brusel', 'Antverpy', 'Gent', 'Charleroi', 'Lutych'],
+                    'Bělorusko': ['Minsk', 'Homel', 'Mahiljow', 'Vicebsk', 'Hrodna'],
+                    'Bosna a Hercegovina': ['Sarajevo', 'Banja Luka', 'Tuzla', 'Zenica', 'Mostar', 'Bihać', 'Brčko', 'Doboj', 'Foča', 'Jahorina', 'Konjic', 'Neum', 'Prijedor', 'Šamac'],
+                    'Bulharsko': ['Sofie', 'Plovdiv', 'Varna', 'Burgas', 'Ruse'],
+                    'Černá Hora': ['Podgorica', 'Nikšić', 'Pljevlja', 'Bijelo Polje', 'Bar'],
+                    'Česká republika': ['Praha', 'Brno', 'Ostrava', 'Plzeň', 'Liberec', 'Olomouc', 'České Budějovice', 'Hradec Králové', 'Ústí nad Labem', 'Pardubice']
+                },
+                get cities() { return this.countryData[this.zeme] || []; }
+            }" class="flex flex-col w-[400px] mx-auto">
+                <h3 class="font-bold text-[24px] text-[#5C2D62] mb-8" style="font-family: 'Poppins', sans-serif;">Moje údaje</h3>
                 
-                <div class="field-container-mobile w-[400px] h-[84px] flex flex-col gap-2 items-center">
+                <div class="w-[400px] h-[84px] flex flex-col gap-2 items-center">
                     <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Vaše přezdívka</label>
-                    <input type="text" class="form-input-mobile w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="Příklad přezdívky">
+                    <input type="text" class="w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="Příklad přezdívky">
                 </div>
                 
                 <!-- Email -->
-                <div class="field-container-mobile w-[400px] h-[84px] flex flex-col gap-2 items-center mt-4">
+                <div class="w-[400px] h-[84px] flex flex-col gap-2 items-center mt-4">
                     <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Váš email</label>
-                    <input type="email" class="form-input-mobile w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="priklad@email.cz">
+                    <input type="email" class="w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="priklad@email.cz">
                 </div>
 
-                <!-- Moje tělo -->
-                <h3 class="font-bold text-[24px] text-[#5C2D62] my-8 self-start" style="font-family: 'Poppins', sans-serif;">Moje tělo</h3>
-                <div class="field-container-mobile w-[400px] h-[84px] flex flex-col gap-2 items-center">
-                    <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Věk</label>
-                    <input type="number" class="form-input-mobile w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="25">
+                <!-- Země -->
+                <div class="w-[400px] h-auto flex flex-col gap-2 items-center mt-4">
+                    <div class="flex justify-between w-[400px]">
+                        <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Země</label>
+                        <div x-show="zeme === ''" class="flex items-center gap-1.5">
+                            <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+                            <span class="text-[13px] text-[#D80027]" style="font-family: 'Poppins', sans-serif;">Povinná položka</span>
+                        </div>
+                    </div>
+                    <div class="relative w-[400px]">
+                        <input x-model="zeme" type="text" readonly class="w-[400px] h-[50px] rounded-[8px] border-[2px] px-4 font-bold text-[15px] text-[#505050]" :class="zeme === '' ? '!border-[#D80027]' : '!border-[#E6E6E6]'" style="font-family: 'Poppins', sans-serif;" placeholder="Česká republika">
+                        <button @click="openZeme = !openZeme; openMesto = false" class="absolute right-1 top-1 w-[42px] h-[42px] rounded-[4px] bg-[#DD3888] flex items-center justify-center">
+                            <svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L5 4L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Accordion Options -->
+                    <div x-show="openZeme" class="w-[400px] border-[2px] border-t-0 border-[#E6E6E6] rounded-b-[8px] bg-white z-10">
+                        <template x-for="country in Object.keys(countryData)" :key="country">
+                            <div class="flex items-center p-2 cursor-pointer hover:bg-[#FFE0E5]" @click="zeme = country; mesto = ''; openZeme = false">
+                                <img :src="'https://flagcdn.com/' + countryCodes[country] + '.svg'" class="w-[24px] h-[24px] mr-2 rounded-full" alt="Flag">
+                                <span x-text="country"></span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-</body>
+
+                <!-- Město -->
+                <div class="w-[400px] h-auto flex flex-col gap-2 items-center mt-4">
+                    <div class="flex justify-between w-[400px]">
+                        <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Město</label>
+                        <div x-show="mesto === ''" class="flex items-center gap-1.5">
+                            <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+                            <span class="text-[13px] text-[#D80027]" style="font-family: 'Poppins', sans-serif;">Povinná položka</span>
+                        </div>
+                    </div>
+                    <div class="relative w-[400px]">
+                        <input x-model="mesto" type="text" readonly class="w-[400px] h-[50px] rounded-[8px] border-[2px] px-4 font-bold text-[15px] text-[#505050]" :class="mesto === '' ? '!border-[#D80027]' : '!border-[#E6E6E6]'" style="font-family: 'Poppins', sans-serif;" placeholder="Praha">
+                        <button @click="openMesto = !openMesto; openZeme = false" class="absolute right-1 top-1 w-[42px] h-[42px] rounded-[4px] bg-[#DD3888] flex items-center justify-center">
+                            <svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L5 4L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Accordion Options -->
+                    <div x-show="openMesto" class="w-[400px] border-[2px] border-t-0 border-[#E6E6E6] rounded-b-[8px] bg-white z-10">
+                        <template x-for="city in cities" :key="city">
+                            <div class="p-2 cursor-pointer hover:bg-[#FFE0E5]" @click="mesto = city; openMesto = false">
+                                <span x-text="city"></span>
+                            </div>
+                        </template>
+                        <div x-show="cities.length === 0" class="p-2 text-gray-500">Nejdříve vyberte zemi</div>
+                    </div>
+                </div>
+
+                <!-- Telefon -->
+                <div class="w-[400px] h-[84px] flex flex-col gap-2 items-center mt-4">
+                    <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Telefon</label>
+                    <input type="tel" class="w-[400px] h-[50px] rounded-[8px] border-[2px] border-[#E6E6E6] px-4 font-bold text-[15px] text-[#505050]" style="font-family: 'Poppins', sans-serif;" placeholder="+420 123 456 789">
+                </div>
+                
+                <!-- Toggle Switches -->
+                <div x-data="{ toggled1: false, toggled2: false }" class="w-[400px] mt-5 flex flex-col gap-[21px]">
+                    <div class="flex items-center gap-3">
+                        <button @click="toggled1 = !toggled1" 
+                                class="w-[44px] h-[24px] rounded-full flex items-center p-[2px] transition-colors duration-300"
+                                :class="toggled1 ? 'bg-[#00B80F]' : 'bg-[#E4E4E7]'">
+                            <div class="w-[20px] h-[20px] bg-white rounded-full shadow-sm transform transition-transform duration-300"
+                                 :class="toggled1 ? 'translate-x-[20px]' : 'translate-x-0'"></div>
+                        </button>
+                        <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">mám WhatsApp</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button @click="toggled2 = !toggled2" 
+                                class="w-[44px] h-[24px] rounded-full flex items-center p-[2px] transition-colors duration-300"
+                                :class="toggled2 ? 'bg-[#00B80F]' : 'bg-[#E4E4E7]'">
+                            <div class="w-[20px] h-[20px] bg-white rounded-full shadow-sm transform transition-transform duration-300"
+                                 :class="toggled2 ? 'translate-x-[20px]' : 'translate-x-0'"></div>
+                        </button>
+                        <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">mám Telegram</span>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button class="w-[400px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
+                    <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
+                    <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="w-[843px] h-[1px] bg-[#E6E6E6] mt-8"></div>
+                </div>
+                <!-- Moje tělo -->
+                <div class="flex flex-col w-[400px]">
 </html>
