@@ -39,7 +39,7 @@
                 <div class="flex flex-col items-end w-[1134px] mx-auto max-[426px]:items-center max-[426px]:w-full max-[426px]:my-8">
                     <div class="w-[843px] max-[426px]:w-[310px] flex items-center justify-center relative">
                         <h2 class="font-bold text-[36px] text-[#5C2D62]" style="font-family: 'Poppins', sans-serif;">Základní údaje</h2>
-                        
+
                         <div class="absolute right-0 flex flex-col items-end gap-0.5 max-[426px]:hidden">
                             <div class="flex items-center gap-1.5">
                                 <div class="w-[14px] h-[14px] rounded-full bg-[#00B80F]"></div>
@@ -49,6 +49,15 @@
                         </div>
                     </div>
                     <x-dashboard.section-divider />
+                    
+                    <!-- Mobile status indicator (rendered below the divider) -->
+                    <div class="hidden max-[426px]:flex flex-row justify-between w-[310px] items-center mt-6 mx-auto">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-[14px] h-[14px] rounded-full bg-[#00B80F]"></div>
+                            <span class="text-[13px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">Nyní si online</span>
+                        </div>
+                        <span class="text-[13px] text-[#505050] underline" style="font-family: 'Poppins', sans-serif; color: #DD3888;">nastavení</span>
+                    </div>
                 </div>
             </div>
 
@@ -117,9 +126,10 @@
                         </div>
 
                         <!-- Save Button -->
-                        <button class="w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
-                            <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                        <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
+                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
+                            <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
                     </div>
 
@@ -135,9 +145,10 @@
                         </div>
                         
                         <!-- Save Button -->
-                        <button class="w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
-                            <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                        <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
+                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
+                            <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
                     </div>
 
@@ -169,9 +180,10 @@
                         </div>
 
                         <!-- Save Button -->
-                        <button class="w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
-                            <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                        <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
+                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
+                            <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
                     </div>
 
@@ -244,9 +256,10 @@
                                 + Přidat další
                             </button>
                             <!-- Save Button -->
-                            <button class="w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
-                                <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                            <button class="group w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
+                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                                <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
+                                <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                             </button>
                         </div>
                         <x-dashboard.section-divider />
@@ -319,9 +332,10 @@
                                 + Přidat další
                             </button>
                             <!-- Save Button -->
-                            <button class="w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
-                                <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
+                            <button class="group w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
+                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                                <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
+                                <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                             </button>
                         </div>
                     </div>
