@@ -195,6 +195,11 @@ Route::get('/preview/dashboard', function () {
     return view('account.dashboard_preview');
 })->name('preview.dashboard');
 
+// Preview route for photos page (added for testing)
+Route::get('/preview/photos', function () {
+    return view('account.photos_preview');
+})->name('preview.photos');
+
 // Dynamic Pages Route (must be last to avoid conflicts)
 Route::get('/{slug}', function ($slug) {
     $page = \App\Models\Page::where('slug', $slug)
