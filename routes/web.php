@@ -200,6 +200,16 @@ Route::get('/preview/photos', function () {
     return view('account.photos_preview');
 })->name('preview.photos');
 
+// Preview route for services page (added for testing)
+Route::get('/preview/services', function () {
+    return view('account.services_preview');
+})->name('preview.services');
+
+// Preview route for statistics page (added for testing)
+Route::get('/preview/statistics', function () {
+    return view('account.statistics_preview');
+})->name('preview.statistics');
+
 // Dynamic Pages Route (must be last to avoid conflicts)
 Route::get('/{slug}', function ($slug) {
     $page = \App\Models\Page::where('slug', $slug)

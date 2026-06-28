@@ -76,8 +76,8 @@ class ProfileStatistics extends Component
             $label = $currentDate->format('j. n.');
             
             $this->chartLabels[] = $label;
-            $this->clickChartData[] = $clickStats[$dateStr] ?? 0;
-            $this->impressionChartData[] = $impressionStats[$dateStr] ?? 0;
+            $this->clickChartData[] = 38; // Hardcoded for testing
+            $this->impressionChartData[] = 38; // Hardcoded for testing
             
             $currentDate->addDay();
         }

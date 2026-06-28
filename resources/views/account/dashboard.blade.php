@@ -36,6 +36,11 @@
         @endforeach
     </div>
 
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold text-secondary mb-4">Statistiky</h2>
+        @livewire('profile-statistics')
+    </div>
+
     {{-- Email Not Verified Warning --}}
     @if (!auth()->user()->hasVerifiedEmail())
         <div class="mb-6 rounded-lg p-4 bg-red-50 border border-red-200">

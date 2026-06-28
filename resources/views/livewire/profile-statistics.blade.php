@@ -6,11 +6,26 @@
             <h2 class="text-2xl font-bold text-secondary mb-4">
                 {{ __('front.account.statistics.profile_views_title') }}
             </h2>
-            <div>
+            <div class="w-[843px] h-[300px] rounded-[15px] relative">
+                <!-- Grid lines (120-0) -->
+                <div class="absolute inset-0 flex flex-col h-full py-2">
+                    @foreach([120, 100, 80, 60, 40, 20] as $num)
+                        <div class="flex items-center gap-[16px]" style="height: 60px;">
+                            <span class="w-[30px] text-right text-[14px] font-medium text-[#505050]" style="font-family: 'Poppins', sans-serif;">{{ $num }}</span>
+                            <div class="flex-grow h-[1px] bg-[#E8E8E8]"></div>
+                        </div>
+                    @endforeach
+                    <!-- Base line -->
+                    <div class="flex items-center gap-[16px]">
+                        <div class="w-[843px] h-[3px] bg-[#E8E8E8]"></div>
+                    </div>
+                </div>
+                
                 <canvas 
                     id="clicksChart" 
-                    height="80"
+                    height="200"
                     wire:ignore
+                    class="absolute inset-0 w-full h-full"
                 ></canvas>
             </div>
             
@@ -48,12 +63,13 @@
             <h2 class="text-2xl font-bold text-secondary mb-4">
                 {{ __('front.account.statistics.listing_views_title') }}
             </h2>
-            <div>
+            <div class="relative w-[843px]">
                 <canvas 
                     id="impressionsChart" 
-                    height="80"
+                    height="200"
                     wire:ignore
                 ></canvas>
+                <div class="absolute bottom-0 left-0 w-[843px] h-[3px] bg-[#E8E8E8]"></div>
             </div>
             
             <!-- Month Navigation for Impressions -->
@@ -106,8 +122,13 @@
     let impressionsChart = null;
 
     function createChart(canvasId, labels, data, color, label) {
+        console.log('Attempting to create chart:', canvasId);
         const ctx = document.getElementById(canvasId);
-        if (!ctx) return null;
+        if (!ctx) {
+            console.error('Canvas not found:', canvasId);
+            return null;
+        }
+        console.log('Canvas found, creating chart:', canvasId);
 
         return new Chart(ctx, {
             type: 'bar',
@@ -117,7 +138,8 @@
                     label: label,
                     data: data,
                     backgroundColor: color,
-                    borderRadius: 6,
+                    borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+                    barThickness: 30,
                     borderSkipped: false,
                 }]
             },
@@ -154,16 +176,13 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            stepSize: 10,
-                            font: {
-                                size: 12,
-                                family: "'Inter', sans-serif"
-                            },
-                            color: '#6B7280'
+                            display: false
                         },
                         grid: {
-                            color: '#E5E7EB',
-                            drawBorder: false
+                            display: false
+                        },
+                        border: {
+                            display: false
                         }
                     },
                     x: {
@@ -190,13 +209,16 @@
         if (clicksChart) {
             clicksChart.data.labels = labels;
             clicksChart.data.datasets[0].data = clickData;
+            clicksChart.data.datasets[0].backgroundColor = '#DD3888';
+            clicksChart.data.datasets[0].borderRadius = { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 };
+            clicksChart.data.datasets[0].barThickness = 30;
             clicksChart.update('none'); // Update without animation
         } else {
             clicksChart = createChart(
                 'clicksChart', 
                 labels, 
                 clickData, 
-                '#EC4899', 
+                '#DD3888', 
                 '{{ __('front.account.statistics.profile_clicks') }}'
             );
         }
@@ -204,13 +226,16 @@
         if (impressionsChart) {
             impressionsChart.data.labels = labels;
             impressionsChart.data.datasets[0].data = impressionData;
+            impressionsChart.data.datasets[0].backgroundColor = '#DD3888';
+            impressionsChart.data.datasets[0].borderRadius = { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 };
+            impressionsChart.data.datasets[0].barThickness = 30;
             impressionsChart.update('none'); // Update without animation
         } else {
             impressionsChart = createChart(
                 'impressionsChart', 
                 labels, 
                 impressionData, 
-                '#7C3AED', 
+                '#DD3888', 
                 '{{ __('front.account.statistics.listing_impressions') }}'
             );
         }
@@ -218,10 +243,17 @@
 
     // Initialize charts on page load
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM ready, initializing charts...');
         const labels = @json($chartLabels);
         const clickData = @json($clickChartData);
         const impressionData = @json($impressionChartData);
-        updateCharts(labels, clickData, impressionData);
+        console.log('Data:', { labels, clickData, impressionData });
+        
+        if (labels && labels.length > 0) {
+            updateCharts(labels, clickData, impressionData);
+        } else {
+            console.warn('No data for charts or labels is empty!');
+        }
     });
 
     // Update charts when Livewire updates
