@@ -62,6 +62,10 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="py-6">
+                        @livewire('profile-statistics')
+                    </div>
                 </div>
             </div>
 
