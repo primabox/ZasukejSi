@@ -27,7 +27,7 @@
 
 {{-- Sidebar --}}
 <aside 
-    class="w-full h-full md:w-80 md:relative fixed top-0 left-0 z-40 bg-white transition-transform duration-300 md:translate-x-0 overflow-y-auto pt-28 md:pt-0"
+    class="w-full h-full md:w-80 md:relative fixed top-0 left-0 z-40 bg-white transition-transform duration-300 md:translate-x-0 overflow-y-auto pt-28 md:pt-0 md:mt-10"
     :class="$store.accountSidebar.isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
 >
     <!-- Navigation Menu -->
@@ -124,6 +124,7 @@
         </ul>
 
         <!-- Advert for VIP (hidden on mobile) -->
+        @unless(request()->routeIs('preview.*'))
         <div class="mt-6 relative hidden md:block">
             <!-- VIP Image -->
             <img src="{{ asset('images/vip-advert.png') }}" alt="VIP" class="w-full rounded-t-xl">
@@ -139,6 +140,7 @@
             </a>
             </div>
         </div>
+        @endunless
     </nav>
 </aside>
 </div>

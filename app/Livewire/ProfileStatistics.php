@@ -3,143 +3,72 @@
 namespace App\Livewire;
 
 use App\Models\Profile;
-use App\Models\ProfileView;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 
 class ProfileStatistics extends Component
 {
     public ?Profile $profile = null;
     public Carbon $currentMonth;
-    
-    // Chart data for both types
-    public array $clickChartData = [];
-    public array $impressionChartData = [];
+    public string $variant = 'homepage';
+    public string $instanceId = '';
+    public int $yAxisMax = 120;
+    public int $yAxisStep = 20;
     public array $chartLabels = [];
-    
-    // Summary stats
-    public int $totalClicks = 0;
-    public int $totalImpressions = 0;
-    public int $monthlyClicks = 0;
-    public int $monthlyImpressions = 0;
+    public array $chartValues = [];
+    public array $chartColors = [];
+    public array $chartVip = [];
 
-    public function mount()
+    public function mount(string $variant = 'homepage')
     {
+        $this->variant = $variant;
+        $this->instanceId = (string) Str::uuid();
+
         $user = auth()->user();
         
         if ($user) {
-            // Load profile
             $user->load('profile');
-            
             if ($user->profile) {
                 $this->profile = $user->profile;
             }
         }
 
-        // Force load a profile if still null to ensure charts render
         if (!$this->profile) {
             $this->profile = \App\Models\Profile::first();
         }
-
-        // Add logging for diagnostics
-        \Illuminate\Support\Facades\Log::info('ProfileStatistics mount', [
-            'user_id' => $user ? $user->id : 'guest',
-            'profile_id' => $this->profile ? $this->profile->id : 'null'
-        ]);
         
         $this->currentMonth = now()->startOfMonth();
-        $this->loadStatistics();
+
+        $this->generateChartData();
     }
 
-    public function loadStatistics(): void
+    private function generateChartData(): void
     {
-        $profileId = $this->profile ? $this->profile->id : 0;
-        $startDate = $this->currentMonth->copy()->startOfMonth();
-        $endDate = $this->currentMonth->copy()->endOfMonth();
-        
-        // Get daily stats for both types
-        $clickStats = $this->profile ? ProfileView::getDailyStats(
-            $profileId,
-            $startDate->toDateString(),
-            $endDate->toDateString(),
-            ProfileView::TYPE_CLICK
-        ) : [];
-        
-        $impressionStats = $this->profile ? ProfileView::getDailyStats(
-            $profileId,
-            $startDate->toDateString(),
-            $endDate->toDateString(),
-            ProfileView::TYPE_IMPRESSION
-        ) : [];
+        $this->chartLabels = [
+            '10. 9.', '11. 9.', '12. 9.', '13. 9.', '14. 9.', '15. 9.', '16. 9.', '17. 9.', '18. 9.',
+            '19. 9.', '20. 9.', '21. 9.', '22. 9.', '23. 9.', '24. 9.', '25. 9.'
+        ];
 
-        // Build chart data for each day of the month (sampling every 3rd day)
-        $this->chartLabels = [];
-        $this->clickChartData = [];
-        $this->impressionChartData = [];
-        
-        $currentDate = $startDate->copy();
-        $dayIndex = 0;
-        while ($currentDate <= $endDate) {
-            if ($dayIndex % 3 === 0) {
-                $this->chartLabels[] = $currentDate->format('j. n.');
-                
-                // If no profile, show 0, else show 38 (test)
-                $this->clickChartData[] = $this->profile ? 38 : 0;
-                $this->impressionChartData[] = $this->profile ? 38 : 0;
-            }
-            
-            $currentDate->addDay();
-            $dayIndex++;
+        if ($this->variant === 'detail') {
+            $this->chartValues = [8, 13, 18, 15, 12, 3, 12, 4, 12, 27, 3, 5, 11, 6, 9, 12];
+            $this->yAxisMax = 30;
+            $this->yAxisStep = 5;
+        } else {
+            $this->chartValues = [38, 42, 64, 60, 22, 38, 43, 64, 44, 68, 96, 104, 66, 84, 83, 36];
+            $this->yAxisMax = 120;
+            $this->yAxisStep = 20;
         }
 
-        // Calculate summary stats
-        $this->totalClicks = $this->profile ? ProfileView::getTotalStats($profileId, ProfileView::TYPE_CLICK) : 0;
-        $this->totalImpressions = $this->profile ? ProfileView::getTotalStats($profileId, ProfileView::TYPE_IMPRESSION) : 0;
-        
-        // Monthly stats
-        $this->monthlyClicks = $this->profile ? ProfileView::where('profile_id', $profileId)
-            ->where('type', ProfileView::TYPE_CLICK)
-            ->whereBetween('viewed_date', [$startDate, $endDate])
-            ->count() : 0;
-            
-        $this->monthlyImpressions = $this->profile ? ProfileView::where('profile_id', $profileId)
-            ->where('type', ProfileView::TYPE_IMPRESSION)
-            ->whereBetween('viewed_date', [$startDate, $endDate])
-            ->count() : 0;
-
-        $this->dispatch('statsUpdated', [
-            'labels' => $this->chartLabels,
-            'clicks' => $this->clickChartData,
-            'impressions' => $this->impressionChartData
-        ]);
-    }
-
-    public function previousMonth(): void
-    {
-        $this->currentMonth = $this->currentMonth->copy()->subMonth();
-        $this->loadStatistics();
-    }
-
-    public function nextMonth(): void
-    {
-        // Don't allow going beyond current month
-        if ($this->canGoNext()) {
-            $this->currentMonth = $this->currentMonth->copy()->addMonth();
-            $this->loadStatistics();
+        $this->chartColors = [];
+        foreach (array_keys($this->chartValues) as $idx) {
+            $this->chartColors[] = $idx < 9 ? '#DD3888' : '#5C2D62';
         }
-    }
 
-    #[Computed]
-    public function formattedMonth(): string
-    {
-        return $this->currentMonth->translatedFormat('F Y');
-    }
-
-    #[Computed]
-    public function canGoNext(): bool
-    {
-        return $this->currentMonth->copy()->addMonth()->startOfMonth() <= now()->startOfMonth();
+        $this->chartVip = [];
+        foreach (array_keys($this->chartValues) as $idx) {
+            $this->chartVip[] = $this->variant === 'detail' ? $idx === 10 : $idx === 11;
+        }
     }
 
     public function render()

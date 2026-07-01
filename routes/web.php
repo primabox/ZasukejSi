@@ -210,6 +210,11 @@ Route::get('/preview/statistics', function () {
     return view('account.statistics_preview');
 })->name('preview.statistics');
 
+// Preview route for ratings page (added for testing)
+Route::get('/preview/ratings', function () {
+    return view('account.ratings_preview');
+})->name('preview.ratings');
+
 // Dynamic Pages Route (must be last to avoid conflicts)
 Route::get('/{slug}', function ($slug) {
     $page = \App\Models\Page::where('slug', $slug)
