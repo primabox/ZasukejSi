@@ -24,7 +24,7 @@ Route::get('/countries', function () {
 })->name('countries.index');
 
 // API routes for AJAX/Alpine.js
-Route::prefix('api')->group(function () {
+Route::prefix('api')->middleware('throttle:60,1')->group(function () {
     Route::get('/profiles', [ProfileController::class, 'api'])->name('api.profiles');
 });
 
@@ -121,7 +121,7 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Notifications Routes
-Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/archived', [App\Http\Controllers\NotificationController::class, 'archived'])->name('archived');
     Route::post('/{notification}/archive', [App\Http\Controllers\NotificationController::class, 'archive'])->name('archive');
     Route::delete('/{notification}', [App\Http\Controllers\NotificationController::class, 'delete'])->name('delete');
@@ -129,14 +129,14 @@ Route::middleware('auth')->prefix('notifications')->name('notifications.')->grou
 });
 
 // Messages Routes
-Route::middleware('auth')->prefix('messages')->name('messages.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('messages')->name('messages.')->group(function () {
     Route::get('/', [App\Http\Controllers\MessageController::class, 'inbox'])->name('index');
     Route::get('/{user}', [App\Http\Controllers\MessageController::class, 'show'])->name('show');
     Route::post('/{user}', [App\Http\Controllers\MessageController::class, 'store'])->name('store');
 });
 
 // Account Routes (authenticated users only - female users for profile management)
-Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('account')->name('account.')->group(function () {
     // Dashboard - redirects based on gender
     Route::get('/', function () {
         $user = auth()->user();
@@ -167,7 +167,7 @@ Route::middleware(['auth'])->prefix('account')->name('account.')->group(function
 });
 
 // Member Routes (authenticated male users)
-Route::middleware(['auth'])->prefix('account/member')->name('account.member.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('account/member')->name('account.member.')->group(function () {
     // Dashboard / User Settings
     Route::get('/', [\App\Http\Controllers\Auth\MemberController::class, 'dashboard'])->name('dashboard');
     Route::patch('/settings', [\App\Http\Controllers\Auth\MemberController::class, 'updateSettings'])->name('settings.update');
@@ -214,6 +214,16 @@ Route::get('/preview/statistics', function () {
 Route::get('/preview/ratings', function () {
     return view('account.ratings_preview');
 })->name('preview.ratings');
+
+// Preview route for favorites page (added for testing)
+Route::get('/preview/favorites', function () {
+    return view('account.favorites_preview');
+})->name('preview.favorites');
+
+// Preview route for archive page (added for testing)
+Route::get('/preview/archive', function () {
+    return view('account.archive_preview');
+})->name('preview.archive');
 
 // Dynamic Pages Route (must be last to avoid conflicts)
 Route::get('/{slug}', function ($slug) {

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\RegisterUser;
-use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
@@ -38,46 +37,30 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
+        $this->validator($request->all())->validate();
+
+        $user = $this->create($request->all());
+
+        // Try to send verification email, but don't let it break registration
         try {
-            Log::info('Registration attempt started', ['email' => $request->email]);
-
-            $this->validator($request->all())->validate();
-            Log::info('Validation passed', ['email' => $request->email]);
-
-            $user = $this->create($request->all());
-            Log::info('User created successfully', ['user_id' => $user->id, 'email' => $user->email]);
-
-            // Try to send verification email, but don't let it break registration
-            try {
-                event(new Registered($user));
-                Log::info('Registered event fired', ['user_id' => $user->id]);
-            } catch (\Exception $e) {
-                // Log email sending failure but continue with registration
-                Log::error('Failed to send verification email', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => $e->getMessage(),
-                ]);
-                // You might want to show a flash message to the user
-                session()->flash('warning', 'Your account was created, but we couldn\'t send the verification email. Please contact support.');
-            }
-
-            Auth::login($user);
-            Log::info('User logged in', ['user_id' => $user->id]);
-
-            // Redirect based on gender
-            if ($user->isMale()) {
-                return redirect('/account/member');
-            }
-            return redirect($this->redirectTo);
+            event(new Registered($user));
         } catch (\Exception $e) {
-            Log::error('Registration failed', [
-                'email' => $request->email,
+            // Log email sending failure (without PII) but continue with registration
+            Log::error('Failed to send verification email', [
+                'user_id' => $user->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
+            session()->flash('warning', __('auth.verification_email_failed'));
         }
+
+        Auth::login($user);
+
+        // Redirect based on gender
+        if ($user->isMale()) {
+            return redirect('/account/member');
+        }
+
+        return redirect($this->redirectTo);
     }
 
 
