@@ -10,7 +10,7 @@
     <!-- Warning Banner -->
     <div class="w-full h-[50px] bg-[#FFE0E5] rounded-[8px] flex items-center justify-between px-4 mb-8">
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+            <img src="{{ asset('images/icons/OctagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
             <span class="font-medium text-[14px] text-[#505050]" style="font-family: 'Poppins', sans-serif;">
                 Dokončete registraci Oprávněné aniž i odstoupil o <span class="underline">snadno osoby</span> vede grafikou osobami
             </span>

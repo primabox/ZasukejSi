@@ -9,7 +9,7 @@
             Fotografie a video
         </a>
         <a href="{{ request()->routeIs('preview.*') ? route('preview.services') : route('account.services') }}" class="w-[210px] h-[50px] rounded-[8px] {{ request()->routeIs('account.services') || request()->routeIs('preview.services') ? 'bg-[#DD3888] text-white' : 'border border-[#E6E6E6] text-[#505050]' }} flex items-center px-4 gap-3 font-medium text-[14px]" style="font-family: 'Poppins', sans-serif;">
-            <img src="{{ asset('images/icons/list.svg') }}" class="w-[20px] h-[20px]" alt="List" style="{{ request()->routeIs('account.services') || request()->routeIs('preview.services') ? 'filter: brightness(0) invert(1);' : 'filter: invert(36%) sepia(87%) saturate(2222%) hue-rotate(309deg) brightness(90%) contrast(92%);' }}">
+            <img src="{{ asset('images/icons/List.svg') }}" class="w-[20px] h-[20px]" alt="List" style="{{ request()->routeIs('account.services') || request()->routeIs('preview.services') ? 'filter: brightness(0) invert(1);' : 'filter: invert(36%) sepia(87%) saturate(2222%) hue-rotate(309deg) brightness(90%) contrast(92%);' }}">
             Moje služby a ceny
         </a>
         <a href="{{ request()->routeIs('preview.*') ? route('preview.statistics') : route('account.statistics') }}" class="w-[210px] h-[50px] rounded-[8px] {{ request()->routeIs('account.statistics') || request()->routeIs('preview.statistics') ? 'bg-[#DD3888] text-white' : 'border border-[#E6E6E6] text-[#505050]' }} flex items-center px-4 gap-3 font-medium text-[14px]" style="font-family: 'Poppins', sans-serif;">
@@ -17,7 +17,7 @@
             Statistiky
         </a>
         <div class="w-[210px] h-[50px] rounded-[8px] border border-[#E6E6E6] flex items-center px-4 gap-3 font-medium text-[14px] text-[#A4A4A4]" style="font-family: 'Poppins', sans-serif;">
-            <img src="{{ asset('images/icons/thumbsup.svg') }}" class="w-[20px] h-[20px]" alt="Thumbsup" style="filter: invert(75%) sepia(0%) saturate(0%) hue-rotate(186deg) brightness(91%) contrast(85%);">
+            <img src="{{ asset('images/icons/ThumbsUp.svg') }}" class="w-[20px] h-[20px]" alt="Thumbsup" style="filter: invert(75%) sepia(0%) saturate(0%) hue-rotate(186deg) brightness(91%) contrast(85%);">
             recenze - již brzy
         </div>
     </div>

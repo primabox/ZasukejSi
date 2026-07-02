@@ -78,7 +78,7 @@
                         
                         <!-- Save Button -->
                         <button class="group w-[240px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 transition-colors duration-300">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                             <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                             <span class="text-[#A4A4A4] group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px;">Uložit změny</span>
                         </button>

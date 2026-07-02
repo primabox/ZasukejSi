@@ -16,7 +16,7 @@
     <main>
         <div class="container mx-auto pt-32 px-4">
             <div class="warning-banner w-[1134px] max-[426px]:w-[309px] h-[50px] max-[426px]:h-[110px] bg-[#FFE0E5] rounded-[8px] flex items-center justify-center relative px-4 mb-8 mx-auto">
-                <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="warning-banner-icon w-[20px] h-[20px] max-[426px]:absolute max-[426px]:top-[10px] max-[426px]:left-[10px]" alt="Alert">
+                <img src="{{ asset('images/icons/OctagonAlert.svg') }}" class="warning-banner-icon w-[20px] h-[20px] max-[426px]:absolute max-[426px]:top-[10px] max-[426px]:left-[10px]" alt="Alert">
                 
                 <div class="warning-text-container w-auto max-[426px]:w-[223px] max-[426px]:h-[83px] flex items-center justify-center gap-3">
                     <span class="font-medium text-[14px] text-[#505050] whitespace-nowrap max-[426px]:whitespace-normal" style="font-family: 'Poppins', sans-serif;">
@@ -30,8 +30,8 @@
             <div class="flex flex-col max-[426px]:flex-col-reverse items-center max-[426px]:w-full">
                 <!-- Stats Cards & Basic Info -->
                 <div class="mb-[88px] stats-container flex flex-nowrap justify-end gap-4 mx-auto w-[1134px] max-[426px]:flex-col max-[426px]:items-center max-[426px]:w-full max-[426px]:gap-[30px]">
-                    <x-dashboard.stats-card icon="{{ asset('images/icons/eye.svg') }}" alt="Eye" value="10 458" label="Celkové zobrazení profilu" />
-                    <x-dashboard.stats-card icon="{{ asset('images/icons/thumbsup.svg') }}" alt="Thumbsup" value="4.78/5" label="Moje hodnocení" />
+                    <x-dashboard.stats-card icon="{{ asset('images/icons/Eye.svg') }}" alt="Eye" value="10 458" label="Celkové zobrazení profilu" />
+                    <x-dashboard.stats-card icon="{{ asset('images/icons/ThumbsUp.svg') }}" alt="Thumbsup" value="4.78/5" label="Moje hodnocení" />
                     <x-dashboard.stats-card icon="{{ asset('images/icons/MessageCircleMore.svg') }}" alt="Message" value="12" label="moje recenze" />
                 </div>
                 
@@ -92,7 +92,7 @@
                             <div class="flex justify-between w-[400px] max-[426px]:w-[310px]">
                                 <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Váha (kg)</label>
                                 <div x-show="vaha === ''" class="flex items-center gap-1.5">
-                                    <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+                                    <img src="{{ asset('images/icons/OctagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
                                     <span class="text-[13px] text-[#D80027]" style="font-family: 'Poppins', sans-serif;">Povinná položka</span>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@
 
                         <!-- Save Button -->
                         <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                             <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                             <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
@@ -146,7 +146,7 @@
                         
                         <!-- Save Button -->
                         <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                             <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                             <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
@@ -181,7 +181,7 @@
 
                         <!-- Save Button -->
                         <button class="group w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
-                            <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                            <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                             <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                             <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                         </button>
@@ -257,7 +257,7 @@
                             </button>
                             <!-- Save Button -->
                             <button class="group w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
-                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                                <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                                 <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                                 <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                             </button>
@@ -333,7 +333,7 @@
                             </button>
                             <!-- Save Button -->
                             <button class="group w-[240px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] hover:bg-[#5C2D62] rounded-[8px] flex items-center justify-center gap-2 mt-8 mb-8 transition-colors duration-300">
-                                <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
+                                <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px] group-hover:hidden" alt="Save">
                                 <img src="{{ asset('images/icons/SaveWhite.svg') }}" class="w-[20px] h-[20px] hidden group-hover:block" alt="Save">
                                 <span class="group-hover:text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
                             </button>

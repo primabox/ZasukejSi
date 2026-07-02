@@ -2794,9 +2794,9 @@
                     // Add animation class
                     img.classList.add('heart-animate');
                     
-                    // Toggle between heart.svg and heartFilled.svg
-                    if (img.src.includes('heart.svg') && !img.src.includes('heartFilled')) {
-                        img.src = "{{ asset('images/icons/heartFilled.svg') }}";
+                    // Toggle between heart.svg and HeartFilled.svg
+                    if (img.src.includes('heart.svg') && !img.src.includes('HeartFilled')) {
+                        img.src = "{{ asset('images/icons/HeartFilled.svg') }}";
                     } else {
                         img.src = "{{ asset('images/icons/heart.svg') }}";
                     }

@@ -40,7 +40,7 @@
         <div class="flex justify-between w-[400px] max-[426px]:!w-[310px]">
             <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Země</label>
             <div x-show="zeme === ''" class="flex items-center gap-1.5">
-                <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+                <img src="{{ asset('images/icons/OctagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
                 <span class="text-[13px] text-[#D80027]" style="font-family: 'Poppins', sans-serif;">Povinná položka</span>
             </div>
         </div>
@@ -68,7 +68,7 @@
         <div class="flex justify-between w-[400px] max-[426px]:!w-[310px]">
             <label class="text-[13px] text-[#505050] self-start" style="font-family: 'Poppins', sans-serif;">Město</label>
             <div x-show="mesto === ''" class="flex items-center gap-1.5">
-                <img src="{{ asset('images/icons/octagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
+                <img src="{{ asset('images/icons/OctagonAlert.svg') }}" class="w-[20px] h-[20px]" alt="Alert">
                 <span class="text-[13px] text-[#D80027]" style="font-family: 'Poppins', sans-serif;">Povinná položka</span>
             </div>
         </div>
@@ -121,7 +121,7 @@
 
     <!-- Save Button -->
     <button class="w-[400px] max-[426px]:!w-[310px] h-[50px] bg-[#E8E8E8] rounded-[8px] flex items-center justify-center gap-2 mt-8">
-        <img src="{{ asset('images/icons/save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
+        <img src="{{ asset('images/icons/Save.svg') }}" class="w-[20px] h-[20px]" alt="Save">
         <span style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #A4A4A4;">Uložit změny</span>
     </button>
 </div>

@@ -347,13 +347,13 @@
                                                     style="width: 97px; height: 40px; background-color: #FFFFFF;">
                                                 <span class="font-semibold text-[16px]"
                                                       style="font-family: 'Poppins', sans-serif; color: #DD3888;">Profil</span>
-                                                <img src="{{ asset('images/icons/user.svg') }}" class="w-[24px] h-[24px]" alt="Profile"
+                                                <img src="{{ asset('images/icons/User.svg') }}" class="w-[24px] h-[24px]" alt="Profile"
                                                      style="filter: invert(36%) sepia(87%) saturate(2222%) hue-rotate(309deg) brightness(90%) contrast(92%);">
                                             </button>
                                             <!-- 3. Message (mobile only) -->
                                             <button class="flex items-center justify-center rounded-[8px]"
                                                     style="width: 40px; height: 40px; background-color: #FFFFFF;">
-                                                <img src="{{ asset('images/icons/messagecirclemore.svg') }}" class="w-[24px] h-[24px]" alt="Message"
+                                                <img src="{{ asset('images/icons/MessageCircleMore.svg') }}" class="w-[24px] h-[24px]" alt="Message"
                                                      style="filter: invert(36%) sepia(87%) saturate(2222%) hue-rotate(309deg) brightness(90%) contrast(92%);">
                                             </button>
                                         </div>

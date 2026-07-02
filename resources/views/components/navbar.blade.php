@@ -202,7 +202,7 @@
                         
                         <!-- User Button -->
                         <a href="#" class="w-[60px] h-[60px] bg-[#DD3888] rounded-[8px] flex items-center justify-center">
-                            <img src="{{ asset('images/icons/user.svg') }}" class="w-[26px] h-[26px]" alt="User">
+                            <img src="{{ asset('images/icons/User.svg') }}" class="w-[26px] h-[26px]" alt="User">
                         </a>
                     </div>
 
@@ -211,9 +211,9 @@
                         <div class="language-dropdown relative group">
                             <button class="language-dropdown-toggle flex items-center" id="nav-language">
                                 @if(app()->getLocale() === 'cs')
-                                    <img src="{{ asset('flags/cs.png') }}" alt="Czech">
+                                    <img src="{{ asset('flags/cs.png') }}" alt="Czech" class="w-6 h-6 rounded">
                                 @else
-                                    <img src="{{ asset('flags/en.png') }}" alt="English">
+                                    <img src="{{ asset('flags/en.png') }}" alt="English" class="w-6 h-6 rounded">
                                 @endif
                             </button>
                             
