@@ -35,10 +35,12 @@ export default defineConfig({
         },
         rollupOptions: {
             output: {
+                // Note: alpinejs is managed by Livewire 3, no manual chunk needed
                 manualChunks: {
-                    'vendor': ['alpinejs'],
                     'swiper': ['swiper'],
                 },
+                // Avoid _ prefix on chunk filenames - Apache may block _ prefixed files
+                chunkFileNames: 'assets/[name]-[hash].js',
             },
         },
         cssMinify: true,

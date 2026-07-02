@@ -51,11 +51,11 @@
         function initProfileSlider() {
             // Check if Swiper is available
             if (typeof Swiper === 'undefined') {
-                console.error('Swiper is not loaded.');
                 return;
             }
 
-            const swiperElement = document.querySelector('.' + sliderId);
+            // Find the swiper element for this slider ID
+            const swiperElement = document.querySelector('.swiper.' + sliderId);
             if (!swiperElement) return;
 
             // Destroy existing instance if any
@@ -63,10 +63,14 @@
                 swiperElement.swiper.destroy(true, true);
             }
 
-            // Initialize Swiper
-            new Swiper('.' + sliderId, {
+            // Initialize Swiper - pass the element directly
+            new Swiper(swiperElement, {
                 slidesPerView: window.innerWidth <= 425 ? 2 : 1,
                 spaceBetween: window.innerWidth <= 425 ? 8 : 16,
+                
+                // Observer enabled for dynamic updates
+                observer: true,
+                observeParents: true,
                 
                 // Responsive breakpoints
                 breakpoints: {
@@ -87,21 +91,21 @@
                         spaceBetween: 20
                     },
                     1280: {
-                        slidesPerView: 5,
+                        slidesPerView: 4,
                         spaceBetween: 20
                     }
                 },
 
                 pagination: {
-                    el: '.swiper-pagination-' + sliderId,
+                    el: document.querySelector('.swiper-pagination-' + sliderId),
                     clickable: true,
                     type: 'bullets',
                     dynamicBullets: false,
                 },
 
                 navigation: {
-                    nextEl: '.swiper-button-next-' + sliderId,
-                    prevEl: '.swiper-button-prev-' + sliderId,
+                    nextEl: document.querySelector('.swiper-button-next-' + sliderId),
+                    prevEl: document.querySelector('.swiper-button-prev-' + sliderId),
                 },
 
                 preloadImages: true,
@@ -127,7 +131,7 @@
                     slidesOffsetAfter: 0,
                     initialSlide: 0,
                     pagination: {
-                        el: '.swiper-pagination-' + profileId,
+                        el: innerSwiperEl.querySelector('.swiper-pagination-' + profileId),
                         clickable: true,
                         dynamicBullets: true,
                     },
@@ -136,11 +140,21 @@
             });
         }
 
-        // Initialize on DOMContentLoaded
+        // Initialize on DOMContentLoaded or immediately if DOM is ready
+        // Also listen for swiper:ready event in case the ES module loads after DOMContentLoaded
+        function tryInit() {
+            if (typeof Swiper !== 'undefined') {
+                initProfileSlider();
+            } else {
+                // Swiper module not yet available — wait for it
+                document.addEventListener('swiper:ready', initProfileSlider, { once: true });
+            }
+        }
+
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initProfileSlider);
+            document.addEventListener('DOMContentLoaded', tryInit);
         } else {
-            initProfileSlider();
+            tryInit();
         }
 
         // Re-initialize when Livewire navigates
@@ -154,6 +168,13 @@
                 setTimeout(initProfileSlider, 100);
             });
         }
+
+        // Re-initialize on window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(initProfileSlider, 250);
+        });
     })();
 </script>
 @endpush

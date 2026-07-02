@@ -2784,36 +2784,35 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Handle static favorite button clicks
-        document.querySelectorAll('.vip-profile-static-favorite').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const img = this.querySelector('img');
-                if (img) {
-                    // Add animation class
-                    img.classList.add('heart-animate');
-                    
-                    // Toggle between heart.svg and HeartFilled.svg
-                    if (img.src.includes('heart.svg') && !img.src.includes('HeartFilled')) {
-                        img.src = "{{ asset('images/icons/HeartFilled.svg') }}";
-                    } else {
-                        img.src = "{{ asset('images/icons/heart.svg') }}";
+    (function() {
+        function initProfileDetailSwiper() {
+            // Handle static favorite button clicks
+            document.querySelectorAll('.vip-profile-static-favorite').forEach(button => {
+                if (button._favInitialized) return;
+                button._favInitialized = true;
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const img = this.querySelector('img');
+                    if (img) {
+                        img.classList.add('heart-animate');
+                        if (img.src.includes('heart.svg') && !img.src.includes('HeartFilled')) {
+                            img.src = "{{ asset('images/icons/HeartFilled.svg') }}";
+                        } else {
+                            img.src = "{{ asset('images/icons/heart.svg') }}";
+                        }
+                        setTimeout(() => { img.classList.remove('heart-animate'); }, 400);
                     }
-                    
-                    // Remove animation class after animation completes
-                    setTimeout(() => {
-                        img.classList.remove('heart-animate');
-                    }, 400);
-                }
+                });
             });
-        });
 
-        if (typeof Swiper !== 'undefined') {
+            if (typeof Swiper === 'undefined') {
+                // Swiper not yet loaded — wait for the ready event
+                document.addEventListener('swiper:ready', initProfileDetailSwiper, { once: true });
+                return;
+            }
+
             const galleryEl = document.querySelector('.vip-profile-gallery-swiper');
-
             let gallerySwiper = null;
-
             if (galleryEl) {
                 gallerySwiper = new Swiper(galleryEl, {
                     loop: {{ $gallerySlides->count() > 3 ? 'true' : 'false' }},
@@ -2821,8 +2820,8 @@
                     spaceBetween: window.innerWidth <= 425 ? 0 : 14,
                     centeredSlides: window.innerWidth > 425,
                     navigation: {
-                        nextEl: '.vip-gallery-nav--next',
-                        prevEl: '.vip-gallery-nav--prev',
+                        nextEl: '.vip-gallery-nav--next, .vip-gallery-desktop-next',
+                        prevEl: '.vip-gallery-nav--prev, .vip-gallery-desktop-prev',
                     },
                     breakpoints: {
                         426: {
@@ -2929,6 +2928,13 @@
             }
         }
 
+        // Trigger Swiper init
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initProfileDetailSwiper);
+        } else {
+            initProfileDetailSwiper();
+        }
+
         const video = document.getElementById('vip-profile-video');
         const toggle = document.getElementById('vip-profile-video-toggle');
         const playIcon = document.getElementById('vip-profile-video-play-icon');
@@ -2967,6 +2973,6 @@
                 event.preventDefault();
             });
         }
-    });
+    })();
 </script>
 @endpush

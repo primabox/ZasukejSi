@@ -184,7 +184,8 @@
                 <!-- Right Side: Register, Login, Language Switcher -->
                 <div class="navbar-actions justify-self-end flex items-center space-x-3">
                     
-                    <!-- Custom Icon Buttons (Always visible for preview purposes) -->
+                    @auth
+                    <!-- Custom Icon Buttons - Auth Only -->
                     <div class="flex items-center space-x-3">
                         <!-- Notifications Button -->
                         <div class="relative w-[60px] h-[60px]">
@@ -195,21 +196,32 @@
                         </div>
                         
                         <!-- Mail Button -->
-                        <a href="#" class="w-[60px] h-[60px] border border-[#DD3888] rounded-[8px] flex items-center justify-center relative">
+                        <a href="{{ route('messages.index') }}" class="w-[60px] h-[60px] border border-[#DD3888] rounded-[8px] flex items-center justify-center relative">
                             <img src="{{ asset('images/icons/mail.svg') }}" class="w-[26px] h-[26px]" alt="Mail">
                             <div class="absolute -top-1 -right-1 w-[26px] h-[26px] bg-[#00B80F] rounded-full flex items-center justify-center font-bold text-[10px] text-white" style="font-family: 'Poppins', sans-serif;">654</div>
                         </a>
                         
                         <!-- User Button -->
-                        <a href="#" class="w-[60px] h-[60px] bg-[#DD3888] rounded-[8px] flex items-center justify-center">
+                        <a href="{{ route('account.dashboard') }}" class="w-[60px] h-[60px] bg-[#DD3888] rounded-[8px] flex items-center justify-center">
                             <img src="{{ asset('images/icons/User.svg') }}" class="w-[26px] h-[26px]" alt="User">
                         </a>
                     </div>
+                    @else
+                    <!-- Auth Buttons - Guest Only -->
+                    <div class="flex items-center space-x-3">
+                        <button @click="$dispatch('show-register-modal')" type="button" class="px-6 py-3 bg-[#DD3888] text-white rounded-lg font-semibold hover:opacity-90 transition">
+                            {{ __('front.nav.register') }}
+                        </button>
+                        <button @click="$dispatch('show-login-modal')" type="button" class="px-6 py-3 border-2 border-[#DD3888] text-[#DD3888] rounded-lg font-semibold hover:bg-[#DD3888] hover:text-white transition">
+                            {{ __('front.nav.login') }}
+                        </button>
+                    </div>
+                    @endauth
 
                     <!-- Language Switcher - Desktop Only -->
-                    <div class="hidden lg:inline">
-                        <div class="language-dropdown relative group">
-                            <button class="language-dropdown-toggle flex items-center" id="nav-language">
+                    <div class="hidden lg:inline" x-data="{ langOpen: false }" @click.outside="langOpen = false">
+                        <div class="language-dropdown relative">
+                            <button class="language-dropdown-toggle flex items-center" id="nav-language" @click="langOpen = !langOpen" type="button">
                                 @if(app()->getLocale() === 'cs')
                                     <img src="{{ asset('flags/cs.png') }}" alt="Czech" class="w-6 h-6 rounded">
                                 @else
@@ -217,7 +229,15 @@
                                 @endif
                             </button>
                             
-                            <div class="language-dropdown-menu absolute top-full right-0 bg-white p-2 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+                            <div class="language-dropdown-menu absolute top-full right-0 bg-white p-2 rounded-lg shadow-lg transition-opacity duration-200 z-50"
+                                 x-show="langOpen"
+                                 x-cloak
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-100"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95">
                                 <a href="{{ url()->current() }}?locale=en" 
                                    class="language-dropdown-item flex items-center gap-2 mb-1"
                                    title="English">

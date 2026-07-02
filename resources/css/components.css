@@ -135,12 +135,12 @@ label {
 }
 
 .language-dropdown-menu {
-  @apply absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 opacity-0 invisible transform -translate-y-2 transition-all duration-200 ease-out;
+  @apply absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50;
   width: 58px;
 }
 
-.language-dropdown.open .language-dropdown-menu {
-  @apply opacity-100 visible translate-y-0;
+[x-cloak] {
+  display: none !important;
 }
 
 .language-dropdown-item {
